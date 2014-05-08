@@ -13,7 +13,10 @@ And then execute:
 
     $ bundle install --local
 
-## Usage
+
+Or, clone the repo into your home directory and change the path in your gem file to point to this directory.
+
+
 
 TODO: Write usage instructions here
 
