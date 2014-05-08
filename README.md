@@ -16,7 +16,9 @@ And then execute:
 
 Or, clone the repo into your home directory and change the path in your gem file to point to this directory.
 
+**Note: these are not the right directions yet for AweSim developers. Once we have an initial version, we will tag it and then install it as a gem on Glenn. Then users can use it by simply gem 'osc-machete' to use the latest one installed or specify a version that is installed.**
 
+## Usage
 
 TODO: Write usage instructions here
 
