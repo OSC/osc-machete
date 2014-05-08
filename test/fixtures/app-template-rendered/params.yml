@@ -1,0 +1,8 @@
+---
+geometry: 'test.stl'
+walltime: '00:30:00'
+nodes: 'nodes=1:ppn=12'
+job_name: 'foobar'
+initial_temp: 80
+density: 0.0027
+coef: 1

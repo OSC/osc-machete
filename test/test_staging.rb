@@ -1,0 +1,41 @@
+require 'minitest/autorun'
+require 'osc/machete'
+require 'yaml'
+require 'tmpdir'
+
+class TestStaging < MiniTest::Unit::TestCase
+  def setup
+    
+    # test staging using HSP template
+    @params = YAML.load(File.read('test/fixtures/app-params.yml'))
+    @template = 'test/fixtures/app-template'
+    @expected = 'test/fixtures/app-template-rendered'
+    
+    # directory where to create jobs
+    # 
+    @target = Dir.mktmpdir
+    @script = 'GLO_job'
+  end
+  
+  def teardown
+    FileUtils.remove_entry @target
+  end
+  
+  def test_template_rendering
+    staging = OSC::Machete::Staging.new @template, @target
+    job = staging.new_job @params, @script
+    
+    assert_equal "", `diff -r #{job.path} #{@expected}`
+    assert_equal "1", Pathname(job.path).basename.to_s
+    
+    job = staging.new_job @params, @script
+    assert_equal "2", Pathname(job.path).basename.to_s
+    job = staging.new_job @params, @script
+    assert_equal "3", Pathname(job.path).basename.to_s
+    
+    Dir.mkdir Pathname(@target) + '19'
+    
+    job = staging.new_job @params, @script
+    assert_equal "20", Pathname(job.path).basename.to_s
+  end
+end
