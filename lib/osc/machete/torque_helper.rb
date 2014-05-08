@@ -22,8 +22,8 @@ class OSC::Machete::TorqueHelper
   # @param pbsid
   # @return results of qstat -x pbsid
   def qstat_xml(pbsid)
-    $cmd = qstat_cmd
-    `#{$cmd} #{$pbsid} -x` unless qstat_cmd.nil?
+    cmd = qstat_cmd
+    `#{cmd} #{pbsid} -x` unless qstat_cmd.nil?
   end
   
   # **FIXME: this might not belong here!**
