@@ -5,7 +5,7 @@ class OSC::Machete::Crimson
   # @param user    optional user object to use
   def initialize(portal, user = nil)
     @portal = portal
-    @user = user || Machete::User.new
+    @user = user || OSC::Machete::User.new
     
     @files_path = Pathname.new(@user.home).join("crimson_files/#{@portal}")
     @config_path = Pathname.new(@user.home).join(".crimson_cfg/#{@portal}")
