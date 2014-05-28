@@ -13,7 +13,10 @@ class OSC::Machete::TorqueHelper
   # consider using Shellwords and other tools
   
   def qsub(script)
-    `qsub #{script}`
+    #FIXME if command returns nil, this will crash
+    # irb(main):007:0> nil.strip
+    # NoMethodError: undefined method `strip' for nil:NilClass
+    `qsub #{script}`.strip
   end
   
   #TODO: bridge to the python torque lib? is there a ruby torque lib?
@@ -43,7 +46,9 @@ class OSC::Machete::TorqueHelper
   # @param output  xml output from qstat -x pbsid
   # @return nil, 'Q', 'H', 'R' for job state
   def parse_qstat_output(output)
-    Nokogiri::XML(output).xpath('//Data/Job/job_state').children.first.content unless output.empty? || output.nil?
+    # FIXME: rescue nil - this is potentially recovering from an error silently
+    # which is bad
+    Nokogiri::XML(output).xpath('//Data/Job/job_state').children.first.content unless output.empty? || output.nil? rescue nil
   end
   
   private
