@@ -46,7 +46,12 @@ class OSC::Machete::Job
       j.submit
     end
     
-    @pbsid = @torque.qsub @script
+    # cd into directory, submit job from there
+    # so that PBS_O_WORKDIR is set to location
+    # where job is run
+    Dir.chdir(@path.to_s) do
+      @pbsid = @torque.qsub @script
+    end
   end
   
   def submitted?
