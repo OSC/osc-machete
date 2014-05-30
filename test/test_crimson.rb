@@ -1,7 +1,7 @@
 require 'minitest/autorun'
 require 'osc/machete'
 
-class TestCrimson < MiniTest::Unit::TestCase
+class TestCrimson < Minitest::Test
   def setup
   end
   

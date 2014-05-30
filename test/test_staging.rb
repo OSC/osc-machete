@@ -3,7 +3,7 @@ require 'osc/machete'
 require 'yaml'
 require 'tmpdir'
 
-class TestStaging < MiniTest::Unit::TestCase
+class TestStaging < Minitest::Test
   def setup
     
     # test staging using HSP template

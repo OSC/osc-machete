@@ -20,11 +20,14 @@ class OSC::Machete::Job
   # 
   def initialize(args)
     # @path = @path.expand_path would change this to absolute path
+    
+    # FIXME: consider instead of path and script name just an absolute script path
     @path = Pathname.new(args[:path].to_s).cleanpath unless args[:path].nil?
     @script = @path.join(args[:script]).cleanpath unless args[:script].nil?
     @pbsid =  args[:pbsid]
     
-    @dependencies = Array(args[:dependent_on])
+    # FIXME: revisit after we design/address how dependencies should really work
+    # @dependencies = Array(args[:dependent_on])
     
     @torque = args[:torque_helper] || OSC::Machete::TorqueHelper.new()
     
@@ -42,9 +45,10 @@ class OSC::Machete::Job
   def submit
     return if submitted?
     
-    @dependencies.each do |j|
-      j.submit
-    end
+    # FIXME: revisit after we design/address how dependencies should really work
+    # @dependencies.each do |j|
+    #   j.submit
+    # end
     
     # cd into directory, submit job from there
     # so that PBS_O_WORKDIR is set to location
