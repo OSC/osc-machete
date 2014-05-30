@@ -22,20 +22,20 @@ class TestStaging < Minitest::Test
   end
   
   def test_template_rendering
-    staging = OSC::Machete::Staging.new @template, @target
-    job = staging.new_job @params, @script
+    staging = OSC::Machete::Staging.new @template, @target, @script
+    job = staging.new_job @params
     
     assert_equal "", `diff -r #{job.path} #{@expected}`
     assert_equal "1", Pathname(job.path).basename.to_s
     
-    job = staging.new_job @params, @script
+    job = staging.new_job @params
     assert_equal "2", Pathname(job.path).basename.to_s
-    job = staging.new_job @params, @script
+    job = staging.new_job @params
     assert_equal "3", Pathname(job.path).basename.to_s
     
     Dir.mkdir Pathname(@target) + '19'
     
-    job = staging.new_job @params, @script
+    job = staging.new_job @params
     assert_equal "20", Pathname(job.path).basename.to_s
   end
 end
