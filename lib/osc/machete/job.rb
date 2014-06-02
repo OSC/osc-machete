@@ -2,7 +2,7 @@ require 'pathname'
 # do we have to do OSC::Appkit:: for every class we create in a gem?
 # or can we just have require be inside a module?
 class OSC::Machete::Job
-  attr_reader :pbsid
+  attr_reader :pbsid, :script_path
   
   # Create new job closure
   # 
