@@ -34,7 +34,7 @@ module OSC
         jobdir = Location.new(@template).copy_to(new_jobdir)
         jobdir.render(params)
     
-        Job.new(path: jobdir, script: @script)
+        Job.new(script: Pathname.new(jobdir.to_s).join(@script))
       end
   
       def new_jobdir

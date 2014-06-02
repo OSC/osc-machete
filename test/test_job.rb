@@ -17,6 +17,12 @@ class TestJob < Minitest::Test
     job = OSC::Machete::Job.new(args.merge(:torque_helper => torque))
   end
   
+  def test_simple_job
+    job = newjob(script: "/path/to/jobdir/main.sh")
+    assert_equal job.path.to_s, "/path/to/jobdir"
+    assert_equal job.script_name, "main.sh"
+  end
+  
   # FIXME: these break because now jobs need a proper path
   # and we cd into them prior to running
   # 

@@ -1,6 +1,10 @@
 require 'pathname'
 require 'mustache'
 
+# FIXME: Location has two methods of interest:
+# copy_to and render; otherwise, could we just use
+# Pathname or URI to refer to a location?
+# Is this extra class necessary?
 class OSC::Machete::Location
   # URIs, Paths, rendering, and copying
   # this should be refactored into separate objects
