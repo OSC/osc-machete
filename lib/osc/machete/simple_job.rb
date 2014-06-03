@@ -141,9 +141,9 @@ module OSC
         OSC::Machete::Staging.new template, target, staging_script_name
       end
 
-      def submit
+      def submit(params)
         # stage and submit job
-        job = staging.new_job self.serializable_hash
+        job = staging.new_job params
         job.submit
 
         # persist job data
