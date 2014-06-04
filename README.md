@@ -1,33 +1,21 @@
 # OSC::Machete
 
-Ruby AweSim app kit code to help with staging and checking the status of batch jobs.
+Ruby code to help with staging and checking the status of batch jobs.
 
 
 ## Installation
 
-Add this line to your application's Gemfile:
+To use 0.1.0, add this line to your application's Gemfile:
 
-    gem 'osc-machete', :path => "/nfs/17/efranz/dev/osc-machete"
+    gem 'osc-machete', :path => "/nfs/17/efranz/prod/osc-machete-0.1.0"
 
 And then execute:
 
     $ bundle install --local
 
-
-Or, clone the repo into your home directory and change the path in your gem file to point to this directory.
-
-**Note: these are not the right directions yet for AweSim developers. Once we have an initial version, we will tag it and then install it as a gem on Glenn. Then users can use it by simply gem 'osc-machete' to use the latest one installed or specify a version that is installed.**
+**This is a temporary solution. Once we figure out a workflow for installing new versions of the gem on the system, the way to add this to your application's Gemfile will change.**
 
 ## Usage
 
-TODO: Write usage instructions here
+**Documentation coming soon!**
 
-## Contributing
-
-TODO: Not sure if we want this section which was auto-generated...
-
-1. Fork it ( http://github.com/<my-github-username>/osc-machete/fork )
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create new Pull Request
