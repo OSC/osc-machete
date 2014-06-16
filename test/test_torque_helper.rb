@@ -30,4 +30,13 @@ class TestTorqueHelper < Minitest::Test
     @shell.stubs(:qstat_xml).returns("")
     assert_nil @shell.qstat('16376372.opt-batch.osc.edu')
   end
+  
+  def test_run_on_oakley
+    assert @shell.run_on_oakley?('test/fixtures/oakley.sh'), "oakley script not recognized to run on oakley"
+    assert ! @shell.run_on_oakley?('test/fixtures/glenn.sh'), "glenn script incorrectly recognized to run on oakley"
+    
+    assert_equal "qsub -q @oak-batch.osc.edu test/fixtures/oakley.sh", @shell.qsub_cmd('test/fixtures/oakley.sh')
+    assert_equal "qsub test/fixtures/glenn.sh", @shell.qsub_cmd('test/fixtures/glenn.sh')
+  end
+  
 end

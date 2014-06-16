@@ -12,11 +12,30 @@ class OSC::Machete::TorqueHelper
   # consider using cocoaine gem
   # consider using Shellwords and other tools
   
+  # return true if script has PBS header specifying Oakley queue
+  def run_on_oakley?(script)
+    # ruby regex returns truthy values if there is a match
+    open(script) { |f| f.read =~ /#PBS -q @oak-batch/ }
+  end
+  
+  # return flag "-q @oak-batch.osc.edu" to add to qsub command
+  # if the script is set to run on Oakley in PBS headers
+  # this is to obviate current torque filter defect in which
+  # a script with PBS header set to specify oak-batch ends
+  # isn't properly handled and the job gets limited to 4GB
+  def queue_cmdline_flag(script)
+    run_on_oakley?(script) ? "-q @oak-batch.osc.edu" : ""
+  end
+  
+  def qsub_cmd(script)
+    "qsub #{queue_cmdline_flag(script)} #{script}".squeeze(' ')
+  end
+  
   def qsub(script)
     #FIXME if command returns nil, this will crash
     # irb(main):007:0> nil.strip
     # NoMethodError: undefined method `strip' for nil:NilClass
-    `qsub #{script}`.strip
+    `#{qsub_cmd(script)}`.strip
   end
   
   #TODO: bridge to the python torque lib? is there a ruby torque lib?
