@@ -34,9 +34,24 @@ class TestTorqueHelper < Minitest::Test
   def test_run_on_oakley
     assert @shell.run_on_oakley?('test/fixtures/oakley.sh'), "oakley script not recognized to run on oakley"
     assert ! @shell.run_on_oakley?('test/fixtures/glenn.sh'), "glenn script incorrectly recognized to run on oakley"
-    
-    assert_equal "qsub -q @oak-batch.osc.edu test/fixtures/oakley.sh", @shell.qsub_cmd('test/fixtures/oakley.sh')
-    assert_equal "qsub test/fixtures/glenn.sh", @shell.qsub_cmd('test/fixtures/glenn.sh')
   end
+  
+  def test_qsub_oakley
+    # test actual shell command used i.e. in backticks
+    @shell.expects(:`).with("qsub -q @oak-batch.osc.edu test/fixtures/oakley.sh").returns("16376372.oak-batch.osc.edu\n")
+    @shell.qsub("test/fixtures/oakley.sh")
+  end
+  
+  def test_qsub_glenn
+    # test actual shell command used i.e. in backticks
+    @shell.expects(:`).with("qsub test/fixtures/glenn.sh").returns("16376372.opt-batch.osc.edu\n")
+    @shell.qsub("test/fixtures/glenn.sh")
+  end
+
+  # TODO: test when nil is returned from qsub
+  # def test_qsub_nil
+  #   @shell.expects(:`).returns(nil)
+  #   @shell.qsub("test/fixtures/glenn.sh")
+  # end
   
 end
