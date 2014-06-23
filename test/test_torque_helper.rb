@@ -47,6 +47,24 @@ class TestTorqueHelper < Minitest::Test
     @shell.expects(:`).with("qsub test/fixtures/glenn.sh").returns("16376372.opt-batch.osc.edu\n")
     @shell.qsub("test/fixtures/glenn.sh")
   end
+  
+  def test_qsub_afterany
+    # test single job dependency as array arg
+    @shell.expects(:`).with("qsub test/fixtures/glenn.sh -W depend=afterany:1234.oakbatch.osc.edu").returns("16376372.opt-batch.osc.edu\n")
+    @shell.qsub("test/fixtures/glenn.sh", afterany: ["1234.oakbatch.osc.edu"])
+  end
+  
+  def test_qsub_afterany_alt
+    # test single job dependency as string arg
+    @shell.expects(:`).with("qsub test/fixtures/glenn.sh -W depend=afterany:1234.oakbatch.osc.edu").returns("16376372.opt-batch.osc.edu\n")
+    @shell.qsub("test/fixtures/glenn.sh", afterany: "1234.oakbatch.osc.edu")
+  end
+  
+  def test_qsub_afterany_2
+    # test 2 job dependencies as array arg
+    @shell.expects(:`).with("qsub test/fixtures/glenn.sh -W depend=afterany:1234.oakbatch.osc.edu:2345.oakbatch.osc.edu").returns("16376372.opt-batch.osc.edu\n")
+    @shell.qsub("test/fixtures/glenn.sh", afterany: ["1234.oakbatch.osc.edu", "2345.oakbatch.osc.edu"])
+  end
 
   # TODO: test when nil is returned from qsub
   # def test_qsub_nil

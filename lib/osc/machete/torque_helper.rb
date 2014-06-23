@@ -17,13 +17,22 @@ class OSC::Machete::TorqueHelper
     open(script) { |f| f.read =~ /#PBS -q @oak-batch/ }
   end
   
-  def qsub(script)
+  # usage: qsub("/path/to/script") or
+  #        qsub("/path/to/script", afterany: "1234.oak-batch.osc.edu") or
+  #        qsub("/path/to/script", afterany: ["1234.oak-batch.osc.edu", "1235.oak-batch.osc.edu"])
+  def qsub(script, afterany: nil)
     # if the script is set to run on Oakley in PBS headers
     # this is to obviate current torque filter defect in which
     # a script with PBS header set to specify oak-batch ends
     # isn't properly handled and the job gets limited to 4GB
     queue = run_on_oakley?(script) ? "-q @oak-batch.osc.edu" : ""
     cmd = "qsub #{queue} #{script}".squeeze(' ')
+    
+    # add dependencies to command
+    afterany_dependencies = Array(afterany)
+    unless afterany_dependencies.empty?
+      cmd += " -W depend=afterany:" + afterany_dependencies.join(":")
+    end
     
     #FIXME if command returns nil, this will crash
     # irb(main):007:0> nil.strip
