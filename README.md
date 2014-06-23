@@ -17,6 +17,6 @@ And then execute:
 
 ## Usage
 
-**Documentation coming really soon!**
+**Documentation coming soon!**
 
 
