@@ -34,6 +34,8 @@ class OSC::Machete::Job
     
     @pbsid =  args[:pbsid]
     @torque = args[:torque_helper] || OSC::Machete::TorqueHelper.new()
+    
+    @afterany = []
   end
   
   # name of the script
@@ -54,7 +56,7 @@ class OSC::Machete::Job
     return if submitted?
     
     # submit any dependent jobs that have not yet been submitted
-    @afterany.each { |j| j.submit } if @afterany
+    @afterany.each { |j| j.submit }
     
     # cd into directory, submit job from there
     # so that PBS_O_WORKDIR is set to location
@@ -62,9 +64,9 @@ class OSC::Machete::Job
     Dir.chdir(path.to_s) do
       
       # Given [Job, Job, Job] get ["123.opt", "124.opt", "125.opt"]
-      afteranyids = @afterany.map(&:pbsid).compact if @afterany
+      afteranyids = @afterany.map(&:pbsid).compact
       
-      if afteranyids.nil? || afteranyids.empty?
+      if afteranyids.empty?
         @pbsid = @torque.qsub script_name
       else
         @pbsid = @torque.qsub script_name, afterany: afteranyids
@@ -74,7 +76,6 @@ class OSC::Machete::Job
   
   # can accept a Job instance or an Array of Job instances
   def afterany(jobs)
-    @afterany ||= []
     @afterany.concat(Array(jobs))
   end
   
