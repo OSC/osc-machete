@@ -9,32 +9,39 @@ class TestJob < Minitest::Test
   def teardown
   end
   
-  def newjob(args = {})
-    # verifies each job is submitted at most one time
-    # and stubs qsub to return pbsid without actually qsubing job
-    torque = OSC::Machete::TorqueHelper.new
-    torque.expects(:qsub).returns(@pbsid).at_most_once
-    job = OSC::Machete::Job.new(args.merge(:torque_helper => torque))
-  end
-  
   def test_basic_job
-    job = newjob(script: "/path/to/jobdir/main.sh")
+    job = OSC::Machete::Job.new(script: "/path/to/jobdir/main.sh")
     assert_equal job.path.to_s, "/path/to/jobdir"
     assert_equal job.script_name, "main.sh"
   end
   
-  # FIXME: these break because now jobs need a proper path
-  # and we cd into them prior to running
-  # 
-  # revisit after we address how dependencies should really work
-  # def test_job_dependency
-  #   job1 = newjob
-  #   job2 = newjob(dependent_on: job1)
-  #   
-  #   job2.submit
-  #   assert job1.submitted?, "dependent job not submitted"
-  #   assert job2.submitted?, "job not submitted"
-  # end
+  def test_job_dependency
+    id1 = "16376371.opt-batch.osc.edu"
+    id2 = "16376372.opt-batch.osc.edu"
+    script = "/tmp/main.sh"
+    scriptname = "main.sh"
+    
+    # create first job
+    torque1 = OSC::Machete::TorqueHelper.new
+    torque1.expects(:qsub).with(scriptname).returns(id1)
+    job1 = OSC::Machete::Job.new script: script, torque_helper: torque1
+    
+    # create second job
+    torque2 = OSC::Machete::TorqueHelper.new
+    torque2.expects(:qsub).with(scriptname, afterany: [id1]).returns(id2)
+    job2 = OSC::Machete::Job.new script: script, torque_helper: torque2
+    
+    job2.afterany job1
+    
+    job2.submit
+    
+    assert job1.submitted?, "dependent job not submitted"
+    assert job2.submitted?, "job not submitted"
+    
+    assert_equal id1, job1.pbsid
+    assert_equal id2, job2.pbsid
+  end
+  
   # 
   # def test_job_dependencies
   #   jobpre = newjob

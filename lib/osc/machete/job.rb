@@ -34,18 +34,6 @@ class OSC::Machete::Job
     
     @pbsid =  args[:pbsid]
     @torque = args[:torque_helper] || OSC::Machete::TorqueHelper.new()
-    
-    # FIXME: revisit after we design/address how dependencies should really work
-    # @dependencies = Array(args[:dependent_on])
-    
-    # not enough requirements
-    # @status = nil
-    # @valid = nil
-    
-    # would you ask System.oakley for the oakley instance of System?
-    # or System.glenn for the glenn instance of System?
-    # how would we change this to oakley?
-    # @system = :oakley
   end
   
   # name of the script
@@ -59,20 +47,35 @@ class OSC::Machete::Job
   end
   
   #TODO: needs more robust solution here, for error checking, etc.
+  #
+  # submit any dependent jobs that haven't been submitted
+  # then submit this job, specifying dependencies as required
   def submit
     return if submitted?
     
-    # FIXME: revisit after we design/address how dependencies should really work
-    # @dependencies.each do |j|
-    #   j.submit
-    # end
+    # submit any dependent jobs that have not yet been submitted
+    @afterany.each { |j| j.submit } if @afterany
     
     # cd into directory, submit job from there
     # so that PBS_O_WORKDIR is set to location
     # where job is run
     Dir.chdir(path.to_s) do
-      @pbsid = @torque.qsub script_name
+      
+      # Given [Job, Job, Job] get ["123.opt", "124.opt", "125.opt"]
+      afteranyids = @afterany.map(&:pbsid).compact if @afterany
+      
+      if afteranyids.nil? || afteranyids.empty?
+        @pbsid = @torque.qsub script_name
+      else
+        @pbsid = @torque.qsub script_name, afterany: afteranyids
+      end
     end
+  end
+  
+  # can accept a Job instance or an Array of Job instances
+  def afterany(jobs)
+    @afterany ||= []
+    @afterany.concat(Array(jobs))
   end
   
   def submitted?
