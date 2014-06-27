@@ -20,7 +20,7 @@ class OSC::Machete::TorqueHelper
   # usage: qsub("/path/to/script") or
   #        qsub("/path/to/script", afterany: "1234.oak-batch.osc.edu") or
   #        qsub("/path/to/script", afterany: ["1234.oak-batch.osc.edu", "1235.oak-batch.osc.edu"])
-  def qsub(script, afterany: nil)
+  def qsub(script, afterany: nil, afterok: nil)
     # if the script is set to run on Oakley in PBS headers
     # this is to obviate current torque filter defect in which
     # a script with PBS header set to specify oak-batch ends
@@ -32,6 +32,11 @@ class OSC::Machete::TorqueHelper
     afterany_dependencies = Array(afterany)
     unless afterany_dependencies.empty?
       cmd += " -W depend=afterany:" + afterany_dependencies.join(":")
+    end
+    
+    afterok_dependencies = Array(afterok)
+    unless afterok_dependencies.empty?
+      cmd += " -W depend=afterok:" + afterok_dependencies.join(":")
     end
     
     #FIXME if command returns nil, this will crash

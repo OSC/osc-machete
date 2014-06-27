@@ -66,6 +66,31 @@ class TestTorqueHelper < Minitest::Test
     @shell.qsub("test/fixtures/glenn.sh", afterany: ["1234.oakbatch.osc.edu", "2345.oakbatch.osc.edu"])
   end
 
+  def test_qsub_afterok
+    # test single job dependency as array arg
+    @shell.expects(:`).with("qsub test/fixtures/glenn.sh -W depend=afterok:1234.oakbatch.osc.edu").returns("16376372.opt-batch.osc.edu\n")
+    @shell.qsub("test/fixtures/glenn.sh", afterok: ["1234.oakbatch.osc.edu"])
+  end
+  
+  def test_qsub_afterok_2
+    # test 2 job dependencies as array arg
+    @shell.expects(:`).with("qsub test/fixtures/glenn.sh -W depend=afterok:1234.oakbatch.osc.edu:2345.oakbatch.osc.edu").returns("16376372.opt-batch.osc.edu\n")
+    @shell.qsub("test/fixtures/glenn.sh", afterok: ["1234.oakbatch.osc.edu", "2345.oakbatch.osc.edu"])
+  end
+  
+  # TODO: what is the format?
+  # -W depend=afterok:1234.oakbatch.osc.edu,afterany:2345.oakbatch.osc.edu"
+  # or
+  # -W depend=afterok:1234.oakbatch.osc.edu,depend=afterany:2345.oakbatch.osc.edu"
+  # 
+  # afterok and afterany
+  # def test_qsub_afterok_and_afterany
+  #   # test single job dependency as array arg
+  #   @shell.expects(:`).with("qsub test/fixtures/glenn.sh -W depend=afterok:1234.oakbatch.osc.edu,afterany:2345.oakbatch.osc.edu").returns("16376372.opt-batch.osc.edu\n")
+  #   @shell.qsub("test/fixtures/glenn.sh", afterok: "1234.oakbatch.osc.edu", afterany: "2345.oakbatch.osc.edu")
+  # end
+  
+  
   # TODO: test when nil is returned from qsub
   # def test_qsub_nil
   #   @shell.expects(:`).returns(nil)
