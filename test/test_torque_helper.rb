@@ -78,17 +78,16 @@ class TestTorqueHelper < Minitest::Test
     @shell.qsub("test/fixtures/glenn.sh", afterok: ["1234.oakbatch.osc.edu", "2345.oakbatch.osc.edu"])
   end
   
-  # TODO: what is the format?
-  # -W depend=afterok:1234.oakbatch.osc.edu,afterany:2345.oakbatch.osc.edu"
-  # or
-  # -W depend=afterok:1234.oakbatch.osc.edu,depend=afterany:2345.oakbatch.osc.edu"
+  # With multiple dependency types, is formatted:
+  #   type[:argument[:argument...][,type:argument...]
+  # i.e. 
+  #   -W depend=afterany:1234.oakbatch.osc.edu,afterok:2345.oakbatch.osc.edu"
   # 
-  # afterok and afterany
-  # def test_qsub_afterok_and_afterany
-  #   # test single job dependency as array arg
-  #   @shell.expects(:`).with("qsub test/fixtures/glenn.sh -W depend=afterok:1234.oakbatch.osc.edu,afterany:2345.oakbatch.osc.edu").returns("16376372.opt-batch.osc.edu\n")
-  #   @shell.qsub("test/fixtures/glenn.sh", afterok: "1234.oakbatch.osc.edu", afterany: "2345.oakbatch.osc.edu")
-  # end
+  # See qsub manpage for details
+  def test_qsub_afterok_and_afterany
+    @shell.expects(:`).with("qsub test/fixtures/glenn.sh -W depend=afterany:1234.oakbatch.osc.edu,afterok:2345.oakbatch.osc.edu").returns("16376372.opt-batch.osc.edu\n")
+    @shell.qsub("test/fixtures/glenn.sh", afterok: "2345.oakbatch.osc.edu", afterany: "1234.oakbatch.osc.edu")
+  end
   
   
   # TODO: test when nil is returned from qsub

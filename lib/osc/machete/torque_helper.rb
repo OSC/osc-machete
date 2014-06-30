@@ -28,15 +28,34 @@ class OSC::Machete::TorqueHelper
     queue = run_on_oakley?(script) ? "-q @oak-batch.osc.edu" : ""
     cmd = "qsub #{queue} #{script}".squeeze(' ')
     
+    #FIXME: building dependency lists the ugly way...
+    # needs refactored next! the qsub interface can be arbitrarily complex
+    # such as qsub(script, dependencies: nil) and accept a hash
+    # afterany: [arg1, arg2, arg3]
+    # afterok: [arg1, arg2, arg3]
+    # and we could iterate over these...
+    # this might end up adding support for after and all the other dependency options automatically
+    # 
+    
     # add dependencies to command
     afterany_dependencies = Array(afterany)
-    unless afterany_dependencies.empty?
-      cmd += " -W depend=afterany:" + afterany_dependencies.join(":")
-    end
-    
     afterok_dependencies = Array(afterok)
-    unless afterok_dependencies.empty?
-      cmd += " -W depend=afterok:" + afterok_dependencies.join(":")
+    
+    unless afterany_dependencies.empty? && afterok_dependencies.empty?
+      cmd += " -W depend="
+      
+      # we could use a hash:
+      # afterany: Array(), afterok: Array(), etc... then... or separate internal object?
+      # type:arg1:arg2:arg3:arg4(,type:arg1:arg2:arg3:arg4)*
+      
+      unless afterany_dependencies.empty?
+        cmd += "afterany:" + afterany_dependencies.join(":")
+      end
+      
+      unless afterok_dependencies.empty?
+        cmd += "," unless afterany_dependencies.empty?
+        cmd += "afterok:" + afterok_dependencies.join(":")
+      end
     end
     
     #FIXME if command returns nil, this will crash
