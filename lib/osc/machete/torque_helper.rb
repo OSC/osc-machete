@@ -18,9 +18,12 @@ class OSC::Machete::TorqueHelper
   end
   
   # usage: qsub("/path/to/script") or
-  #        qsub("/path/to/script", afterany: "1234.oak-batch.osc.edu") or
-  #        qsub("/path/to/script", afterany: ["1234.oak-batch.osc.edu", "1235.oak-batch.osc.edu"])
-  def qsub(script, afterany: nil, afterok: nil)
+  #        qsub("/path/to/script", depends_on: {afterany: ["1234.oak-batch.osc.edu"]})
+  # 
+  # Where depends_on is a hash with key being dependency type and array containing the
+  # arguments. See documentation on dependency_list in qsub man pages for details.
+  # 
+  def qsub(script, depends_on: {})
     # if the script is set to run on Oakley in PBS headers
     # this is to obviate current torque filter defect in which
     # a script with PBS header set to specify oak-batch ends
@@ -28,35 +31,20 @@ class OSC::Machete::TorqueHelper
     queue = run_on_oakley?(script) ? "-q @oak-batch.osc.edu" : ""
     cmd = "qsub #{queue} #{script}".squeeze(' ')
     
-    #FIXME: building dependency lists the ugly way...
-    # needs refactored next! the qsub interface can be arbitrarily complex
-    # such as qsub(script, dependencies: nil) and accept a hash
-    # afterany: [arg1, arg2, arg3]
-    # afterok: [arg1, arg2, arg3]
-    # and we could iterate over these...
-    # this might end up adding support for after and all the other dependency options automatically
-    # 
-    
-    # add dependencies to command
-    afterany_dependencies = Array(afterany)
-    afterok_dependencies = Array(afterok)
-    
-    unless afterany_dependencies.empty? && afterok_dependencies.empty?
-      cmd += " -W depend="
+    # add dependencies
+    comma=false # FIXME: better name?
+    depends_on.each do |type, args|
+      args = Array(args)
       
-      # we could use a hash:
-      # afterany: Array(), afterok: Array(), etc... then... or separate internal object?
-      # type:arg1:arg2:arg3:arg4(,type:arg1:arg2:arg3:arg4)*
-      
-      unless afterany_dependencies.empty?
-        cmd += "afterany:" + afterany_dependencies.join(":")
-      end
-      
-      unless afterok_dependencies.empty?
-        cmd += "," unless afterany_dependencies.empty?
-        cmd += "afterok:" + afterok_dependencies.join(":")
+      unless args.empty?
+        cmd += comma ? "," : " -W depend="
+        comma = true
+        
+        # type is "afterany" or :afterany
+        cmd += type.to_s + ":" + args.join(":")
       end
     end
+    
     
     #FIXME if command returns nil, this will crash
     # irb(main):007:0> nil.strip

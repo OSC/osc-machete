@@ -69,7 +69,7 @@ class OSC::Machete::Job
       if afteranyids.empty?
         @pbsid = @torque.qsub script_name
       else
-        @pbsid = @torque.qsub script_name, afterany: afteranyids
+        @pbsid = @torque.qsub script_name, depends_on: { afterany: afteranyids }
       end
     end
   end

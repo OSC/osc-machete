@@ -31,7 +31,7 @@ class TestJob < Minitest::Test
     # create second job that depends on the first and expect qsub to send pbsid of the first job
     # which will not be known until the first job qsub-ed and 16376371.opt-batch.osc.edu is returned
     torque2 = OSC::Machete::TorqueHelper.new
-    torque2.expects(:qsub).with(@scriptname, afterany: [@id1]).returns(@id2)
+    torque2.expects(:qsub).with(@scriptname, depends_on: { afterany: [@id1] }).returns(@id2)
     job2 = OSC::Machete::Job.new script: @scriptpath, torque_helper: torque2
     
     # add the dependency and submit the job
