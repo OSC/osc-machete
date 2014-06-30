@@ -34,9 +34,6 @@ class OSC::Machete::Job
     
     @pbsid =  args[:pbsid]
     @torque = args[:torque_helper] || OSC::Machete::TorqueHelper.new()
-    
-    @afterany = []
-    @afterok = []
   end
   
   # name of the script
@@ -83,22 +80,27 @@ class OSC::Machete::Job
   
   # can accept a Job instance or an Array of Job instances
   def afterany(jobs)
+    @afterany ||= []
     @afterany.concat(Array(jobs))
   end
   
   def afterok(jobs)
+    @afterok ||= []
     @afterok.concat(Array(jobs))
   end
   
   private
   
   def submit_dependencies
-    @afterany.each { |j| j.submit }
-    @afterok.each { |j| j.submit }
+    @afterany.each { |j| j.submit } if @afterany
+    @afterok.each { |j| j.submit } if @afterok
   end
   
   def dependency_ids
     ids = {}
+    
+    @afterany ||= []
+    @afterok ||= []
     
     ids[:afterany] = @afterany.map(&:pbsid).compact
     ids[:afterok] = @afterok.map(&:pbsid).compact
