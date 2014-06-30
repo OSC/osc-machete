@@ -62,11 +62,7 @@ class OSC::Machete::Job
     # so that PBS_O_WORKDIR is set to location
     # where job is run
     Dir.chdir(path.to_s) do
-      if dependency_ids.empty?
-        @pbsid = @torque.qsub script_name
-      else
-        @pbsid = @torque.qsub script_name, depends_on: dependency_ids
-      end
+      @pbsid = @torque.qsub script_name, depends_on: dependency_ids
     end
   end
   

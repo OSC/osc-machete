@@ -25,7 +25,7 @@ class TestJob < Minitest::Test
   def test_job_dependency_afterany
     # create first job and expect qsub to work as it does before
     torque1 = OSC::Machete::TorqueHelper.new
-    torque1.expects(:qsub).with(@scriptname).returns(@id1)
+    torque1.expects(:qsub).with(@scriptname, depends_on: {}).returns(@id1)
     job1 = OSC::Machete::Job.new script: @scriptpath, torque_helper: torque1
     
     # create second job that depends on the first and expect qsub to send pbsid of the first job
