@@ -56,27 +56,18 @@ class OSC::Machete::Job
     return if submitted?
     
     # submit any dependent jobs that have not yet been submitted
-    @afterany.each { |j| j.submit }
+    submit_dependencies
     
     # cd into directory, submit job from there
     # so that PBS_O_WORKDIR is set to location
     # where job is run
     Dir.chdir(path.to_s) do
-      
-      # Given [Job, Job, Job] get ["123.opt", "124.opt", "125.opt"]
-      afteranyids = @afterany.map(&:pbsid).compact
-      
-      if afteranyids.empty?
+      if dependency_ids.empty?
         @pbsid = @torque.qsub script_name
       else
-        @pbsid = @torque.qsub script_name, depends_on: { afterany: afteranyids }
+        @pbsid = @torque.qsub script_name, depends_on: dependency_ids
       end
     end
-  end
-  
-  # can accept a Job instance or an Array of Job instances
-  def afterany(jobs)
-    @afterany.concat(Array(jobs))
   end
   
   def submitted?
@@ -92,4 +83,24 @@ class OSC::Machete::Job
   # def status_as_string(status)
   #   {:Q => "Queued", :H => "Hold", :R => "Running"}.fetch(status, "Completed")
   # end
+  
+  # can accept a Job instance or an Array of Job instances
+  def afterany(jobs)
+    @afterany.concat(Array(jobs))
+  end
+  
+  private
+  
+  def submit_dependencies
+    @afterany.each { |j| j.submit }
+  end
+  
+  def dependency_ids
+    ids = {}
+    
+    ids[:afterany] = @afterany.map(&:pbsid).compact
+    
+    ids.keep_if { |k,v| ! v.empty? }
+  end
+  
 end
