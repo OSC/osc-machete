@@ -48,37 +48,31 @@ class TestTorqueHelper < Minitest::Test
     @shell.qsub("test/fixtures/glenn.sh")
   end
   
+  # assert helper method to verify that
+  # the provided hash of dependencies to qsub command produces the desired
+  # dependency_list string
+  # 
+  # dependency_list: the desired string to follow  -W depend= in the qsub shell command
+  # dependencies: the hash to pass as an argument with keyword depends_on: to qsub
+  # 
+  def assert_qsub_dependency_list(dependency_list, dependencies)
+    shell = OSC::Machete::TorqueHelper.new
+    shell.stubs(:qstat_xml).returns(@xml)
+    
+    shell.expects(:`).with("qsub test/fixtures/glenn.sh -W depend=#{dependency_list}").returns("16376372.opt-batch.osc.edu\n")
+    shell.qsub("test/fixtures/glenn.sh", depends_on: dependencies)
+  end
   
-  # FIXME: tests for job dependencies seem to have aweful amount of duplication
-  # is there a clean way to fix this duplication?
   def test_qsub_afterany
-    # test single job dependency as array arg
-    @shell.expects(:`).with("qsub test/fixtures/glenn.sh -W depend=afterany:1234.oakbatch.osc.edu").returns("16376372.opt-batch.osc.edu\n")
-    @shell.qsub("test/fixtures/glenn.sh", depends_on: { afterany: ["1234.oakbatch.osc.edu"] })
+    assert_qsub_dependency_list("afterany:1234.oakbatch.osc.edu", { afterany: ["1234.oakbatch.osc.edu"] })
+    assert_qsub_dependency_list("afterany:1234.oakbatch.osc.edu", { afterany: "1234.oakbatch.osc.edu" })
+    assert_qsub_dependency_list("afterany:1234.oakbatch.osc.edu:2345.oakbatch.osc.edu", { afterany: ["1234.oakbatch.osc.edu", "2345.oakbatch.osc.edu"] })
   end
   
-  def test_qsub_afterany_alt
-    # test single job dependency as string arg
-    @shell.expects(:`).with("qsub test/fixtures/glenn.sh -W depend=afterany:1234.oakbatch.osc.edu").returns("16376372.opt-batch.osc.edu\n")
-    @shell.qsub("test/fixtures/glenn.sh", depends_on: { afterany: "1234.oakbatch.osc.edu" })
-  end
-  
-  def test_qsub_afterany_2
-    # test 2 job dependencies as array arg
-    @shell.expects(:`).with("qsub test/fixtures/glenn.sh -W depend=afterany:1234.oakbatch.osc.edu:2345.oakbatch.osc.edu").returns("16376372.opt-batch.osc.edu\n")
-    @shell.qsub("test/fixtures/glenn.sh", depends_on: { afterany: ["1234.oakbatch.osc.edu", "2345.oakbatch.osc.edu"] })
-  end
 
   def test_qsub_afterok
-    # test single job dependency as array arg
-    @shell.expects(:`).with("qsub test/fixtures/glenn.sh -W depend=afterok:1234.oakbatch.osc.edu").returns("16376372.opt-batch.osc.edu\n")
-    @shell.qsub("test/fixtures/glenn.sh", depends_on: { afterok: ["1234.oakbatch.osc.edu"] })
-  end
-  
-  def test_qsub_afterok_2
-    # test 2 job dependencies as array arg
-    @shell.expects(:`).with("qsub test/fixtures/glenn.sh -W depend=afterok:1234.oakbatch.osc.edu:2345.oakbatch.osc.edu").returns("16376372.opt-batch.osc.edu\n")
-    @shell.qsub("test/fixtures/glenn.sh", depends_on: { afterok: ["1234.oakbatch.osc.edu", "2345.oakbatch.osc.edu"] })
+    assert_qsub_dependency_list("afterok:1234.oakbatch.osc.edu", { afterok: ["1234.oakbatch.osc.edu"] })
+    assert_qsub_dependency_list("afterok:1234.oakbatch.osc.edu:2345.oakbatch.osc.edu", { afterok: ["1234.oakbatch.osc.edu", "2345.oakbatch.osc.edu"] })
   end
   
   # With multiple dependency types, is formatted:
@@ -88,20 +82,13 @@ class TestTorqueHelper < Minitest::Test
   # 
   # See qsub manpage for details
   def test_qsub_afterok_and_afterany
-    @shell.expects(:`).with("qsub test/fixtures/glenn.sh -W depend=afterany:1234.oakbatch.osc.edu,afterok:2345.oakbatch.osc.edu").returns("16376372.opt-batch.osc.edu\n")
-    @shell.qsub("test/fixtures/glenn.sh", depends_on: { afterany: "1234.oakbatch.osc.edu", afterok: "2345.oakbatch.osc.edu" })
+    assert_qsub_dependency_list("afterany:1234.oakbatch.osc.edu,afterok:2345.oakbatch.osc.edu",
+      { afterany: "1234.oakbatch.osc.edu", afterok: "2345.oakbatch.osc.edu" })
   end
   
-  def test_qsub_after
-    # test single job dependency as array arg
-    @shell.expects(:`).with("qsub test/fixtures/glenn.sh -W depend=after:1234.oakbatch.osc.edu").returns("16376372.opt-batch.osc.edu\n")
-    @shell.qsub("test/fixtures/glenn.sh", depends_on: { after: ["1234.oakbatch.osc.edu"] })
-  end
-  
-  def test_qsub_afternotok
-    # test 2 job dependencies as array arg
-    @shell.expects(:`).with("qsub test/fixtures/glenn.sh -W depend=afternotok:1234.oakbatch.osc.edu:2345.oakbatch.osc.edu").returns("16376372.opt-batch.osc.edu\n")
-    @shell.qsub("test/fixtures/glenn.sh", depends_on: { afternotok: ["1234.oakbatch.osc.edu", "2345.oakbatch.osc.edu"] })
+  def test_qsub_other
+    assert_qsub_dependency_list("after:1234.oakbatch.osc.edu", { after: ["1234.oakbatch.osc.edu"] })
+    assert_qsub_dependency_list("afternotok:1234.oakbatch.osc.edu:2345.oakbatch.osc.edu", { afternotok: ["1234.oakbatch.osc.edu", "2345.oakbatch.osc.edu"] })
   end
   
   def test_qsub_all_dependencies
@@ -117,8 +104,7 @@ class TestTorqueHelper < Minitest::Test
     depencencies_str += ",after:2347.oakbatch.osc.edu:2348.oakbatch.osc.edu"
     depencencies_str += ",afternotok:2349.oakbatch.osc.edu:2350.oakbatch.osc.edu:2351.oakbatch.osc.edu"
     
-    @shell.expects(:`).with("qsub test/fixtures/glenn.sh -W depend=#{depencencies_str}").returns("16376372.opt-batch.osc.edu\n")
-    @shell.qsub("test/fixtures/glenn.sh", depends_on: dependencies)
+    assert_qsub_dependency_list(depencencies_str, dependencies)
   end
   
   # TODO: test when nil is returned from qsub
