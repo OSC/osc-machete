@@ -48,6 +48,9 @@ class TestTorqueHelper < Minitest::Test
     @shell.qsub("test/fixtures/glenn.sh")
   end
   
+  
+  # FIXME: tests for job dependencies seem to have aweful amount of duplication
+  # is there a clean way to fix this duplication?
   def test_qsub_afterany
     # test single job dependency as array arg
     @shell.expects(:`).with("qsub test/fixtures/glenn.sh -W depend=afterany:1234.oakbatch.osc.edu").returns("16376372.opt-batch.osc.edu\n")
@@ -89,6 +92,34 @@ class TestTorqueHelper < Minitest::Test
     @shell.qsub("test/fixtures/glenn.sh", depends_on: { afterany: "1234.oakbatch.osc.edu", afterok: "2345.oakbatch.osc.edu" })
   end
   
+  def test_qsub_after
+    # test single job dependency as array arg
+    @shell.expects(:`).with("qsub test/fixtures/glenn.sh -W depend=after:1234.oakbatch.osc.edu").returns("16376372.opt-batch.osc.edu\n")
+    @shell.qsub("test/fixtures/glenn.sh", depends_on: { after: ["1234.oakbatch.osc.edu"] })
+  end
+  
+  def test_qsub_afternotok
+    # test 2 job dependencies as array arg
+    @shell.expects(:`).with("qsub test/fixtures/glenn.sh -W depend=afternotok:1234.oakbatch.osc.edu:2345.oakbatch.osc.edu").returns("16376372.opt-batch.osc.edu\n")
+    @shell.qsub("test/fixtures/glenn.sh", depends_on: { afternotok: ["1234.oakbatch.osc.edu", "2345.oakbatch.osc.edu"] })
+  end
+  
+  def test_qsub_all_dependencies
+    dependencies = {
+      afterany: "1234.oakbatch.osc.edu",
+      afterok: "2345.oakbatch.osc.edu",
+      after: ["2347.oakbatch.osc.edu", "2348.oakbatch.osc.edu"],
+      afternotok: ["2349.oakbatch.osc.edu", "2350.oakbatch.osc.edu", "2351.oakbatch.osc.edu"]
+    }
+    
+    depencencies_str = "afterany:1234.oakbatch.osc.edu"
+    depencencies_str += ",afterok:2345.oakbatch.osc.edu"
+    depencencies_str += ",after:2347.oakbatch.osc.edu:2348.oakbatch.osc.edu"
+    depencencies_str += ",afternotok:2349.oakbatch.osc.edu:2350.oakbatch.osc.edu:2351.oakbatch.osc.edu"
+    
+    @shell.expects(:`).with("qsub test/fixtures/glenn.sh -W depend=#{depencencies_str}").returns("16376372.opt-batch.osc.edu\n")
+    @shell.qsub("test/fixtures/glenn.sh", depends_on: dependencies)
+  end
   
   # TODO: test when nil is returned from qsub
   # def test_qsub_nil
