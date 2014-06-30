@@ -80,16 +80,15 @@ class OSC::Machete::Job
   #   {:Q => "Queued", :H => "Hold", :R => "Running"}.fetch(status, "Completed")
   # end
   
+  # creates Job#afterany(jobs) and Job#afterok(jobs) etc.
   # can accept a Job instance or an Array of Job instances
-  def afterany(jobs)
-    @dependencies[:afterany] = [] unless @dependencies.has_key?(:afterany)
-    @dependencies[:afterany].concat(Array(jobs))
+  [:afterany, :afterok].each do |type|
+    define_method(type) do |jobs|
+      @dependencies[type] = [] unless @dependencies.has_key?(type)
+      @dependencies[type].concat(Array(jobs))
+    end
   end
   
-  def afterok(jobs)
-    @dependencies[:afterok] = [] unless @dependencies.has_key?(:afterok)
-    @dependencies[:afterok].concat(Array(jobs))
-  end
   
   private
   
