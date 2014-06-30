@@ -81,8 +81,8 @@ class OSC::Machete::Job
   # end
   
   # creates Job#afterany(jobs) and Job#afterok(jobs) etc.
-  # can accept a Job instance or an Array of Job instances
-  [:afterany, :afterok].each do |type|
+  # each method can accept a Job instance or an Array of Job instances
+  [:afterany, :afterok, :after, :afternotok].each do |type|
     define_method(type) do |jobs|
       @dependencies[type] = [] unless @dependencies.has_key?(type)
       @dependencies[type].concat(Array(jobs))
