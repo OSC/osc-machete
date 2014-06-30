@@ -34,6 +34,8 @@ class OSC::Machete::Job
     
     @pbsid =  args[:pbsid]
     @torque = args[:torque_helper] || OSC::Machete::TorqueHelper.new()
+    
+    @dependencies = {} # {:afterany => [Job, Job], :afterok => [Job]}
   end
   
   # name of the script
@@ -80,30 +82,29 @@ class OSC::Machete::Job
   
   # can accept a Job instance or an Array of Job instances
   def afterany(jobs)
-    @afterany ||= []
-    @afterany.concat(Array(jobs))
+    @dependencies[:afterany] = [] unless @dependencies.has_key?(:afterany)
+    @dependencies[:afterany].concat(Array(jobs))
   end
   
   def afterok(jobs)
-    @afterok ||= []
-    @afterok.concat(Array(jobs))
+    @dependencies[:afterok] = [] unless @dependencies.has_key?(:afterok)
+    @dependencies[:afterok].concat(Array(jobs))
   end
   
   private
   
   def submit_dependencies
-    @afterany.each { |j| j.submit } if @afterany
-    @afterok.each { |j| j.submit } if @afterok
+    #  assumes each dependency is a Job object
+    @dependencies.values.flatten.each { |j| j.submit }
   end
   
+  # build a dictionary of ids for each dependency type
   def dependency_ids
     ids = {}
     
-    @afterany ||= []
-    @afterok ||= []
-    
-    ids[:afterany] = @afterany.map(&:pbsid).compact
-    ids[:afterok] = @afterok.map(&:pbsid).compact
+    @dependencies.each do |type, jobs|
+      ids[type] = jobs.map(&:pbsid).compact
+    end
     
     ids.keep_if { |k,v| ! v.empty? }
   end
