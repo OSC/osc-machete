@@ -9,6 +9,8 @@ require "osc/machete/torque_helper"
 require "osc/machete/staging"
 require "osc/machete/system"
 require "osc/machete/user"
+require "osc/machete/submittable"
+require "osc/machete/statusable"
 require "osc/machete/simple_job"
 
 module OSC
