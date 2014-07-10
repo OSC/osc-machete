@@ -86,6 +86,8 @@ class OSC::Machete::Job
     define_method(type) do |jobs|
       @dependencies[type] = [] unless @dependencies.has_key?(type)
       @dependencies[type].concat(Array(jobs))
+      
+      self
     end
   end
   

@@ -72,6 +72,23 @@ class TestJob < Minitest::Test
     assert_equal @id2, job2.pbsid
   end
   
+  # here we repeat the above test but when setting up the dependency we chain
+  # OSC::Machete::Job.new(...).afterok(...)
+  # as long as afterok returns self, chaining will work
+  def test_job_dependency_afterok_chaining
+    # create first job and expect qsub to work as it does before
+    torque1 = OSC::Machete::TorqueHelper.new
+    torque1.expects(:qsub).with(@scriptname, depends_on: {}).returns(@id1)
+    job1 = OSC::Machete::Job.new script: @scriptpath, torque_helper: torque1
+
+    # create second job that depends on the first and expect qsub to send pbsid of the first job
+    # which will not be known until the first job qsub-ed and 16376371.opt-batch.osc.edu is returned
+    torque2 = OSC::Machete::TorqueHelper.new
+    torque2.expects(:qsub).with(@scriptname, depends_on: { afterok: [@id1] }).returns(@id2)
+    job2 = OSC::Machete::Job.new(script: @scriptpath, torque_helper: torque2).afterok(job1)
+    job2.submit
+  end
+  
   def test_job_dependency_after
     # create first job and expect qsub to work as it does before
     torque1 = OSC::Machete::TorqueHelper.new
