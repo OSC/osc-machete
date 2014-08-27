@@ -6,8 +6,11 @@ module OSC
   module Machete
     module SimpleJob
       def self.included(obj)
-        obj.include OSC::Machete::SimpleJob::Submittable
-        obj.include OSC::Machete::SimpleJob::Statusable
+        #HACK: we bypass the private visiblity of Module#include
+        # for Ruby 2.0.0; in Ruby 2.1.0 Module#include is public
+        # so this should be safe
+        obj.send :include, OSC::Machete::SimpleJob::Submittable
+        obj.send :include, OSC::Machete::SimpleJob::Statusable
       end
     end
   end
