@@ -9,16 +9,6 @@ class OSC::Machete::JobDir
     name[/^\d+$/]
   end
   
-  # return true if Pathname is a job directory
-  def jobdir?(path)
-    jobdir_name?(path.basename.to_s) && path.directory?
-  end
-  
-  # get a list of all job directories
-  def jobdirs
-    @target.children.select { |i| jobdir?(i) }
-  end
-  
   # get a list of directories in the target directory
   def targetdirs
     @target.children.select(&:directory?)
@@ -26,7 +16,8 @@ class OSC::Machete::JobDir
   
   # find the next unique integer name for a job directory
   def unique_dir
-    dirs = jobdirs.map { |i| i.basename.to_s.to_i }
+    paths = @target.children.select { |i| jobdir_name?(i.basename.to_s) }
+    dirs = paths.map { |i| i.basename.to_s.to_i }
     (dirs.count > 0) ? (dirs.max + 1).to_s : 1.to_s
   end
   
