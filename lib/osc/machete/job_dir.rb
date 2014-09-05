@@ -11,7 +11,7 @@ class OSC::Machete::JobDir
   
   # return true if Pathname is a job directory
   def jobdir?(path)
-    jobdir_name?(path.basename.to_s) && path.directory?
+    jobdir_name?(path.basename.to_s)
   end
   
   # get a list of all job directories
