@@ -26,8 +26,9 @@ class OSC::Machete::JobDir
   
   # find the next unique integer name for a job directory
   def unique_dir
-    dirs = jobdirs.map { |i| i.basename.to_s.to_i }
-    (dirs.count > 0) ? (dirs.max + 1).to_s : 1.to_s
+    taken_paths = @target.children.select { |path| jobdir_name?(path.basename.to_s) }
+    taken_ints = taken_paths.map { |path| path.basename.to_s.to_i }
+    (taken_ints.count > 0) ? (taken_ints.max + 1).to_s : 1.to_s
   end
   
   def new_jobdir
