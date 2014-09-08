@@ -28,13 +28,13 @@ describe OSC::Machete::Location do
     end
 
     it "should delete the template if user specifies" do
-      subject.render("", {options: true})
+      subject.render("", {replace: true})
       File.exists?("#{target}/file.txt").must_equal true
       File.exists?("#{target}/file.txt.mustache").must_equal false
     end
 
     it "shouldn't delete the template if user specifies" do
-      subject.render("", {options: false})
+      subject.render("", {replace: false})
       File.exists?("#{target}/file.txt").must_equal true
       File.exists?("#{target}/file.txt.mustache").must_equal true
     end
