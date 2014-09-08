@@ -3,11 +3,7 @@ require 'osc/machete'
 
 describe OSC::Machete::Location do
 
-  let(:target) { "LocationTestApp" }
-
-  before do
-    Dir.mkdir(target)
-  end
+  let(:target) { Dir.mktmpdir("location") }
 
   after do
     FileUtils.remove_entry target
