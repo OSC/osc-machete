@@ -3,11 +3,7 @@ require 'osc/machete'
 
 describe OSC::Machete::JobDir do
 
-  let(:target) { "App123" }
-
-  before do
-    Dir.mkdir(target)
-  end
+  let(:target) { Dir.mktmpdir("jobdir") }
 
   after do
     FileUtils.remove_entry target
