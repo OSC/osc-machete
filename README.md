@@ -17,6 +17,13 @@ And then execute:
 
 ## Usage
 
-**Documentation coming soon!**
 
+### OSC::Machete::Statusable
+
+After including `OSC::Machete::Statusable` or `OSC::Machete::SimpleJob`, you will want to add the fields to the model for storing job data:
+
+```
+rails g migration add_job_attrs_to_simulation status:string pbsid:string job_path:string
+rake db:migrate
+```
 
