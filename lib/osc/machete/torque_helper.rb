@@ -73,6 +73,16 @@ class OSC::Machete::TorqueHelper
     output.to_sym unless output.nil?
   end
   
+  def qdel(pbsid)
+    #TODO: testing on Oakley?
+    #TODO: testing on Glenn?
+    #TODO: error handling?
+    cmd = "qdel #{pbsid}"
+    `#{cmd}`
+    
+    true
+  end
+  
   # **FIXME: this might not belong here!**
   # but not sure whether it should be here, on Job, or somewhere in between
   # 

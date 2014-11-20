@@ -6,17 +6,18 @@ class TestJob < Minitest::Test
     @id1 = "16376371.opt-batch.osc.edu"
     @id2 = "16376372.opt-batch.osc.edu"
     
-    @scriptpath = "/tmp/main.sh"
-    @jobdir = "/tmp"
+    @jobdir = Pathname.new(Dir.mktmpdir)
     @scriptname = "main.sh"
+    @scriptpath = @jobdir.join(@scriptname)
   end
   
   def teardown
+    @jobdir.rmtree if @jobdir.exist?
   end
   
   def test_basic_job
     job = OSC::Machete::Job.new(script: @scriptpath)
-    assert_equal job.path.to_s, @jobdir
+    assert_equal job.path.to_s, @jobdir.to_s
     assert_equal job.script_name, @scriptname
   end
   
@@ -104,5 +105,24 @@ class TestJob < Minitest::Test
     # add the dependency and submit the job
     job2.after job1
     job2.submit
+  end
+  
+  
+  def test_job_delete
+    # FIXME: the unit tests in this file are not dry...
+    # FIXME: rethink the interface: should delete return true if a job was actually deleted?
+    
+    torque1 = OSC::Machete::TorqueHelper.new
+    torque1.expects(:qdel).with(@id1).returns(true)
+    job = OSC::Machete::Job.new(script: @scriptpath, pbsid: @id1, torque_helper: torque1)
+    job.delete
+    assert @jobdir.exist?, "deleting job by default should not deleted the directory too"
+    
+    torque2 = OSC::Machete::TorqueHelper.new
+    torque2.expects(:qdel).with(@id1).returns(true)
+    job = OSC::Machete::Job.new(script: @scriptpath, pbsid: @id1, torque_helper: torque2)
+    job.delete(rmdir: true)
+    
+    assert ! @jobdir.exist?, "deleting job and specifying rmdir:true should have deleted the directory too"
   end
 end

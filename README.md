@@ -32,7 +32,7 @@ rake db:migrate
 ### Example of using Machete directly via irb
 
 ```
--bash-3.2$ irb -I/nfs/17/efranz/prod/osc-machete-0.1.0/lib -rosc/machete
+-bash-3.2$ irb -I/nfs/17/efranz/prod/osc-machete-0.2.2/lib -rosc/machete
 irb(main):009:0> j = OSC::Machete::Job.new pbsid: "2601223.oak-batch.osc.edu"
 => #<OSC::Machete::Job:0x002b861b94b340 @pbsid="2601223.oak-batch.osc.edu", @torque=#<OSC::Machete::TorqueHelper:0x002b861b94b318>>
 irb(main):010:0> j.status

@@ -91,6 +91,17 @@ class OSC::Machete::Job
     end
   end
   
+  def delete(rmdir: false)
+    # FIXME: using a keyword argument here... should we also do so in the initializer
+    # instead of the hash parameter
+    
+    # FIXME: rethink this interface... should qdel be idempotent? 
+    # After first call, no errors thrown after?
+    if pbsid && @torque.qdel(pbsid)
+      # recursively delete the directory after killing the job
+      Pathname.new(path).rmtree if path && rmdir
+    end
+  end
   
   private
   
