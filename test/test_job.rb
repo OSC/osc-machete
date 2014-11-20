@@ -125,4 +125,21 @@ class TestJob < Minitest::Test
     
     assert ! @jobdir.exist?, "deleting job and specifying rmdir:true should have deleted the directory too"
   end
+  
+  def test_job_dependency_delete
+    torque1 = OSC::Machete::TorqueHelper.new
+    torque1.expects(:qdel).with(@id1).returns(true)
+    torque1.expects(:qdel).with(@id2).returns(true)
+    job1 = OSC::Machete::Job.new(script: @scriptpath, pbsid: @id1, torque_helper: torque1)
+    job2 = OSC::Machete::Job.new(script: @scriptpath, pbsid: @id2, torque_helper: torque1)
+    
+    job2.afterok job1
+    
+    # we want to be able to safely delete two jobs that share the same pbs_work_dir and don't
+    # want to be able to call rmdir: true on both without worrying that the first one deleted
+    # the actual directory so the second might fail
+    # both should succeed (if the directory doesn't exist, just ignore that step)
+    job1.delete(rmdir: true)
+    job2.delete(rmdir: true)
+  end
 end

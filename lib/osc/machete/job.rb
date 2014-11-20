@@ -98,8 +98,12 @@ class OSC::Machete::Job
     # FIXME: rethink this interface... should qdel be idempotent? 
     # After first call, no errors thrown after?
     if pbsid && @torque.qdel(pbsid)
+      # FIXME: removing a directory is always a dangerous action.
+      # I wonder if we can add more tests to make sure we don't delete
+      # something if the script name is munged
+      
       # recursively delete the directory after killing the job
-      Pathname.new(path).rmtree if path && rmdir
+      Pathname.new(path).rmtree if path && rmdir && File.exists?(path)
     end
   end
   
