@@ -5,15 +5,24 @@ Ruby code to help with staging and checking the status of batch jobs.
 
 ## Installation
 
-To use 0.1.0, add this line to your application's Gemfile:
+To use, add this line to your application's Gemfile:
 
-    gem 'osc-machete', :path => "/nfs/17/efranz/prod/osc-machete-0.1.0"
+    gem 'osc-machete'
 
 And then execute:
 
     $ bundle install --local
 
-**This is a temporary solution. Once we figure out a workflow for installing new versions of the gem on the system, the way to add this to your application's Gemfile will change.**
+
+If you don't have osc-machete installed, you can do so by:
+
+1. clone this repo
+2. checkout the tag you want to build
+3. `rake install`
+
+Alternatively, you can use the latest version of the repo via bundler's git option:
+
+    gem 'osc-machete', :git => 'git@github.com:AweSim-OSC/osc-machete.git'
 
 ## Usage
 
@@ -32,7 +41,7 @@ rake db:migrate
 ### Example of using Machete directly via irb
 
 ```
--bash-3.2$ irb -I/nfs/17/efranz/prod/osc-machete-0.2.2/lib -rosc/machete
+-bash-3.2$ irb -rosc/machete
 irb(main):009:0> j = OSC::Machete::Job.new pbsid: "2601223.oak-batch.osc.edu"
 => #<OSC::Machete::Job:0x002b861b94b340 @pbsid="2601223.oak-batch.osc.edu", @torque=#<OSC::Machete::TorqueHelper:0x002b861b94b318>>
 irb(main):010:0> j.status
@@ -53,7 +62,7 @@ puts j.status
 And then run it like this:
 
 ```
--bash-3.2$ ruby -I/nfs/17/efranz/prod/osc-machete-0.1.0/lib test.rb
+-bash-3.2$ ruby test.rb
 Q
 -bash-3.2$
 ```
