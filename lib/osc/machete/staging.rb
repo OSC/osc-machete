@@ -27,14 +27,22 @@ module OSC
     
         raise ArgumentError, 'target for staging should be a directory' unless @target.directory?
       end
-  
+ 
+      # copy directory to new job directory and render mustache template files
+      # return created directory
+      def stage(params)
+        jobdir = Location.new(@template).copy_to(new_jobdir)
+        jobdir.render(params)
+        jobdir.to_s
+      end
+ 
+      # <b>DEPRECATED:</b> use <tt>stage</tt> and create Job objects outside of this class
+      # The staging class should not be concerned with creating Job objects.
+      #
       # create a new job by copying and rendering template
       # TODO: provide a dependency
       def new_job(params)
-        jobdir = Location.new(@template).copy_to(new_jobdir)
-        jobdir.render(params)
-    
-        Job.new(script: Pathname.new(jobdir.to_s).join(@script))
+        Job.new(script: Pathname.new(stage(params)).join(@script))
       end
   
       def new_jobdir

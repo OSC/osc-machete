@@ -68,7 +68,12 @@ module OSC
         end
 
         def submit(params)
-          # stage and submit job
+          # stage
+          staged_dir = staging.stage(params)
+          
+          # create and submit job
+          job = Job.new(script: Pathname.new(staged_dir).join(@script))
+          
           job = staging.new_job params
           job.submit
 
