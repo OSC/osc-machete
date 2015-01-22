@@ -16,7 +16,7 @@ module OSC
       # target could be a method name that returns the path
       # for example, in user's crimson files
       # 
-      def initialize(template, target, script)
+      def initialize(template, target, script="main.sh")
         # 
         # an OSC::Appkit::Location object...
         # or a URI helper? URI.copyTo(URI) or URI.copyTo(Pathname)
