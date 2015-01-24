@@ -1,0 +1,139 @@
+module OSC
+  module Machete
+    module SimpleJob
+      module Workflow
+        
+        def has_machete_workflow_of(jobs_active_record_relation_symbol)
+          # yes, this is magic mimicked from http://guides.rubyonrails.org/plugins.html
+          #  and http://yehudakatz.com/2009/11/12/better-ruby-idioms/
+          cattr_accessor :jobs_active_record_relation_symbol
+          self.jobs_active_record_relation_symbol = jobs_active_record_relation_symbol
+          
+          # separate modules to group common methods for readability purposes
+          # both builder methods and status methods need the jobs relation so
+          # we include that first
+          self.send :include, OSC::Machete::SimpleJob::Workflow::JobsRelation
+          self.send :include, OSC::Machete::SimpleJob::Workflow::BuilderMethods
+          self.send :include, OSC::Machete::SimpleJob::Workflow::StatusMethods
+        end
+        
+        module JobsRelation
+          def jobs_active_record_relation
+            self.send self.class.jobs_active_record_relation_symbol
+          end
+        end
+        
+        # depends on jobs_active_record_relation being defined
+        module BuilderMethods
+          #FIXME: this should be a constant provided by the app: data_root
+          def data_root
+            OSC::Machete::Crimson.new(Rails.application.class.parent_name).files_path
+          end
+        
+          def staging_template_name
+            self.class.name.underscore
+          end
+
+          # Simulation => simulations
+          # FlowratePerformanceRun => flowrate_performance_runs
+          def staging_target_dir_name
+            staging_template_name.pluralize
+          end
+          
+          def staging_target_dir
+            data_root.join(staging_target_dir_name)
+          end
+        
+          def stage
+            staging_template_dir = Rails.root.join("jobs", staging_template_name)
+        
+            staged_dir = OSC::Machete::JobDir.new(staging_target_dir).new_jobdir
+            FileUtils.mkdir_p staged_dir
+            FileUtils.cp_r staging_template_dir.to_s + "/.", staged_dir
+        
+            staged_dir
+          end
+      
+          def render_mustache_files(staged_dir, template_view)
+            Location.new(staged_dir).render(template_view)
+          end
+
+          def after_stage(staged_dir)
+          end
+
+          def build_jobs(staged_dir, jobs = [])
+            # TODO:
+            # by default we look to see if pre.sh, main.sh, and post.sh exist, and set afterok relationships between them
+            # jobs << OSC::Machete::Job.new(script: staged_dir.join(Container::SOLVE_SCRIPT_NAME))
+            # jobs << OSC::Machete::Job.new(script: staged_dir.join(Container::POST_SCRIPT_NAME)).afterok(jobs.last)
+          end
+
+          def submit_jobs(jobs)
+            jobs.each(&:submit)
+          end
+
+          def save_jobs(jobs)
+            self.staged_dir_path = staged_dir.to_s if self.respond_to?(:staged_dir=)
+            self.save if self.id.nil? || self.respond_to?(:staged_dir=)
+            
+            jobs.each do |job|
+              self.jobs_active_record_relation.create(job: job)
+            end
+          end
+
+          # do everything
+          def submit(template_view)
+            staged_dir = stage
+            render_mustache_files(staged_dir, template_view)
+            after_stage(staged_dir)
+            jobs = build_jobs(staged_dir)
+            submit_jobs(jobs)
+            save_jobs(jobs)
+          end
+        end
+        
+        # depends on jobs_active_record_relation being defined
+        module StatusMethods
+          def submitted?
+            jobs_active_record_relation.count > 0
+          end
+
+          def completed?
+            # true if all jobs are completed
+            submitted? && jobs_active_record_relation.where(status: ["F", "C"]).count == jobs_active_record_relation.count
+          end
+
+          def failed?
+            # true if any of the jobs .failed?
+            jobs_active_record_relation.where(status: ["F"]).any?
+          end
+
+          # returns true if in a running state (R,Q,H)
+          def running_queued_or_hold?
+            # true if any of the jobs .running?
+            jobs_active_record_relation.where(status: ["Q", "R", "H"]).any?
+          end
+
+          # FIXME: better name for this?
+          def status_human_readable
+            if completed?
+              "Completed"
+            elsif jobs_active_record_relation.where(status: "R").any?
+              "Running"
+            elsif jobs_active_record_relation.where(status: "Q").any?
+              "Queued"
+            elsif jobs_active_record_relation.where(status: "H").any?
+              "Hold"
+            else
+              "Not Submitted"
+            end
+          end
+        end
+        
+        # extend Active Record with the has_workflow_of method
+        ActiveRecord::Base.extend OSC::Machete::SimpleJob::Workflow if defined? ActiveRecord::Base
+      end
+    end
+  end
+end
+

@@ -11,6 +11,7 @@ require "osc/machete/user"
 require "osc/machete/simple_job"
 require "osc/machete/simple_job/submittable"
 require "osc/machete/simple_job/statusable"
+require "osc/machete/simple_job/workflow"
 
 module OSC
   module Machete
