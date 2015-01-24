@@ -7,11 +7,10 @@ require "osc/machete/job_dir"
 require "osc/machete/location"
 require "osc/machete/torque_helper"
 require "osc/machete/staging"
-require "osc/machete/system"
 require "osc/machete/user"
-require "osc/machete/submittable"
-require "osc/machete/statusable"
 require "osc/machete/simple_job"
+require "osc/machete/simple_job/submittable"
+require "osc/machete/simple_job/statusable"
 
 module OSC
   module Machete
