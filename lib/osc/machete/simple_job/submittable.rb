@@ -68,12 +68,14 @@ module OSC
         end
 
         def submit(params)
-          # stage
-          staged_dir = staging.stage(params)
-          
-          # create and submit job
-          job = Job.new(script: Pathname.new(staged_dir).join(@script))
-          
+          # FIXME: uncomment to replace `job = staging.new_job params` when
+          # you bump to an incompatible version if you keep SimpleJob::Submittable
+          # 
+          # # stage
+          # staged_dir = staging.stage(params)
+          # 
+          # # create and submit job
+          # job = Job.new(script: Pathname.new(staged_dir).join(@script))
           job = staging.new_job params
           job.submit
 
