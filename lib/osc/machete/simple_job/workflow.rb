@@ -43,7 +43,7 @@ module OSC
           def staging_target_dir
             data_root.join(staging_target_dir_name)
           end
-        
+          
           def stage
             staging_template_dir = Rails.root.join("jobs", staging_template_name)
         
@@ -60,12 +60,10 @@ module OSC
 
           def after_stage(staged_dir)
           end
-
+          
+          # returns an array of unsubmitted OSC::Machete::Job objects with their dependencies (if any) configured
           def build_jobs(staged_dir, jobs = [])
-            # TODO:
-            # by default we look to see if pre.sh, main.sh, and post.sh exist, and set afterok relationships between them
-            # jobs << OSC::Machete::Job.new(script: staged_dir.join(Container::SOLVE_SCRIPT_NAME))
-            # jobs << OSC::Machete::Job.new(script: staged_dir.join(Container::POST_SCRIPT_NAME)).afterok(jobs.last)
+            raise NotImplementedError, "Objects including OSC::Machete::SimpleJob::Workflow must implement build_jobs"
           end
 
           def submit_jobs(jobs)
