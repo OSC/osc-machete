@@ -58,14 +58,32 @@ module OSC
             statuses[status]
           end
         end
-
+        
+        # a hook that can be overid with custom code
+        # also looks for default validation methods for existing 
+        def results_valid?
+          valid = true
+          
+          if self.respond_to? :script_name
+            validation_method = File.basename(script_name, ".*").underscore.parameterize('_') + "_results_valid?"
+            
+            if self.respond_to?(validation_method)
+              valid = self.send(validation_method)
+            end
+          end
+          
+          valid
+        end
+        
         #FIXME: should have a unit test for this!
         def update_status!
           if submitted? && ! completed?
             # if the status of the job is nil, the job is no longer in the batch
             # system, so it is either completed or failed
             current_status = OSC::Machete::Job.new(pbsid: pbsid).status
-            current_status = current_status.nil? ? "C" : current_status.to_s
+            if current_status == current_status.nil?
+              current_status = results_valid? ? "C" : "F"
+            end
 
             if current_status != self.status
               # FIXME: how do we integrate logging into Rails apps?
