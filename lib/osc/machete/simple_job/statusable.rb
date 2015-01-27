@@ -61,6 +61,7 @@ module OSC
         
         # a hook that can be overid with custom code
         # also looks for default validation methods for existing 
+        # WARNING: THIS USES ActiveSupport::Inflector methods underscore and parameterize
         def results_valid?
           valid = true
           
