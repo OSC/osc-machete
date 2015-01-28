@@ -77,16 +77,30 @@ module OSC
         end
         
         #FIXME: should have a unit test for this!
-        def update_status!
-          if submitted? && ! completed?
+        # job.update_status! will update and save object 
+        # if submitted? and ! completed? and status changed from previous state
+        # force will cause status to update regardless of completion status,
+        # redoing the validations. This way, if you are fixing validation methods
+        # you can use the Rails console to update the status of a Workflow by doing this:
+        #
+        #     Container.last.jobs.each {|j| j.update_status!(force: true) }
+        #
+        # Or for a single statusable such as job:
+        #
+        #     job.update_status!(force: true)
+        #
+        # FIXME: should log whether a validation method was called or
+        # throw a warning that no validation method was found (the one that would have been called)
+        def update_status!(force: false)
+          if submitted? && (! completed? || force)
             # if the status of the job is nil, the job is no longer in the batch
             # system, so it is either completed or failed
             current_status = OSC::Machete::Job.new(pbsid: pbsid).status
-            if current_status == current_status.nil?
+            if current_status.nil?
               current_status = results_valid? ? "C" : "F"
             end
 
-            if current_status != self.status
+            if current_status != self.status || force
               # FIXME: how do we integrate logging into Rails apps?
               # puts "status changed. current_status: #{current_status} and status is #{status}"
               self.status = current_status

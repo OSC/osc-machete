@@ -80,7 +80,7 @@ module OSC
           end
 
           # do everything
-          def submit(template_view)
+          def submit(template_view=self)
             staged_dir = stage
             render_mustache_files(staged_dir, template_view)
             after_stage(staged_dir)
@@ -114,7 +114,9 @@ module OSC
 
           # FIXME: better name for this?
           def status_human_readable
-            if completed?
+            if failed?
+              "Failed"
+            elsif completed?
               "Completed"
             elsif jobs_active_record_relation.where(status: "R").any?
               "Running"
