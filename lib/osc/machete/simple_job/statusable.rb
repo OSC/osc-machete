@@ -59,6 +59,15 @@ module OSC
           end
         end
         
+        # Build the results validation method name from script_name attr
+        # using ActiveSupport methods
+        #
+        # Call this using the Rails console to see what method you should implement
+        # to support results validation for that job.
+        def results_validation_method_name
+          File.basename(script_name, ".*").underscore.parameterize('_') + "_results_valid?"
+        end
+ 
         # a hook that can be overid with custom code
         # also looks for default validation methods for existing 
         # WARNING: THIS USES ActiveSupport::Inflector methods underscore and parameterize
@@ -66,10 +75,8 @@ module OSC
           valid = true
           
           if self.respond_to? :script_name
-            validation_method = File.basename(script_name, ".*").underscore.parameterize('_') + "_results_valid?"
-            
-            if self.respond_to?(validation_method)
-              valid = self.send(validation_method)
+            if self.respond_to?(results_validation_method_name)
+              valid = self.send(results_validation_method_name)
             end
           end
           
