@@ -70,7 +70,7 @@ module OSC
             jobs.each(&:submit)
           end
 
-          def save_jobs(jobs)
+          def save_jobs(jobs, staged_dir)
             self.staged_dir = staged_dir.to_s if self.respond_to?(:staged_dir=)
             self.save if self.id.nil? || self.respond_to?(:staged_dir=)
 
@@ -86,7 +86,7 @@ module OSC
             after_stage(staged_dir)
             jobs = build_jobs(staged_dir)
             submit_jobs(jobs)
-            save_jobs(jobs)
+            save_jobs(jobs, staged_dir)
           end
         end
 
