@@ -16,24 +16,38 @@ class OSC::Machete::JobDir
   end
   
   # return true if Pathname is a job directory
+  # FIXME: this is not used anywhere; remove it?
   def jobdir?(path)
     jobdir_name?(path.basename.to_s) && path.directory?
   end
   
   # get a list of all job directories
+  # FIXME: this is not used anywhere; remove it?
   def jobdirs
     @target.exist? ? @target.children.select { |i| jobdir?(i) } : []
   end
   
+  
   # get a list of directories in the target directory
-  # FIXME: this is not used anywhere; remove it
+  # FIXME: this is not used anywhere; remove it?
   def targetdirs
     @target.exist? ? @target.children.select(&:directory?) : []
   end
   
   # find the next unique integer name for a job directory
   def unique_dir
-    dirs = jobdirs.map { |i| i.basename.to_s.to_i }
-    (dirs.count > 0) ? (dirs.max + 1).to_s : 1.to_s
+    taken_ints = taken_paths.map { |path| path.basename.to_s.to_i }
+    (taken_ints.count > 0) ? (taken_ints.max + 1).to_s : 1.to_s
+  end
+  
+  private
+  
+  # paths that are unavailable for creating a new job directory
+  def taken_paths
+    if @target.exist?
+      @target.children.select { |path| jobdir_name?(path.basename.to_s) }
+    else
+      []
+    end
   end
 end
