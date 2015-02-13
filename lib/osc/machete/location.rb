@@ -23,7 +23,7 @@ class OSC::Machete::Location
     # @path has / auto-dropped, so we add it to make sure we copy everything
     # in the old directory to the new
     destloc = self.class.new(dest)
-    `rsync -r --exclude='.svn/.git' #{@path.to_s}/ #{destloc.to_s}`
+    `rsync -r --exclude='.svn' --exclude='.git' --exclude='.gitignore' --filter=':- .gitignore' #{@path.to_s}/ #{destloc.to_s}`
     
     # return target location so we can chain method
     destloc
