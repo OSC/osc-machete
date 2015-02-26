@@ -46,6 +46,11 @@ module OSC
         def running?
           submitted? && ! completed?
         end
+        
+        # returns true if in a running state (R,Q,H)
+        def running_queued_or_hold?
+          ["Q", "R", "H"].include?(status)
+        end
 
         # FIXME: better name for this?
         def status_human_readable

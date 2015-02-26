@@ -105,6 +105,10 @@ module OSC
             # true if any of the jobs .failed?
             jobs_active_record_relation.where(status: ["F"]).any?
           end
+          
+          def running?
+            jobs_active_record_relation.where(status: "R").any?
+          end
 
           # returns true if in a running state (R,Q,H)
           def running_queued_or_hold?
@@ -118,7 +122,7 @@ module OSC
               "Failed"
             elsif completed?
               "Completed"
-            elsif jobs_active_record_relation.where(status: "R").any?
+            elsif running?
               "Running"
             elsif jobs_active_record_relation.where(status: "Q").any?
               "Queued"
