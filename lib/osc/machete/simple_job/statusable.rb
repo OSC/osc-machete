@@ -2,6 +2,7 @@ module OSC
   module Machete
     module SimpleJob
       module Statusable
+        extend Gem::Deprecate
         # methods that deal with pbs batch job status management
         # within a Rails ActiveRecord model
         
@@ -35,21 +36,27 @@ module OSC
         def completed?
           # FIXME: instead of storing magic constants
           # we need regular constants
-          status == "C" || status == "F"
+          status.to_s == "C" || status.to_s == "F"
         end
 
         def failed?
-          status == "F"
+          status.to_s == "F"
         end
 
         # returns true if in a running state (R,Q,H)
         def running?
-          submitted? && ! completed?
+          active?
         end
+        deprecate :running?, "Use active? instead", 2015, 03
         
         # returns true if in a running state (R,Q,H)
         def running_queued_or_hold?
-          ["Q", "R", "H"].include?(status)
+          active?
+        end
+        deprecate :running_queued_or_hold?, "Use active? instead", 2015, 03
+        
+        def active?
+          submitted? && ! completed?
         end
 
         # FIXME: better name for this?
@@ -60,7 +67,7 @@ module OSC
             "Not Submitted"
           else
             # FIXME: is this safe? perhaps a default?
-            statuses[status]
+            statuses[status.to_s]
           end
         end
         

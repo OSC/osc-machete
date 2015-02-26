@@ -92,6 +92,8 @@ module OSC
 
         # depends on jobs_active_record_relation being defined
         module StatusMethods
+          extend Gem::Deprecate
+          
           def submitted?
             jobs_active_record_relation.count > 0
           end
@@ -105,15 +107,15 @@ module OSC
             # true if any of the jobs .failed?
             jobs_active_record_relation.where(status: ["F"]).any?
           end
-          
-          def running?
-            jobs_active_record_relation.where(status: "R").any?
-          end
 
-          # returns true if in a running state (R,Q,H)
+          # returns true if in a running state (R,Q,H) i.e. not completed and not submitted
           def running_queued_or_hold?
-            # true if any of the jobs .running?
-            jobs_active_record_relation.where(status: ["Q", "R", "H"]).any?
+            active?
+          end
+          deprecate :running_queued_or_hold?, "Use active? instead", 2015, 03
+          
+          def active?
+            submitted? && ! completed?
           end
 
           # FIXME: better name for this?
@@ -122,7 +124,7 @@ module OSC
               "Failed"
             elsif completed?
               "Completed"
-            elsif running?
+            elsif jobs_active_record_relation.where(status: "R").any?
               "Running"
             elsif jobs_active_record_relation.where(status: "Q").any?
               "Queued"
