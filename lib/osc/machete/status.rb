@@ -14,15 +14,15 @@ class OSC::Machete::Status
   # W Job is waiting for its execution time (-a option) to be reached.
   # S (Unicos only) Job is suspended.
   #
-  # Ordered hash for precedence
-  # Hashes enumerate their values in the order that the corresponding keys were inserted
-  VALUES = {nil=>"not_submitted", "C"=>"completed", "F"=>"failed", 
-            "E"=>"exiting", "T"=>"transitioning", "W"=>"waiting", "S"=>"suspended", 
-            "H"=>"held", "Q"=>"queued", "R"=>"running"}
+  VALUES = [[nil, "not_submitted"], ["C", "completed"], ["F", "failed"], 
+            ["E", "exiting"], ["T", "transitioning"], ["W", "waiting"], ["S", "suspended"], 
+            ["H", "held"], ["Q", "queued"], ["R", "running"]]
+  VALUES_HASH = Hash[VALUES]
+  PRECENDENCE = VALUES.map(&:first)
   
   # create self.completed, self.running, etc.
   class << self
-    VALUES.each do |char, name|
+    VALUES_HASH.each do |char, name|
       define_method(name) do
         OSC::Machete::Status.new(char)
       end
@@ -30,7 +30,7 @@ class OSC::Machete::Status
   end
   
   # create completed?, running?, etc.
-  VALUES.each do |char, name|
+  VALUES_HASH.each do |char, name|
     define_method("#{name}?") do
       self == OSC::Machete::Status.new(char)
     end
@@ -43,7 +43,7 @@ class OSC::Machete::Status
   def initialize(char)
     @char = char.to_s
     @char = nil if @char.empty?
-    raise "Invalid status value" unless VALUES.has_key?(@char)
+    raise "Invalid status value" unless VALUES_HASH.has_key?(@char)
   end
   
   def to_s
@@ -52,7 +52,7 @@ class OSC::Machete::Status
   
   def inspect
     # FIXME: ActiveSupport  replace with .humanize and simpler datastructure
-     VALUES[@char].split("_").map(&:capitalize).join(" ")
+     VALUES_HASH[@char].split("_").map(&:capitalize).join(" ")
   end
   
   def +(other)
@@ -77,6 +77,6 @@ class OSC::Machete::Status
   
   def precendence
     # Hashes enumerate their values in the order that the corresponding keys were inserted
-    VALUES.keys.index(@char)
+    PRECENDENCE.index(@char)
   end
 end
