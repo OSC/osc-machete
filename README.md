@@ -32,7 +32,7 @@ Alternatively, you can use the latest version of the repo via bundler's git opti
 After including `OSC::Machete::Statusable` or `OSC::Machete::SimpleJob`, you will want to add the fields to the model for storing job data:
 
 ```
-rails g migration add_job_attrs_to_simulation status:string pbsid:string job_path:string
+rails g migration add_job_attrs_to_simulation status:string pbsid:string job_path:string script_name:string
 rake db:migrate
 ```
 
