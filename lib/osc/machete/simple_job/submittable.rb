@@ -22,14 +22,6 @@ module OSC
           "main.sh"
         end
 
-        def crimson_files_dir_name
-          # TODO: maybe it should be a constant that is auto-set to Rails.application.class.parent_name
-          # such as CRIMSON_FILES_DIR_NAME=Rails.application.class.parent_name
-          # in an initializer
-          # in this case it ends up being "HelloSim"
-          Rails.application.class.parent_name
-        end
-
         def staging_target_dir_name
           # FIXME: is there any reason to pluralize?
           # removing this constraint could offer more options for naming things
@@ -40,14 +32,8 @@ module OSC
         end
 
         def staging_target_dir
-          # TODO: add jobs to ~/crimson_files/DemoSim/jobs/
-          # and file uploads to another location later (perhaps ~/crimson_files/DemoSim/files/)
-          # or perhaps different types of jobs in different dirs i.e.
-          # ~/crimson_files/DemoSim/flowrate_performance_tests/
-
-          OSC::Machete::Crimson.new(crimson_files_dir_name).files_path.join(staging_target_dir_name)
+          Rails.configuration.dataroot.join(staging_target_dir_name)
         end
-
 
         # build staging class
         # uses hook methods to get specific arguments

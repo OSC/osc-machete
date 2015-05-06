@@ -27,7 +27,7 @@ module OSC
         module BuilderMethods
           #FIXME: this should be a constant provided by the app: data_root
           def data_root
-            OSC::Machete::Crimson.new(Rails.application.class.parent_name).files_path
+            Rails.configuration.dataroot
           end
 
           def staging_template_name

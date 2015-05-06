@@ -26,7 +26,6 @@ class TestSimpleJob < Minitest::Test
     
     # verify responds to submit methods
     assert_respond_to obj, :staging_template_name
-    assert_respond_to obj, :crimson_files_dir_name
     assert_respond_to obj, :staging
     assert_respond_to obj, :submit
   end
@@ -43,7 +42,6 @@ class TestSimpleJob < Minitest::Test
     
     # verify responds to submit methods
     assert_respond_to obj, :staging_template_name
-    assert_respond_to obj, :crimson_files_dir_name
     assert_respond_to obj, :staging
     assert_respond_to obj, :submit
     

@@ -21,12 +21,10 @@ class TestStatusable < Minitest::Test
     
     assert @job.submitted?
     assert ! @job.completed?
-    assert @job.running_queued_or_hold?
     assert @job.active?
     assert_equal "Queued", @job.status_human_readable
     
     @job.status = :R
-    assert @job.running_queued_or_hold?
     assert @job.active?
     assert_equal "Running", @job.status_human_readable
     
@@ -44,12 +42,10 @@ class TestStatusable < Minitest::Test
     
     assert @job.submitted?
     assert ! @job.completed?
-    assert @job.running_queued_or_hold?
     assert @job.active?
     assert_equal "Queued", @job.status_human_readable
     
     @job.status = "R"
-    assert @job.running_queued_or_hold?
     assert @job.active?
     assert_equal "Running", @job.status_human_readable
     
