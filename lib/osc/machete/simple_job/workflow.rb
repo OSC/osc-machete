@@ -27,7 +27,10 @@ module OSC
         module BuilderMethods
           #FIXME: this should be a constant provided by the app: data_root
           def data_root
-            Rails.configuration.dataroot
+            raise NotImplementedError, "Objects including "\
+              "OSC::Machete::SimpleJob::Workflow must implement data_root "\
+              "OR include awesim_rails gem in project" unless defined? AwesimRails
+            AwesimRails.dataroot.join(staging_target_dir_name)
           end
 
           def staging_template_name

@@ -32,7 +32,8 @@ module OSC
         end
 
         def staging_target_dir
-          Rails.configuration.dataroot.join(staging_target_dir_name)
+          raise "override staging_target_dir or include awesim_rails gem" unless defined? AwesimRails
+          AwesimRails.dataroot.join(staging_target_dir_name)
         end
 
         # build staging class
