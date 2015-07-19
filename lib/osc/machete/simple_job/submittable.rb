@@ -54,7 +54,7 @@ module OSC
           OSC::Machete::Staging.new template, target, staging_script_name
         end
 
-        def submit(params)
+        def submit(template_view=self)
           # FIXME: uncomment to replace `job = staging.new_job params` when
           # you bump to an incompatible version if you keep SimpleJob::Submittable
           # 
@@ -63,7 +63,7 @@ module OSC
           # 
           # # create and submit job
           # job = Job.new(script: Pathname.new(staged_dir).join(@script))
-          job = staging.new_job params
+          job = staging.new_job template_view
           job.submit
 
           # persist job data
