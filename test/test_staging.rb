@@ -13,7 +13,7 @@ class TestStaging < Minitest::Test
     
     # directory where to create jobs
     # 
-    @target = Dir.mktmpdir
+    @target = File.realpath Dir.mktmpdir
     @script = 'GLO_job'
   end
   
