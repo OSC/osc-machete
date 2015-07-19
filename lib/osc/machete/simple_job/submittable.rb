@@ -66,10 +66,8 @@ module OSC
           job = staging.new_job template_view
           job.submit
 
-          # persist job data
-          self.status = job.status
-          self.pbsid = job.pbsid
-          self.job_path = job.path.to_s
+          # persist job data (use job= specified on statusable)
+          self.job = job
           self.save
         end
       end
