@@ -5,7 +5,7 @@ module OSC
         extend Gem::Deprecate
         # methods that deal with pbs batch job status management
         # within a Rails ActiveRecord model
-        
+
         def self.included(obj)
           # TODO: throw warning if we detect that pbsid, status, save,
           # etc. are not apart of this; i.e.
@@ -29,37 +29,55 @@ module OSC
           self.status = new_job.status
         end
 
+        # Returns true if the job has been submitted.
+        # 
+        # If the pbsid is nil or the pbsid is an empty string,
+        # then the job hasn't been submitted and method returns false.
         def submitted?
           ! (pbsid.nil? || pbsid == "")
         end
 
+        # Returns true if the job is no longer running.
+        # 
+        # If the job status is completed or failed
+        # return true.
         def completed?
-          # FIXME: instead of storing magic constants
-          # we need regular constants
           status.to_s == "C" || status.to_s == "F"
         end
 
+        # Returns true if the job has failed.
         def failed?
           status.to_s == "F"
         end
 
-        # returns true if in a running state (R,Q,H)
+        # Returns true if in a running state (R,Q,H)
+        # 
+        # DEPRECATED: Use 'active?' instead.
         def running?
           active?
         end
         deprecate :running?, "Use active? instead", 2015, 03
         
-        # returns true if in a running state (R,Q,H)
+        # Returns true if in a running state (R,Q,H)
         def running_queued_or_hold?
           active?
         end
         deprecate :running_queued_or_hold?, "Use active? instead", 2015, 03
         
+        # Returns true if the job has been submitted and is not completed.
         def active?
           submitted? && ! completed?
         end
 
-        # FIXME: better name for this?
+        # Returns a string representing a human readable status label.
+        # 
+        # Status options:
+        #   Hold
+        #   Running
+        #   Queued
+        #   Failed
+        #   Completed
+        #   Not Submitted
         def status_human_readable
           statuses = {"H" => "Hold", "R" => "Running", "Q" => "Queued", "F" => "Failed", "C" => "Completed"}
 
@@ -80,7 +98,9 @@ module OSC
           File.basename(script_name, ".*").underscore.parameterize('_') + "_results_valid?"
         end
  
-        # a hook that can be overid with custom code
+        # Returns true if the 
+        # 
+        # A hook that can be overidden with custom code
         # also looks for default validation methods for existing 
         # WARNING: THIS USES ActiveSupport::Inflector methods underscore and parameterize
         def results_valid?

@@ -18,25 +18,30 @@ module OSC
           self.class.name.underscore
         end
 
+        # Returns the staging script name.
+        # 
+        # Currently static "main.sh"
         def staging_script_name
           "main.sh"
         end
 
+        # Returns a name of the staging target that has been underscored and pluralized
+        # based on the class name.
+        # 
+        # Examples: 
+        #   Simulation => simulations
+        #   FlowratePerformanceRun => flowrate_performance_runs
         def staging_target_dir_name
-          # FIXME: is there any reason to pluralize?
-          # removing this constraint could offer more options for naming things
-
-          # Simulation => simulations
-          # FlowratePerformanceRun => flowrate_performance_runs
           self.class.name.underscore.pluralize
         end
+
 
         def staging_target_dir
           raise "override staging_target_dir or include awesim_rails gem" unless defined? AwesimRails
           AwesimRails.dataroot.join(staging_target_dir_name)
         end
 
-        # build staging class
+        # Build staging class
         # uses hook methods to get specific arguments
         # such as the template name, etc.
         def staging
