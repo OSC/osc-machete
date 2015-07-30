@@ -98,8 +98,6 @@ module OSC
           File.basename(script_name, ".*").underscore.parameterize('_') + "_results_valid?"
         end
  
-        # Returns true if the 
-        # 
         # A hook that can be overidden with custom code
         # also looks for default validation methods for existing 
         # WARNING: THIS USES ActiveSupport::Inflector methods underscore and parameterize
