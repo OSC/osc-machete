@@ -25,14 +25,6 @@ module OSC
 
         # depends on jobs_active_record_relation being defined
         module BuilderMethods
-          #FIXME: this should be a constant provided by the app: data_root
-          def data_root
-            raise NotImplementedError, "Objects including "\
-              "OSC::Machete::SimpleJob::Workflow must implement data_root "\
-              "OR include awesim_rails gem in project" unless defined? AwesimRails
-            AwesimRails.dataroot.join(staging_target_dir_name)
-          end
-
           def staging_template_name
             self.class.name.underscore
           end
@@ -44,7 +36,8 @@ module OSC
           end
 
           def staging_target_dir
-            data_root.join(staging_target_dir_name)
+            raise "override staging_target_dir or include awesim_rails gem" unless defined? AwesimRails
+            AwesimRails.dataroot.join(staging_target_dir_name)
           end
 
           def stage
