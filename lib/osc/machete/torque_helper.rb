@@ -9,7 +9,7 @@ require 'nokogiri'
 class OSC::Machete::TorqueHelper
   
   #*TODO:*
-  # consider using cocoaine gem
+  # consider using cocaine gem
   # consider using Shellwords and other tools
   
   # return true if script has PBS header specifying Oakley queue
@@ -17,8 +17,8 @@ class OSC::Machete::TorqueHelper
     open(script) { |f| f.read =~ /#PBS -q @oak-batch/ }
   end
   
-  # usage: qsub("/path/to/script") or
-  #        qsub("/path/to/script", depends_on: {afterany: ["1234.oak-batch.osc.edu"]})
+  # usage: <tt>qsub("/path/to/script")</tt> or
+  #        <tt>qsub("/path/to/script", depends_on: { afterany: ["1234.oak-batch.osc.edu"] })</tt>
   # 
   # Where depends_on is a hash with key being dependency type and array containing the
   # arguments. See documentation on dependency_list in qsub man pages for details.
@@ -87,7 +87,7 @@ class OSC::Machete::TorqueHelper
   # but not sure whether it should be here, on Job, or somewhere in between
   # 
   # @param output  xml output from qstat -x pbsid
-  # @return nil, 'Q', 'H', 'R' for job state
+  # @return [String, nil] nil, 'Q', 'H', 'R' for job state
   def parse_qstat_output(output)
     # FIXME: rescue nil - this is potentially recovering from an error silently
     # which is bad
