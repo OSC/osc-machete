@@ -40,9 +40,11 @@ module OSC
             AwesimRails.dataroot.join(staging_target_dir_name)
           end
 
-          def stage
-            staging_template_dir = Rails.root.join("jobs", staging_template_name)
+          def staging_template_dir
+            Rails.root.join("jobs", staging_template_name)
+          end
 
+          def stage
             staged_dir = OSC::Machete::JobDir.new(staging_target_dir).new_jobdir
             FileUtils.mkdir_p staged_dir
             FileUtils.cp_r staging_template_dir.to_s + "/.", staged_dir
