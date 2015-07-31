@@ -21,10 +21,10 @@ class OSC::Machete::Job
   # If so, we can revert to separate path and script arguments or
   # add special case arguments to handle this situation.
   # 
-  # 
-  # @param script  full path to script (required)
-  # @param pbsid   pbsid of a job already submitted (optional)
-  # @param torque_helper  override default torque helper (optional)
+  # @param [Hash] args the arguments to create the job
+  # @option args [String] :script  full path to script (required)
+  # @option args [String, nil] :pbsid   pbsid of a job already submitted (optional)
+  # @option args [TorqueHelper, nil]  :torque_helper  override default torque helper (optional)
   #                       NOTE: used for testing purposes
   #                       we could use it also if we had different
   #                       torque_helper classes for different systems
