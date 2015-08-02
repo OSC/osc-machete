@@ -16,7 +16,9 @@ require 'pathname'
 #     job.status #=> nil
 #     job.pbsid #=> nil
 #
+#     # PBS_O_WORKDIR will be set to the directory containing the script
 #     job.submit
+#
 #     job.submitted? #=> true
 #     job.status #=> "Q"
 #     job.pbsid #=> "3422735.oak-batch"
@@ -52,7 +54,8 @@ require 'pathname'
 class OSC::Machete::Job
   attr_reader :pbsid, :script_path
 
-  # Create new job closure
+  # Create Job instance to represent an unsubmitted batch job from the specified
+  # script, or an existing, already submitted batch job from the specified pbsid
   #
   # Takes params in options hash as single argument:
   #
@@ -67,7 +70,7 @@ class OSC::Machete::Job
   # in the directory containing the shell script that is run. 
   #
   # @param [Hash] args the arguments to create the job
-  # @option args [String] :script  full path to script (required)
+  # @option args [String] :script  full path to script (optional)
   # @option args [String, nil] :pbsid   pbsid of a job already submitted (optional)
   # @option args [TorqueHelper, nil]  :torque_helper  override default torque helper (optional)
   #                       NOTE: used for testing purposes
@@ -95,6 +98,9 @@ class OSC::Machete::Job
 
   # Submit any dependent jobs that haven't been submitted
   # then submit this job, specifying dependencies as required by Torque.
+  # Submitting includes cd-ing into the script's directory and qsub-ing from
+  # that location, ensuring that environment variable PBS_O_WORKDIR is
+  # set to the directory containing the script.
   def submit
     return if submitted?
 
@@ -106,16 +112,29 @@ class OSC::Machete::Job
     # cd into directory, submit job from there
     # so that PBS_O_WORKDIR is set to location
     # where job is run
+    #
+    #TODO: you can set PBS_O_WORKDIR via qsub args, is this necessary? there is
+    # another env var besides PBS_O_WORKDIR that is affected by the path of the
+    # current directory when the job is submitted
+    #
+    #TODO: what if you want to submit via piping to qsub i.e. without creating a file?
     Dir.chdir(path.to_s) do
       @pbsid = @torque.qsub script_name, depends_on: dependency_ids
     end
   end
 
+  # @return [Boolean] true if @pbsid is set
   def submitted?
     ! @pbsid.nil?
   end
 
+  # @return [String, nil] character representation of status such as "H", "Q", "R" or nil if not in the system
   def status
+    # FIXME: this method returns nil in two different cases for 2 different reasons
+    # 1. @pbsid is nil
+    # 2. qstat returns nil because qstat's output returned ""
+    # a solution to this problem is switching to using a StatusValue object.
+    # Then TorqueHelper#qstat will always return a StatusValue object (never nil)
     @torque.qstat @pbsid unless @pbsid.nil?
   end
 
