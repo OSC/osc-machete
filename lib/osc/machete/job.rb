@@ -83,22 +83,22 @@ class OSC::Machete::Job
     @dependencies = {} # {:afterany => [Job, Job], :afterok => [Job]}
   end
 
-  # name of the script
+  # @return [String, nil] script name or nil if instance wasn't initialized with a script
   def script_name
     Pathname.new(@script_path).basename.to_s if @script_path
   end
 
-  # path to job directory 
+  # @return [String, nil] job directory or nil if instance wasn't initialized with a script
   def path
     Pathname.new(@script_path).dirname if @script_path
   end
 
-  #TODO: needs more robust solution here, for error checking, etc.
-  #
-  # submit any dependent jobs that haven't been submitted
-  # then submit this job, specifying dependencies as required
+  # Submit any dependent jobs that haven't been submitted
+  # then submit this job, specifying dependencies as required by Torque.
   def submit
     return if submitted?
+
+    #TODO: needs more robust solution here, for error checking, etc.
 
     # submit any dependent jobs that have not yet been submitted
     submit_dependencies
@@ -119,29 +119,48 @@ class OSC::Machete::Job
     @torque.qstat @pbsid unless @pbsid.nil?
   end
 
-  # TODO: moving caching status/workflow into here
-  # or keep in other objects outside of Job?
-  # def status_as_string(status)
-  #   {:Q => "Queued", :H => "Hold", :R => "Running"}.fetch(status, "Completed")
-  # end
-
-  # creates Job#afterany(jobs) and Job#afterok(jobs) etc.
-  # each method can accept a Job instance or an Array of Job instances
-  [:afterany, :afterok, :after, :afternotok].each do |type|
-    define_method(type) do |jobs|
-      @dependencies[type] = [] unless @dependencies.has_key?(type)
-      @dependencies[type].concat(Array(jobs))
-
-      self
-    end
+  # Ensure Job starts only after the specified Job(s) complete
+  #
+  # @param [Job, Array<Job>] jobs Job(s) that this Job should depend on (wait for)
+  # @return [self] self so you can chain method calls
+  def afterany(jobs)
+    add_dependencies(:afterany, jobs)
   end
 
-  def delete(rmdir: false)
-    # FIXME: using a keyword argument here... should we also do so in the initializer
-    # instead of the hash parameter
+  # Ensure Job starts only after the specified Job(s) complete with successful
+  # return value.
+  #
+  # @param (see #afterany)
+  # @return (see #afterany)
+  def afterok(jobs)
+    add_dependencies(:afterok, jobs)
+  end
 
+  # Ensure Job starts only after the specified Job(s) start.
+  #
+  # @param (see #afterany)
+  # @return (see #afterany)
+  def after(jobs)
+    add_dependencies(:after, jobs)
+  end
+
+  # Ensure Job starts only after the specified Job(s) complete with error
+  # return value.
+  #
+  # @param (see #afterany)
+  # @return (see #afterany)
+  def afternotok(jobs)
+    add_dependencies(:afternotok, jobs)
+  end
+
+  # Kill the currently running batch job
+  #
+  # @param [Boolean] rmdir (false) if true, recursively remove the containing directory of the job script if killing the job succeeded
+  # @return [nil]
+  def delete(rmdir: false)
     # FIXME: rethink this interface... should qdel be idempotent? 
     # After first call, no errors thrown after?
+
     if pbsid && @torque.qdel(pbsid)
       # FIXME: removing a directory is always a dangerous action.
       # I wonder if we can add more tests to make sure we don't delete
@@ -170,4 +189,10 @@ class OSC::Machete::Job
     ids.keep_if { |k,v| ! v.empty? }
   end
 
+  def add_dependencies(type, jobs)
+    @dependencies[type] = [] unless @dependencies.has_key?(type)
+    @dependencies[type].concat(Array(jobs))
+
+    self
+  end
 end
