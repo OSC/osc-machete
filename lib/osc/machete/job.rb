@@ -50,7 +50,11 @@ require 'pathname'
 #     job1.status #=> "Q"
 #     job2.status #=> "H"
 #
-
+# @!attribute [r] pbsid 
+#   @return [String, nil] the PBS job id, or nil if not set
+# @!attribute [r] script_path 
+#   @return [String, nil] path of the job script, or nil if not set
+#
 class OSC::Machete::Job
   attr_reader :pbsid, :script_path
 
