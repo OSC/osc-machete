@@ -38,7 +38,6 @@ class OSC::Machete::Location
     end
   end
   
-  #TODO: see how you use pystache for the renderer...
   def render(params, options = {})
     # custom_delimiters = options['delimeters'] || nil
     replace_template_files = options[:replace].nil? ? true : options[:replace]

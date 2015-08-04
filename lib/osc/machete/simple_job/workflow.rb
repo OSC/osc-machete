@@ -35,15 +35,29 @@ module OSC
             staging_template_name.pluralize
           end
 
+          # Gets the staging target directory path.
+          # Joins the AwesimRails.dataroot and the staging target directory name.
+          # 
+          # @raise [Exception] "override staging_target_dir or include awesim_rails gem"
+          # 
+          # @return [String] The staging target directory path.
           def staging_target_dir
             raise "override staging_target_dir or include awesim_rails gem" unless defined? AwesimRails
             AwesimRails.dataroot.join(staging_target_dir_name)
           end
 
+          # Gets the staging template directory path.
+          # Joins the {rails root}/jobs/{staging_template_name} into a path.
+          # 
+          # @return [String] The staging template directory path.
           def staging_template_dir
             Rails.root.join("jobs", staging_template_name)
           end
 
+          # Creates a new staging target job directory on the system
+          # Copies the staging template directory to the staging target job directory
+          # 
+          # @return [String] The staged directory path.
           def stage
             staged_dir = OSC::Machete::JobDir.new(staging_target_dir).new_jobdir
             FileUtils.mkdir_p staged_dir
@@ -52,14 +66,28 @@ module OSC
             staged_dir
           end
 
+          # Creates a new location and renders the mustache files
+          # 
+          # @param [String] staged_dir The staging target directory path.
+          # @param [Hash] template_view The template options to be rendered.
+          # 
+          # @return [Location] The location of the staged and rendered template.
           def render_mustache_files(staged_dir, template_view)
             Location.new(staged_dir).render(template_view)
           end
 
+          # Actions to perform after staging
+          # 
+          # @param [String] staged_dir The staged directory path.
           def after_stage(staged_dir)
           end
 
-          # returns an array of unsubmitted OSC::Machete::Job objects with their dependencies (if any) configured
+          # Unimplemented method for building jobs.
+          # 
+          # @param [String] staged_dir The staged directory path.
+          # @param [Array, Nil] jobs An array of jobs to be built.
+          # 
+          # @raise [NotImplementedError] The method is currently not implemented
           def build_jobs(staged_dir, jobs = [])
             raise NotImplementedError, "Objects including OSC::Machete::SimpleJob::Workflow must implement build_jobs"
           end
