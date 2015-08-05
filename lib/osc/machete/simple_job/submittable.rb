@@ -10,7 +10,12 @@ module OSC
         # ActiveSupport or expect Rails.application to be defined
         # 
 
-        # template directory location
+        # Staging template directory location with underscores based on the calling class name.
+        # 
+        # @example Simulation => simulation
+        # @example FlowratePerfRun => flowrate_perf_run
+        # 
+        # @return [String] The staging template directory location.
         def staging_template_name
           # Simulation => simulation
           # FlowratePerfRun => flowrate_perf_run
@@ -21,6 +26,8 @@ module OSC
         # Returns the staging script name.
         # 
         # Currently static "main.sh"
+        # 
+        # @return [String] The staging script name: "main.sh"
         def staging_script_name
           "main.sh"
         end
@@ -28,14 +35,17 @@ module OSC
         # Returns a name of the staging target that has been underscored and pluralized
         # based on the class name.
         # 
-        # Examples: 
-        #   Simulation => simulations
-        #   FlowratePerformanceRun => flowrate_performance_runs
+        # @example Simulation => simulations
+        # @example FlowratePerformanceRun => flowrate_performance_runs
+        # 
+        # @return [String] The staging target directory name that has been underscored and pluralized.
         def staging_target_dir_name
           self.class.name.underscore.pluralize
         end
 
-
+        # Returns the full path of the staging target directory combined with the rails dataroot.
+        # 
+        # @return [String] The path of the staging target directory combined with the rails dataroot. 
         def staging_target_dir
           raise "override staging_target_dir or include awesim_rails gem" unless defined? AwesimRails
           AwesimRails.dataroot.join(staging_target_dir_name)
@@ -75,8 +85,7 @@ module OSC
           self.job = job
           self.save
         end
-      end
-      
+      end      
     end
   end
 end
