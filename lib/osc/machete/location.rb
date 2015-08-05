@@ -15,10 +15,16 @@ class OSC::Machete::Location
     @template_ext = ".mustache"
   end
   
+  # @return [String] The location path as String.
   def to_s
     @path.to_s
   end
   
+  # Copies the data in a Location to a destination path using rsync. 
+  # 
+  # @param [String] dest The target location as path string. 
+  # 
+  # @return [String] The target location path.
   def copy_to(dest)
     # @path has / auto-dropped, so we add it to make sure we copy everything
     # in the old directory to the new
