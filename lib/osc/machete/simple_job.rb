@@ -4,7 +4,14 @@
 
 module OSC
   module Machete
+    # The SimpleJob module
     module SimpleJob
+
+      # SimpleJob Initializer
+      # 
+      # Includes the Submittable and Statusable modules.
+      # 
+      # @param [Object] obj The base object.
       def self.included(obj)
         #HACK: we bypass the private visiblity of Module#include
         # for Ruby 2.0.0; in Ruby 2.1.0 Module#include is public

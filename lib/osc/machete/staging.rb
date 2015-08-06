@@ -45,6 +45,9 @@ module OSC
         Job.new(script: Pathname.new(stage(params)).join(@script))
       end
   
+      # Creates a new JobDir object and path.
+      # 
+      # @return [JobDir] A JobDir object initialized to @target and assigned a unique folder.
       def new_jobdir
         JobDir.new(@target).new_jobdir
       end
