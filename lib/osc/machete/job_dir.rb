@@ -4,6 +4,9 @@ class OSC::Machete::JobDir
     @target = Pathname.new(parent_directory).cleanpath
   end
   
+  # Returns a unique path for a job
+  # 
+  # @return [String] A path of a unique job directory as string.
   def new_jobdir
     @target + unique_dir
   end

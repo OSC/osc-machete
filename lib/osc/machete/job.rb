@@ -127,11 +127,15 @@ class OSC::Machete::Job
     end
   end
 
+  # Check whether the job jas been submitted.
+  # 
   # @return [Boolean] true if @pbsid is set
   def submitted?
     ! @pbsid.nil?
   end
 
+  # Perform a qstat and return a char representing the status of the job.
+  # 
   # @return [String, nil] character representation of status such as "H", "Q", "R" or nil if not in the system
   def status
     # FIXME: this method returns nil in two different cases for 2 different reasons

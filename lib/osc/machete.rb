@@ -13,6 +13,7 @@ require "osc/machete/simple_job/statusable"
 require "osc/machete/simple_job/workflow"
 
 module OSC
+  # The main osc-machete module.
   module Machete
     # Your code goes here...
   end
