@@ -52,20 +52,26 @@ class OSC::Machete::TorqueHelper
     `#{cmd}`.strip
   end
   
+  # Performs a qstat -x command to return the xml output of a job.
+  #
   #TODO: bridge to the python torque lib? is there a ruby torque lib?
   # or external service?
   # 
-  # @param pbsid
-  # @return results of qstat -x pbsid
+  # @param [String] pbsid
+  # 
+  # @return [String] results of qstat -x pbsid
   def qstat_xml(pbsid)
     cmd = qstat_cmd
     `#{cmd} #{pbsid} -x` unless cmd.nil?
   end
   
+  # Performs a qstat request on a single job.
+  # 
   # **FIXME: this might not belong here!**
   # 
-  # @param pbsid
-  # @return nil, :Q, :H, :R for job state
+  # @param [String] pbsid The pbsid of the job to inspect. 
+  # 
+  # @return [nil, :Q, :H, :R] The job state
   def qstat(pbsid)
     output = qstat_xml pbsid
     output = parse_qstat_output(output) unless output.nil?
@@ -73,6 +79,14 @@ class OSC::Machete::TorqueHelper
     output.to_sym unless output.nil?
   end
   
+  # Perform a qdel command on a single job.
+  # 
+  # FIXME: Needs Testing on clusters
+  # FIXME: Needs Error handling
+  # 
+  # @param [String] pbsid The pbsid of the job to be deleted.
+  # 
+  # @return [Boolean] Returns true.
   def qdel(pbsid)
     #TODO: testing on Oakley?
     #TODO: testing on Glenn?
