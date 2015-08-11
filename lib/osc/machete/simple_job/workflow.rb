@@ -1,8 +1,12 @@
 module OSC
   module Machete
     module SimpleJob
+      # A plugin to maintain a workflow for Jobs.
       module Workflow
 
+        # Registers a workflow relationship and sets up a hook to additional builder methods.
+        # 
+        # @param [Symbol] jobs_active_record_relation_symbol The Job Identifier
         def has_machete_workflow_of(jobs_active_record_relation_symbol)
           # yes, this is magic mimicked from http://guides.rubyonrails.org/plugins.html
           #  and http://yehudakatz.com/2009/11/12/better-ruby-idioms/
@@ -17,7 +21,9 @@ module OSC
           self.send :include, OSC::Machete::SimpleJob::Workflow::StatusMethods
         end
 
+        # The module defining the active record relation of the jobs
         module JobsRelation
+          # Assign the active record relation of this instance to the 
           def jobs_active_record_relation
             self.send self.class.jobs_active_record_relation_symbol
           end
@@ -92,10 +98,17 @@ module OSC
             raise NotImplementedError, "Objects including OSC::Machete::SimpleJob::Workflow must implement build_jobs"
           end
 
+          # Call the #submit method on each job in a hash.
+          # 
+          # @param [Hash] jobs A Hash of Job objects to be submitted.
           def submit_jobs(jobs)
             jobs.each(&:submit)
           end
 
+          # Saves a Hash of jobs to a staged directory
+          # 
+          # @param [Hash] jobs A Hash of Job objects to be saved.
+          # @param [Location] staged_dir The staged directory as Location object.
           def save_jobs(jobs, staged_dir)
             self.staged_dir = staged_dir.to_s if self.respond_to?(:staged_dir=)
             self.save if self.id.nil? || self.respond_to?(:staged_dir=)
@@ -105,7 +118,16 @@ module OSC
             end
           end
 
-          # do everything
+          # Perform the submit actions.
+          # 
+          # Sets the staged_dir
+          # Renders the mustache files.
+          # Calls after_stage.
+          # Calls build_jobs.
+          # Submits the jobs.
+          # Saves the jobs.
+          # 
+          # @param optional [Hash] template_view (self) The template options to be rendered.
           def submit(template_view=self)
             staged_dir = stage
             render_mustache_files(staged_dir, template_view)
