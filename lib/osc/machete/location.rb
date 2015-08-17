@@ -60,6 +60,9 @@ class OSC::Machete::Location
   # Render each mustache template and rename the file, removing the extension
   # that indicates it is a template file i.e. `.mustache`.
   #
+  # @param [Hash] params the "context" or "hash" for use when rendering mustache templates
+  # @param [Hash] options to modify rendering behavior
+  # @option options [Boolean] :replace (true) if true will delete the template file after the rendered file is created
   # @return [self] returns self for optional chaining
   def render(params, options = {})
     # custom_delimiters = options['delimeters'] || nil
