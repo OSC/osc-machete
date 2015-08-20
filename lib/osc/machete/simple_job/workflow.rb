@@ -5,7 +5,7 @@ module OSC
       module Workflow
 
         # Registers a workflow relationship and sets up a hook to additional builder methods.
-        # 
+        #
         # @param [Symbol] jobs_active_record_relation_symbol The Job Identifier
         def has_machete_workflow_of(jobs_active_record_relation_symbol)
           # yes, this is magic mimicked from http://guides.rubyonrails.org/plugins.html
@@ -23,7 +23,7 @@ module OSC
 
         # The module defining the active record relation of the jobs
         module JobsRelation
-          # Assign the active record relation of this instance to the 
+          # Assign the active record relation of this instance to the
           def jobs_active_record_relation
             self.send self.class.jobs_active_record_relation_symbol
           end
@@ -33,22 +33,22 @@ module OSC
         module BuilderMethods
 
           # Returns the name of the class with underscores.
-          # 
+          #
           # @example Underscore a class
           #   FlowratePerformanceRun => flowrate_performance_run
-          # 
+          #
           # @return [String] The template name
           def staging_template_name
             self.class.name.underscore
           end
 
           # Returns the name of a staging directory that has been underscored and pluralized.
-          # 
+          #
           # @example
           #   Simulation => simulations
           # @example
           #   FlowratePerformanceRun => flowrate_performance_runs
-          # 
+          #
           # @return [String] The staging template directory name
           def staging_target_dir_name
             staging_template_name.pluralize
@@ -56,9 +56,9 @@ module OSC
 
           # Gets the staging target directory path.
           # Joins the AwesimRails.dataroot and the staging target directory name.
-          # 
+          #
           # @raise [Exception] "override staging_target_dir or include awesim_rails gem"
-          # 
+          #
           # @return [String] The staging target directory path.
           def staging_target_dir
             raise "override staging_target_dir or include awesim_rails gem" unless defined? AwesimRails
@@ -67,7 +67,7 @@ module OSC
 
           # Gets the staging template directory path.
           # Joins the {rails root}/jobs/{staging_template_name} into a path.
-          # 
+          #
           # @return [String] The staging template directory path.
           def staging_template_dir
             Rails.root.join("jobs", staging_template_name)
@@ -75,7 +75,7 @@ module OSC
 
           # Creates a new staging target job directory on the system
           # Copies the staging template directory to the staging target job directory
-          # 
+          #
           # @return [String] The staged directory path.
           def stage
             staged_dir = OSC::Machete::JobDir.new(staging_target_dir).new_jobdir
@@ -86,40 +86,40 @@ module OSC
           end
 
           # Creates a new location and renders the mustache files
-          # 
+          #
           # @param [String] staged_dir The staging target directory path.
           # @param [Hash] template_view The template options to be rendered.
-          # 
+          #
           # @return [Location] The location of the staged and rendered template.
           def render_mustache_files(staged_dir, template_view)
             Location.new(staged_dir).render(template_view)
           end
 
           # Actions to perform after staging
-          # 
+          #
           # @param [String] staged_dir The staged directory path.
           def after_stage(staged_dir)
           end
 
           # Unimplemented method for building jobs.
-          # 
+          #
           # @param [String] staged_dir The staged directory path.
           # @param [Array, Nil] jobs An array of jobs to be built.
-          # 
+          #
           # @raise [NotImplementedError] The method is currently not implemented
           def build_jobs(staged_dir, jobs = [])
             raise NotImplementedError, "Objects including OSC::Machete::SimpleJob::Workflow must implement build_jobs"
           end
 
           # Call the #submit method on each job in a hash.
-          # 
+          #
           # @param [Hash] jobs A Hash of Job objects to be submitted.
           def submit_jobs(jobs)
             jobs.each(&:submit)
           end
 
           # Saves a Hash of jobs to a staged directory
-          # 
+          #
           # @param [Hash] jobs A Hash of Job objects to be saved.
           # @param [Location] staged_dir The staged directory as Location object.
           def save_jobs(jobs, staged_dir)
@@ -132,14 +132,14 @@ module OSC
           end
 
           # Perform the submit actions.
-          # 
+          #
           # Sets the staged_dir
           # Renders the mustache files.
           # Calls after_stage.
           # Calls build_jobs.
           # Submits the jobs.
           # Saves the jobs.
-          # 
+          #
           # @param [Hash, nil] template_view (self) The template options to be rendered.
           def submit(template_view=self)
             staged_dir = stage
@@ -154,7 +154,7 @@ module OSC
         # depends on jobs_active_record_relation being defined
         module StatusMethods
           extend Gem::Deprecate
-          
+
           def submitted?
             jobs_active_record_relation.count > 0
           end
@@ -174,7 +174,7 @@ module OSC
             active?
           end
           deprecate :running_queued_or_hold?, "Use active? instead", 2015, 03
-          
+
           def active?
             submitted? && ! completed?
           end

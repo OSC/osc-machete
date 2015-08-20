@@ -50,9 +50,9 @@ require 'pathname'
 #     job1.status #=> "Q"
 #     job2.status #=> "H"
 #
-# @!attribute [r] pbsid 
+# @!attribute [r] pbsid
 #   @return [String, nil] the PBS job id, or nil if not set
-# @!attribute [r] script_path 
+# @!attribute [r] script_path
 #   @return [String, nil] path of the job script, or nil if not set
 #
 class OSC::Machete::Job
@@ -71,7 +71,7 @@ class OSC::Machete::Job
   #     Job.new(opts)
   #
   # Job class makes assumption that a job's PBS_O_WORKDIR will be
-  # in the directory containing the shell script that is run. 
+  # in the directory containing the shell script that is run.
   #
   # @param [Hash] args the arguments to create the job
   # @option args [String] :script  full path to script (optional)
@@ -128,14 +128,14 @@ class OSC::Machete::Job
   end
 
   # Check whether the job jas been submitted.
-  # 
+  #
   # @return [Boolean] true if @pbsid is set
   def submitted?
     ! @pbsid.nil?
   end
 
   # Perform a qstat and return a char representing the status of the job.
-  # 
+  #
   # @return [String, nil] character representation of status such as "H", "Q", "R" or nil if not in the system
   def status
     # FIXME: this method returns nil in two different cases for 2 different reasons
@@ -185,7 +185,7 @@ class OSC::Machete::Job
   # @param [Boolean] rmdir (false) if true, recursively remove the containing directory of the job script if killing the job succeeded
   # @return [nil]
   def delete(rmdir: false)
-    # FIXME: rethink this interface... should qdel be idempotent? 
+    # FIXME: rethink this interface... should qdel be idempotent?
     # After first call, no errors thrown after?
 
     if pbsid && @torque.qdel(pbsid)

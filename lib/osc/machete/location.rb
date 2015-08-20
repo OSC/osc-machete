@@ -2,7 +2,7 @@ require 'pathname'
 require 'mustache'
 
 # A util class with methods used with staging a simulation template directory.
-# Use it by wrapping a file path (either string or Pathname object). 
+# Use it by wrapping a file path (either string or Pathname object).
 # For example, if I have a template directory at "/nfs/05/efranz/template"
 # I can recursivly copy the template directory:
 #
@@ -29,9 +29,9 @@ class OSC::Machete::Location
     @path.to_s
   end
 
-  # Copies the data in a Location to a destination path using rsync. 
+  # Copies the data in a Location to a destination path using rsync.
   #
-  # @param [String, Pathname] dest The target location path. 
+  # @param [String, Pathname] dest The target location path.
   # @return [Location] The target location path wrapped by Location instance.
   def copy_to(dest)
     # @path has / auto-dropped, so we add it to make sure we copy everything

@@ -8,9 +8,9 @@ module OSC
     module SimpleJob
 
       # SimpleJob Initializer
-      # 
+      #
       # Includes the Submittable and Statusable modules.
-      # 
+      #
       # @param [Object] obj The base object.
       def self.included(obj)
         #HACK: we bypass the private visiblity of Module#include
