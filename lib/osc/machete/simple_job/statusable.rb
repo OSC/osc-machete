@@ -1,11 +1,12 @@
 module OSC
   module Machete
     module SimpleJob
+      # Methods that deal with pbs batch job status management
+      # within a Rails ActiveRecord model
       module Statusable
         extend Gem::Deprecate
-        # methods that deal with pbs batch job status management
-        # within a Rails ActiveRecord model
-
+        
+        # Initialize the object
         def self.included(obj)
           # TODO: throw warning if we detect that pbsid, status, save,
           # etc. are not apart of this; i.e.
@@ -150,7 +151,7 @@ module OSC
         # FIXME: should log whether a validation method was called or
         # throw a warning that no validation method was found (the one that would have been called)
         # 
-        # @param optional [Boolean] force Force the update. (Default: false)
+        # @param [Boolean, nil] force Force the update. (Default: false)
         def update_status!(force: false)
           if submitted? && (! completed? || force)
             # if the status of the job is nil, the job is no longer in the batch

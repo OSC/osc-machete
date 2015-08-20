@@ -31,12 +31,25 @@ module OSC
 
         # depends on jobs_active_record_relation being defined
         module BuilderMethods
+
+          # Returns the name of the class with underscores.
+          # 
+          # @example Underscore a class
+          #   FlowratePerformanceRun => flowrate_performance_run
+          # 
+          # @return [String] The template name
           def staging_template_name
             self.class.name.underscore
           end
 
-          # Simulation => simulations
-          # FlowratePerformanceRun => flowrate_performance_runs
+          # Returns the name of a staging directory that has been underscored and pluralized.
+          # 
+          # @example
+          #   Simulation => simulations
+          # @example
+          #   FlowratePerformanceRun => flowrate_performance_runs
+          # 
+          # @return [String] The staging template directory name
           def staging_target_dir_name
             staging_template_name.pluralize
           end
@@ -127,7 +140,7 @@ module OSC
           # Submits the jobs.
           # Saves the jobs.
           # 
-          # @param optional [Hash] template_view (self) The template options to be rendered.
+          # @param [Hash, nil] template_view (self) The template options to be rendered.
           def submit(template_view=self)
             staged_dir = stage
             render_mustache_files(staged_dir, template_view)

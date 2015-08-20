@@ -1,15 +1,13 @@
 module OSC
   module Machete
     module SimpleJob
-      module Submittable
-        # methods that deal with pbs batch job staging and submission
-        # within a Rails ActiveRecord model
+      # Methods that deal with pbs batch job staging and submission
+      # within a Rails ActiveRecord model
+      # 
+      # Hook methods are rails-specific i.e. they require
+      # ActiveSupport or expect Rails.application to be defined 
+      module Submittable        
         
-        # 
-        # hook methods are rails-specific i.e. they require
-        # ActiveSupport or expect Rails.application to be defined
-        # 
-
         # Staging template directory location with underscores based on the calling class name.
         # 
         # @example Simulation => simulation
@@ -69,6 +67,9 @@ module OSC
           OSC::Machete::Staging.new template, target, staging_script_name
         end
 
+        # Submits the job and saves to the database.
+        # 
+        # @param [Object, nil] template_view A template view object or the template view staged to the job.
         def submit(template_view=self)
           # FIXME: uncomment to replace `job = staging.new_job params` when
           # you bump to an incompatible version if you keep SimpleJob::Submittable

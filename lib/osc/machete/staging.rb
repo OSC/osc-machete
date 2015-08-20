@@ -3,6 +3,7 @@ require 'pathname'
 
 module OSC
   module Machete
+    # Class for managing template locations and paths.
     class Staging
   
       #TODO: subclass to specify template location and destination directory?
@@ -16,6 +17,9 @@ module OSC
       # target could be a method name that returns the path
       # for example, in user's crimson files
       # 
+      # @param [String] template The path to the job template.
+      # @param [String] target The path to the job target.
+      # @param [String, nil] script The script file name (Default: 'main.sh')
       def initialize(template, target, script="main.sh")
         # 
         # an OSC::Appkit::Location object...
