@@ -29,7 +29,8 @@ class OSC::Machete::TorqueHelper
     # a script with PBS header set to specify oak-batch ends
     # isn't properly handled and the job gets limited to 4GB
     queue = run_on_oakley?(script) ? "-q @oak-batch.osc.edu" : ""
-    cmd = "qsub #{queue} #{script}".squeeze(' ')
+    prefix = run_on_oakley?(script) ? ". /etc/profile.d/modules-env.sh && module swap torque torque-4.2.8_vis &&" : ""
+    cmd = "#{prefix} qsub #{queue} #{script}".squeeze(' ')
 
     # add dependencies
     comma=false # FIXME: better name?
@@ -62,7 +63,9 @@ class OSC::Machete::TorqueHelper
   # @return [String] results of qstat -x pbsid
   def qstat_xml(pbsid)
     cmd = qstat_cmd
-    `#{cmd} #{pbsid} -x` unless cmd.nil?
+    # Check if running on Oakley
+    prefix = pbsid =~ /oak-batch/ ? ". /etc/profile.d/modules-env.sh && module swap torque torque-4.2.8_vis &&" : ""
+    `#{prefix} #{cmd} #{pbsid} -x` unless cmd.nil?
   end
 
   # Performs a qstat request on a single job.
@@ -91,7 +94,9 @@ class OSC::Machete::TorqueHelper
     #TODO: testing on Oakley?
     #TODO: testing on Glenn?
     #TODO: error handling?
-    cmd = "qdel #{pbsid}"
+    # Check if running on Oakley
+    prefix = pbsid =~ /oak-batch/ ? ". /etc/profile.d/modules-env.sh && module swap torque torque-4.2.8_vis &&" : ""
+    cmd = "#{prefix} qdel #{pbsid}"
     `#{cmd}`
 
     true
