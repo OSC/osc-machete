@@ -66,7 +66,7 @@ module OSC
           end
 
           # Gets the staging template directory path.
-          # Joins the {rails root}/jobs/{staging_template_name} into a path.
+          # Joins the { rails root }/jobs/{ staging_template_name } into a path.
           #
           # @return [String] The staging template directory path.
           def staging_template_dir
