@@ -32,6 +32,11 @@ module OSC
           self.status = new_job.status
         end
 
+        # Returns associated OSC::Machete::Job instance
+        def job
+          OSC::Machete::Job.new(pbsid: pbsid, script: Pathname.new(job_path).join(script_name))
+        end
+
         # Returns true if the job has been submitted.
         #
         # If the pbsid is nil or the pbsid is an empty string,
@@ -156,8 +161,8 @@ module OSC
           if submitted? && (! completed? || force)
             # if the status of the job is nil, the job is no longer in the batch
             # system, so it is either completed or failed
-            current_status = OSC::Machete::Job.new(pbsid: pbsid).status
-            if current_status.nil?
+            current_status = job.status
+            if current_status.nil? || current_status == "C"
               current_status = results_valid? ? "C" : "F"
             end
 

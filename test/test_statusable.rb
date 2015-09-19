@@ -57,4 +57,28 @@ class TestStatusable < Minitest::Test
     assert @job.completed?, "completed? should return true when status is F or C"
     assert @job.failed?, "failed? should return true when status is F"
   end
+
+  def test_results_valid_hook_called
+    # normally, qstat returns nil, and we call hook
+    assert_nil @job.job.status
+
+    @job.status = "R"
+    @job.expects(:"results_valid?").at_least_once
+    @job.update_status!
+
+    # sometimes, qstat returns "C": still call the hook!
+    @job.define_singleton_method(:job) {
+      OpenStruct.new(:status => "C")
+    }
+    assert "C", @job.job.status
+
+    @job.status = "R"
+    @job.expects(:"results_valid?").at_least_once
+    @job.update_status!
+
+    # but if the status is completed we don't want the hook to run again
+    @job.expects(:"results_valid?").never
+    @job.status = "C"
+    @job.update_status!
+  end
 end
