@@ -60,6 +60,7 @@ class TestStatusable < Minitest::Test
 
   def test_results_valid_hook_called
     # normally, qstat returns nil, and we call hook
+    @job.define_singleton_method(:job) { OpenStruct.new(:status => nil) }
     assert_nil @job.job.status
 
     @job.status = "R"
@@ -67,9 +68,7 @@ class TestStatusable < Minitest::Test
     @job.update_status!
 
     # sometimes, qstat returns "C": still call the hook!
-    @job.define_singleton_method(:job) {
-      OpenStruct.new(:status => "C")
-    }
+    @job.define_singleton_method(:job) { OpenStruct.new(:status => "C") }
     assert "C", @job.job.status
 
     @job.status = "R"
