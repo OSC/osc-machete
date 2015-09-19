@@ -46,13 +46,21 @@ class TestTorqueHelper < Minitest::Test
   
   def test_qsub_oakley
     # test actual shell command used i.e. in backticks
-    @shell.expects(:`).with("qsub -q @oak-batch.osc.edu test/fixtures/oakley.sh").returns("16376372.oak-batch.osc.edu\n")
+    #
+    # EFHACK: because the shell command now requires a prefix to successfully
+    # submit from Glenn webservice nodes to Oakley (and presumably Ruby), we
+    # verify that the shell command ends with what is expected. This makes all
+    # the existing tests work. A better approach should be considered during
+    # refactor/rewrite.
+    #
+    # thank you mocha: http://gofreerange.com/mocha/docs/Mocha/Expectation.html#with-instance_method
+    @shell.expects(:`).with() {|v| v.end_with? "qsub -q @oak-batch.osc.edu test/fixtures/oakley.sh"}.returns("16376372.oak-batch.osc.edu\n")
     @shell.qsub("test/fixtures/oakley.sh")
   end
   
   def test_qsub_glenn
     # test actual shell command used i.e. in backticks
-    @shell.expects(:`).with("qsub test/fixtures/glenn.sh").returns("16376372.opt-batch.osc.edu\n")
+    @shell.expects(:`).with() {|v| v.end_with? "qsub test/fixtures/glenn.sh"}.returns("16376372.opt-batch.osc.edu\n")
     @shell.qsub("test/fixtures/glenn.sh")
   end
   
@@ -67,7 +75,7 @@ class TestTorqueHelper < Minitest::Test
     shell = OSC::Machete::TorqueHelper.new
     shell.stubs(:qstat_xml).returns(@xml)
     
-    shell.expects(:`).with("qsub test/fixtures/glenn.sh -W depend=#{dependency_list}").returns("16376372.opt-batch.osc.edu\n")
+    shell.expects(:`).with() {|v| v.end_with? "qsub test/fixtures/glenn.sh -W depend=#{dependency_list}"}.returns("16376372.opt-batch.osc.edu\n")
     shell.qsub("test/fixtures/glenn.sh", depends_on: dependencies)
   end
   
