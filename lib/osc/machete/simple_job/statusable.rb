@@ -34,7 +34,8 @@ module OSC
 
         # Returns associated OSC::Machete::Job instance
         def job
-          OSC::Machete::Job.new(pbsid: pbsid, script: Pathname.new(job_path).join(script_name))
+          script_path = respond_to?(:script_name) ? Pathname.new(job_path).join(script_name) : nil
+          OSC::Machete::Job.new(pbsid: pbsid, script: script_path)
         end
 
         # Returns true if the job has been submitted.
