@@ -163,7 +163,7 @@ module OSC
             # if the status of the job is nil, the job is no longer in the batch
             # system, so it is either completed or failed
             current_status = job.status
-            if current_status.nil? || current_status == "C"
+            if current_status.nil? || current_status.to_s == "C"
               current_status = results_valid? ? "C" : "F"
             end
 
