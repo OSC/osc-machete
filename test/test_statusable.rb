@@ -81,9 +81,10 @@ class TestStatusable < Minitest::Test
     @job.expects(:"results_valid?").at_least_once
     @job.update_status!
 
+
     # sometimes, qstat returns "C": still call the hook!
     @job.define_singleton_method(:job) { OpenStruct.new(:status => "C") }
-    assert "C", @job.job.status
+    assert_equal "C", @job.job.status
 
     @job.status = "R"
     @job.expects(:"results_valid?").at_least_once
@@ -92,6 +93,36 @@ class TestStatusable < Minitest::Test
     # but if the status is completed we don't want the hook to run again
     @job.expects(:"results_valid?").never
     @job.status = "C"
+    @job.update_status!
+  end
+
+  def test_results_valid_hook_called_when_status_returns_symbol
+    # sometimes, qstat returns :C and the job returns "C" still call the hook!
+    @job.define_singleton_method(:job) { OpenStruct.new(:status => :C) }
+    assert_equal :C, @job.job.status
+
+    @job.status = "R"
+    @job.expects(:"results_valid?").at_least_once
+    @job.update_status!
+
+    # but if the status is completed we don't want the hook to run again
+    @job.expects(:"results_valid?").never
+    @job.status = "C"
+    @job.update_status!
+  end
+
+  # if status is R but also saved record is also R we shouldn't save
+  def test_save_after_update_when_status_returns_symbol
+    @job.define_singleton_method(:job) { OpenStruct.new(:status => :R) }
+    assert :R, @job.job.status
+
+    @job.expects(:"save").never
+    @job.status = "R"
+    @job.update_status!
+
+    @job.expects(:"save").at_least_once
+    @job.define_singleton_method(:job) { OpenStruct.new(:status => :R) }
+    @job.status = "Q"
     @job.update_status!
   end
 

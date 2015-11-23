@@ -167,7 +167,7 @@ module OSC
               current_status = results_valid? ? "C" : "F"
             end
 
-            if current_status != self.status || force
+            if current_status.to_s != self.status.to_s || force
               # FIXME: how do we integrate logging into Rails apps?
               # puts "status changed. current_status: #{current_status} and status is #{status}"
               self.status = current_status
