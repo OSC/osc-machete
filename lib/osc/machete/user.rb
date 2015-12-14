@@ -14,6 +14,7 @@ class OSC::Machete::User
     begin
       gid = Etc.getgrnam(group).gid
     rescue
+      # Group does not exist
       gid = -1
     end
 
