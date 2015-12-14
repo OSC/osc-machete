@@ -1,14 +1,39 @@
 # Class that maintains the name and home identifiers of a User.
 #
-# @attr_reader [String] :name The ENV['USER'] or ENV['APACHE_USER']
-# @attr_reader [String] :home The ENV['HOME']
 class OSC::Machete::User
+
   attr_reader :name, :home
 
-  # Sets the machete user to the ENV['USER'], or the ENV['APACHE_USER'] if ENV['USER'] is not set.
-  # Sets the machete home to the ENV['HOME']
-  def initialize()
-    @name = ENV['USER'] || ENV['APACHE_USER']
-    @home = ENV['HOME']
+  def initialize(username = Etc.getpwuid.name)
+    @name = username
   end
+
+  def member_of_group?(group)
+
+    # Convert group name to gid.
+    begin
+      gid = Etc.getgrnam(group).gid
+    rescue
+      gid = -1
+    end
+
+    self.groups.include?(gid)
+  end
+
+  def awesim_user?
+    self.member_of_group?("awsmdev")
+  end
+
+  # get sorted list of group ids that user is part of
+  # by inspecting the /etc/group file
+  # there is also a ruby impl of this
+  def groups
+    Process.groups
+  end
+
+  # return Pathname for home directory
+  def home
+    Dir.home(@name)
+  end
+
 end
