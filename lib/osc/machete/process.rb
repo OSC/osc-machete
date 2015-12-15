@@ -19,7 +19,7 @@ class OSC::Machete::Process
 
   # has the group membership changed since this process started?
   def group_membership_changed?
-    @user.groups.uniq.sort != OSC::Machete::User.new.groups
+    Process.groups.uniq.sort != @user.groups
   end
 
   def home
