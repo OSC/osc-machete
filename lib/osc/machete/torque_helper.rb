@@ -8,6 +8,10 @@ require 'nokogiri'
 # == FIXME: This contains no state whatsoever. It should probably be changed into a module.
 class OSC::Machete::TorqueHelper
 
+  def self.default
+    self::new()
+  end
+
   #*TODO:*
   # consider using cocaine gem
   # consider using Shellwords and other tools

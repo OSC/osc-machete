@@ -85,7 +85,7 @@ class OSC::Machete::Job
     # @script_path = @script_path.expand_path would change this to absolute path
 
     @pbsid =  args[:pbsid]
-    @torque = args[:torque_helper] || OSC::Machete::TorqueHelper.new()
+    @torque = args[:torque_helper] || OSC::Machete::TorqueHelper.default
 
     @dependencies = {} # {:afterany => [Job, Job], :afterok => [Job]}
   end
