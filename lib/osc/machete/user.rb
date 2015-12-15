@@ -29,7 +29,7 @@ class OSC::Machete::User
   # by inspecting the /etc/group file
   # there is also a ruby impl of this
   def groups
-    Process.groups
+    `id -G $USER`.strip.split.map(&:to_i).uniq.sort
   end
 
   # return Pathname for home directory
