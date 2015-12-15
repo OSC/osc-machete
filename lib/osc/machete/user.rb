@@ -9,16 +9,7 @@ class OSC::Machete::User
   end
 
   def member_of_group?(group)
-
-    # Convert group name to gid.
-    begin
-      gid = Etc.getgrnam(group).gid
-    rescue
-      # Group does not exist
-      gid = -1
-    end
-
-    self.groups.include?(gid)
+    Etc.getgrnam(group).mem.include?(@name) rescue false
   end
 
   def awesim_user?
