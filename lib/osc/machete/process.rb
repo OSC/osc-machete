@@ -1,9 +1,12 @@
+# Class that maintains the User and additional methods for the process.
+#
 class OSC::Machete::Process
 
   def initialize
     @user = OSC::Machete::User.new
   end
 
+  # The system name of the process user
   def username
     @user.name
   end
@@ -22,6 +25,9 @@ class OSC::Machete::Process
     Process.groups.uniq.sort != @user.groups
   end
 
+  # The home directory path of the process user.
+  #
+  # @return [String] The directory path.
   def home
     @user.home
   end
