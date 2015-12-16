@@ -12,10 +12,6 @@ class OSC::Machete::User
     Etc.getgrnam(group).mem.include?(@name) rescue false
   end
 
-  def awesim_user?
-    self.member_of_group?("awsmdev")
-  end
-
   # get sorted list of group ids that user is part of
   # by inspecting the /etc/group file
   # there is also a ruby impl of this
