@@ -16,10 +16,6 @@ class OSC::Machete::Process
     Etc.getgrgid(Process.gid).name
   end
 
-  def awesim_user?
-    @user.awesim_user?
-  end
-
   # has the group membership changed since this process started?
   def group_membership_changed?
     Process.groups.uniq.sort != @user.groups
