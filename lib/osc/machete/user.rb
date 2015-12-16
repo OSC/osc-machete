@@ -2,7 +2,7 @@
 #
 class OSC::Machete::User
 
-  attr_reader :name, :home
+  attr_reader :name
 
   def initialize(username = Etc.getpwuid.name)
     @name = username
