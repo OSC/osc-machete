@@ -21,6 +21,10 @@ class OSC::Machete::User
     @name = username
   end
 
+  # Determine if user is member of specified group
+  #
+  # @param [String] group name
+  # @return [Boolean] true if user is a member of the specified group
   def member_of_group?(group)
     Etc.getgrnam(group).mem.include?(@name) rescue false
   end
