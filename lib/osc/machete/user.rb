@@ -21,6 +21,13 @@ class OSC::Machete::User
     @name = username
   end
 
+  # factory method to produce a User from specified uid
+  #
+  # @return [User] user for the specified uid
+  def self.from_uid(uid)
+    self.new Etc.getpwuid(uid).name
+  end
+
   # Determine if user is member of specified group
   #
   # @param [String] group name
