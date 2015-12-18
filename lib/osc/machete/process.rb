@@ -1,4 +1,5 @@
 # Class that maintains the User and additional methods for the process.
+# Helper methods provided use the Process module underneath.
 #
 class OSC::Machete::Process
 
