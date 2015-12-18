@@ -1,9 +1,22 @@
 # Class that maintains the name and home identifiers of a User.
+# Helper methods provided use the Etc module underneath.
 #
 class OSC::Machete::User
 
   attr_reader :name
 
+  # default user is the username of the current process
+  #
+  # FIXME: is this true? Etc.getpwuid claims to use the default
+  # value from the Passwd struct:
+  # http://docs.ruby-lang.org/en/2.0.0/Etc.html#Passwd
+  # could this ever be different from Process.gid?
+  # Should we provide constructors for a User object for the given uid
+  # instead of username, or in Process do
+  # OSC::Machete::User.new(Etc.getpwuid.name(Process.gid))
+  # Or should the default be OSC::Machete::User.from_uid(Process.uid)
+  # Is there ever a difference between the two?
+  #
   def initialize(username = Etc.getpwuid.name)
     @name = username
   end
@@ -15,13 +28,26 @@ class OSC::Machete::User
   # get sorted list of group ids that user is part of
   # by inspecting the /etc/group file
   # there is also a ruby impl of this
+  #
+  # @return [Array] ids of groups that the user is a member of
   def groups
     `id -G $USER`.strip.split.map(&:to_i).uniq.sort
   end
 
-  # return Pathname for home directory
+  # FIXME: should we be using Pathnames here?
+  #
+  # Return Pathname for home directory
+  # The home directory path of the user.
+  #
+  # @return [Pathname] The directory path.
+  # def home
+  #   Pathname.new(Dir.home(@name))
+  # end
+
+  # The home directory path of the user.
+  #
+  # @return [String] path to the home directory.
   def home
     Dir.home(@name)
   end
-
 end
