@@ -30,6 +30,16 @@ class OSC::Machete::Status
     end
   end
 
+  def initialize(char)
+    @char = char.to_s
+    @char = nil if @char.empty?
+
+    # FIXME: instead of raising exception, should the status be set to
+    # "Unavailable" if a wrong value is set? i.e. our null obj? then we might
+    # change this to "invalid" instead of "unavailable"
+    raise "Invalid status value" unless VALUES_HASH.has_key?(@char)
+  end
+
   # Only Status value that is invalid is "not avaliable"
   # this should not be cached!
   def valid?
@@ -39,42 +49,36 @@ class OSC::Machete::Status
   def active?
     running? || queued? || held?
   end
-  
-  def initialize(char)
-    @char = char.to_s
-    @char = nil if @char.empty?
-    raise "Invalid status value" unless VALUES_HASH.has_key?(@char)
-  end
-  
+
   def to_s
     @char.to_s
   end
-  
+
   def inspect
     # FIXME: ActiveSupport  replace with .humanize and simpler datastructure
      VALUES_HASH[@char].split("_").map(&:capitalize).join(" ")
   end
-  
+
   def +(other)
     [self, other].max
   end
-  
+
   def <=>(other)
     precendence <=> other.precendence
   end
-  
+
   def eql?(other)
     other.to_s == to_s
   end
-  
+
   def ==(other)
     self.eql?(other)
   end
-  
+
   def hash
     @char.hash
   end
-  
+
   def precendence
     # Hashes enumerate their values in the order that the corresponding keys were inserted
     PRECENDENCE.index(@char)
