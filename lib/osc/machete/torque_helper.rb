@@ -16,13 +16,13 @@ class OSC::Machete::TorqueHelper
     case char
     when "C", nil
       OSC::Machete::Status.completed
-    when "Q"
+    when "Q", "T", "W" # T W happen before job starts
       OSC::Machete::Status.queued
     when "H"
       OSC::Machete::Status.held
     else
       # all other statuses considerd "running" state
-      # including T, S, W, E, etc.
+      # including S, E, etc.
       # see http://docs.adaptivecomputing.com/torque/4-1-3/Content/topics/commands/qstat.htm
       OSC::Machete::Status.running
     end
