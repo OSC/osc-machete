@@ -9,8 +9,8 @@ class OSC::Machete::Status
   # R Job is running.
   #
   # U Status is unavailable (null status object)
-  VALUES = [["U", "unavailable"], [nil, "not_submitted"], ["C", "completed"], ["F", "failed"], 
-            ["H", "held"], ["Q", "queued"], ["R", "running"]]
+  VALUES = [["U", "unavailable"], [nil, "not_submitted"], ["C", "completed"], ["F", "failed"],
+            ["H", "held"], ["Q", "queued"], ["R", "running"], ["S", "suspended"]]
   VALUES_HASH = Hash[VALUES]
   PRECENDENCE = VALUES.map(&:first)
   
@@ -47,7 +47,7 @@ class OSC::Machete::Status
   end
 
   def active?
-    running? || queued? || held?
+    running? || queued? || held? || suspended?
   end
 
   def to_s
