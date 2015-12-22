@@ -41,7 +41,7 @@ class OSC::Machete::Status
   # Only Status value that is invalid is "not avaliable"
   # this should not be cached!
   def valid?
-    ! unavailable?
+    ! undetermined?
   end
 
   def active?
