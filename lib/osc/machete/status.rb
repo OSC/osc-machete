@@ -6,16 +6,11 @@ class OSC::Machete::Status
   # adaptive computing:
   # http://docs.adaptivecomputing.com/torque/4-1-3/Content/topics/commands/qstat.htm
   # C Job is completed after having run.
-  # E Job is exiting after having run.
   # H Job is held.
   # Q Job is queued, eligible to run or routed.
   # R Job is running.
-  # T Job is being moved to new location.   transition
-  # W Job is waiting for its execution time (-a option) to be reached.
-  # S (Unicos only) Job is suspended.
   #
   VALUES = [[nil, "not_submitted"], ["C", "completed"], ["F", "failed"], 
-            ["E", "exiting"], ["T", "transitioning"], ["W", "waiting"], ["S", "suspended"], 
             ["H", "held"], ["Q", "queued"], ["R", "running"]]
   VALUES_HASH = Hash[VALUES]
   PRECENDENCE = VALUES.map(&:first)
@@ -35,9 +30,9 @@ class OSC::Machete::Status
       self == OSC::Machete::Status.new(char)
     end
   end
-  
+
   def active?
-    running? || queued? || held? || exiting? || transitioning? || waiting? || suspended?
+    running? || queued? || held?
   end
   
   def initialize(char)
