@@ -1,6 +1,7 @@
 # declares the module
 require "osc/machete/version"
 
+require "osc/machete/status"
 require "osc/machete/job"
 require "osc/machete/job_dir"
 require "osc/machete/location"
