@@ -10,7 +10,11 @@ class OSC::Machete::Status
   # Q Job is queued, eligible to run or routed.
   # R Job is running.
   #
-  VALUES = [[nil, "not_submitted"], ["C", "completed"], ["F", "failed"], 
+  # FIXME: is unavailable an appropriate "null object" version of this?
+  # Funny that the key for the "null" object is "Unavailable", not "not submitted"
+  # Maybe we change this?
+  # Caching an "Unavailable" status would be a bad idea
+  VALUES = [["U", "unavailable"], [nil, "not_submitted"], ["C", "completed"], ["F", "failed"], 
             ["H", "held"], ["Q", "queued"], ["R", "running"]]
   VALUES_HASH = Hash[VALUES]
   PRECENDENCE = VALUES.map(&:first)
@@ -29,6 +33,12 @@ class OSC::Machete::Status
     define_method("#{name}?") do
       self == OSC::Machete::Status.new(char)
     end
+  end
+
+  # Only Status value that is invalid is "not avaliable"
+  # this should not be cached!
+  def valid?
+    ! unavailable?
   end
 
   def active?
