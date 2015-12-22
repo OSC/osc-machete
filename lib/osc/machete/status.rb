@@ -38,12 +38,6 @@ class OSC::Machete::Status
     @char = self.class.undetermined.to_s unless VALUES_HASH.has_key?(@char)
   end
 
-  # Only Status value that is invalid is "not avaliable"
-  # this should not be cached!
-  def valid?
-    ! undetermined?
-  end
-
   def submitted?
     ! (not_submitted? || undetermined?)
   end

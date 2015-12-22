@@ -66,9 +66,6 @@ class TestStatus < Minitest::Test
 
   def test_undetermined
     assert_equal Status.new("X"), Status.undetermined
-    assert @running.valid?
-    assert @new.valid?
-    assert ! Status.undetermined.valid?
   end
 
   def test_submitted
