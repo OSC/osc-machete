@@ -63,4 +63,8 @@ class TestStatus < Minitest::Test
     assert_equal @running, @running + @queued
     assert_equal @queued, @new + @queued
   end
+
+  def test_undetermined
+    assert_equal Status.new("X"), Status.undetermined
+  end
 end

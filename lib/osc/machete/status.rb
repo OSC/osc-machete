@@ -9,7 +9,7 @@ class OSC::Machete::Status
   # R Job is running.
   #
   # U Status is unavailable (null status object)
-  VALUES = [["U", "unavailable"], [nil, "not_submitted"], ["C", "completed"], ["F", "failed"],
+  VALUES = [["U", "undetermined"], [nil, "not_submitted"], ["C", "completed"], ["F", "failed"],
             ["H", "held"], ["Q", "queued"], ["R", "running"], ["S", "suspended"]]
   VALUES_HASH = Hash[VALUES]
   PRECENDENCE = VALUES.map(&:first)
@@ -34,10 +34,8 @@ class OSC::Machete::Status
     @char = char.to_s
     @char = nil if @char.empty?
 
-    # FIXME: instead of raising exception, should the status be set to
-    # "Unavailable" if a wrong value is set? i.e. our null obj? then we might
-    # change this to "invalid" instead of "unavailable"
-    raise "Invalid status value" unless VALUES_HASH.has_key?(@char)
+    # if invalid status value char, default to undetermined
+    @char = self.class.undetermined.to_s unless VALUES_HASH.has_key?(@char)
   end
 
   # Only Status value that is invalid is "not avaliable"
