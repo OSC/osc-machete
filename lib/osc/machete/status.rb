@@ -3,17 +3,12 @@ class OSC::Machete::Status
   
   attr_reader :char
   
-  # adaptive computing:
-  # http://docs.adaptivecomputing.com/torque/4-1-3/Content/topics/commands/qstat.htm
   # C Job is completed after having run.
   # H Job is held.
   # Q Job is queued, eligible to run or routed.
   # R Job is running.
   #
-  # FIXME: is unavailable an appropriate "null object" version of this?
-  # Funny that the key for the "null" object is "Unavailable", not "not submitted"
-  # Maybe we change this?
-  # Caching an "Unavailable" status would be a bad idea
+  # U Status is unavailable (null status object)
   VALUES = [["U", "unavailable"], [nil, "not_submitted"], ["C", "completed"], ["F", "failed"], 
             ["H", "held"], ["Q", "queued"], ["R", "running"]]
   VALUES_HASH = Hash[VALUES]
