@@ -70,4 +70,14 @@ class TestStatus < Minitest::Test
     assert @new.valid?
     assert ! Status.undetermined.valid?
   end
+
+  def test_submitted
+    assert @completed.submitted?
+    assert @running.submitted?
+    assert @queued.submitted?
+    assert @failed.submitted?
+    assert @completed.submitted?
+    assert ! @new.submitted?
+    assert ! Status.undetermined.submitted?
+  end
 end
