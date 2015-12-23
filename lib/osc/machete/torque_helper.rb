@@ -1,4 +1,4 @@
-require 'nokogiri'
+require 'pbs'
 
 # == Helper object: ruby interface to torque shell commands
 # in the same vein as stdlib's Shell which
