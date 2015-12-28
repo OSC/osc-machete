@@ -56,9 +56,6 @@ class OSC::Machete::Status
     ! (not_submitted? || undetermined?)
   end
 
-  # Get an array of all the possible Status values that are an "active" state
-  #
-  # @return [Array] - all possible active Status values
   def active?
     running? || queued? || held? || suspended?
   end
