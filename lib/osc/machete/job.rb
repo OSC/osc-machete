@@ -139,9 +139,9 @@ class OSC::Machete::Job
   # @return [Status] value object representing status of a job
   def status
     if @pbsid.nil?
-      Status.not_submitted
+      OSC::Machete::Status.not_submitted
     else
-      @torque.qstat
+      @torque.qstat @pbsid
     end
   end
 
