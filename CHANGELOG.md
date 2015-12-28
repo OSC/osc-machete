@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+## [1.0.0.pre2] - 2015-12-28
 ### Added
 - Status value object
 - `User.from_uid` factory method
@@ -28,6 +30,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 Previous release of osc-machete
 
-[Unreleased]: https://github.com/AweSim-OSC/osc-machete/compare/v1.0.0.pre1...release/1.0
+[Unreleased]: https://github.com/AweSim-OSC/osc-machete/compare/v1.0.0.pre2...release/1.0
+[1.0.0.pre2]: https://github.com/AweSim-OSC/osc-machete/compare/v1.0.0.pre1...v1.0.0.pre2
 [1.0.0.pre1]: https://github.com/AweSim-OSC/osc-machete/compare/v0.6.3...v1.0.0.pre1
 
