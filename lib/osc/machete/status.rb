@@ -13,7 +13,21 @@ class OSC::Machete::Status
             ["H", "held"], ["Q", "queued"], ["R", "running"], ["S", "suspended"]]
   VALUES_HASH = Hash[VALUES]
   PRECENDENCE = VALUES.map(&:first)
-  
+
+  # Get an array of all the possible Status values
+  #
+  # @return [Array] - all possible Status values
+  def self.values
+    VALUES.map{ |v| OSC::Machete::Status.new(v.first) }
+  end
+
+  # Get an array of all the possible active Status values
+  #
+  # @return [Array] - all possible active Status values
+  def self.active_values
+    values.select(&:active?)
+  end
+
   # create self.completed, self.running, etc.
   class << self
     VALUES_HASH.each do |char, name|

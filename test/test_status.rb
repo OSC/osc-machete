@@ -11,6 +11,8 @@ class TestStatus < Minitest::Test
     @queued = Status.queued
     @failed = Status.failed
     @new = Status.not_submitted
+    @suspended = Status.suspended
+    @undetermined = Status.undetermined
   end
   
   def teardown
@@ -76,5 +78,10 @@ class TestStatus < Minitest::Test
     assert @completed.submitted?
     assert ! @new.submitted?
     assert ! Status.undetermined.submitted?
+  end
+
+  def test_active_status_values
+    assert_equal Status.values.sort, [@undetermined, @new, @completed, @failed, @held, @queued, @running, @suspended].sort
+    assert_equal Status.active_values.sort, [@running, @queued, @held, @suspended].sort
   end
 end
