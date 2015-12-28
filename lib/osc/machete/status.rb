@@ -20,7 +20,14 @@ class OSC::Machete::Status
   def self.values
     VALUES.map{ |v| OSC::Machete::Status.new(v.first) }
   end
-  
+
+  # Get an array of all the possible active Status values
+  #
+  # @return [Array] - all possible active Status values
+  def self.active_values
+    values.select(&:active?)
+  end
+
   # create self.completed, self.running, etc.
   class << self
     VALUES_HASH.each do |char, name|
@@ -54,12 +61,6 @@ class OSC::Machete::Status
   # @return [Array] - all possible active Status values
   def active?
     running? || queued? || held? || suspended?
-  end
-
-  def self.active_values
-    # TODO:
-    # values.select(&:active)
-    [self.running, self.queued, self.held, self.suspended]
   end
 
   def to_s
