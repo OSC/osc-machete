@@ -46,6 +46,10 @@ class OSC::Machete::Status
     running? || queued? || held? || suspended?
   end
 
+  def self.active_values
+    [self.running, self.queued, self.held, self.suspended]
+  end
+
   def to_s
     @char.to_s
   end
