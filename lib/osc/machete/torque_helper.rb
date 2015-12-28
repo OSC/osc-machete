@@ -48,12 +48,18 @@ class OSC::Machete::TorqueHelper
     # this is to obviate current torque filter defect in which
     # a script with PBS header set to specify oak-batch ends
     # isn't properly handled and the job gets limited to 4GB
-    queue = run_on_oakley?(script) ? "-q @oak-batch.osc.edu" : ""
-    prefix = run_on_oakley?(script) ? ". /etc/profile.d/modules-env.sh && module swap torque torque-4.2.8_vis &&" : ""
-    cmd = "#{prefix} qsub #{queue} #{script}".squeeze(' ')
+    #queue = run_on_oakley?(script) ? "-q @oak-batch.osc.edu" : ""
+    #prefix = run_on_oakley?(script) ? ". /etc/profile.d/modules-env.sh && module swap torque torque-4.2.8_vis &&" : ""
+    #cmd = "#{prefix} qsub #{queue} #{script}".squeeze(' ')
+
+    # FIXME: This is based on the previous code, however it is designed to operate exclusively on Oakley
+    #        Will require modification to run on other clusters.
+    pbs_conn   =   run_on_oakley?(script) ? PBS::Conn.batch("oakley") : ""
+    pbs_job    =   PBS::Job.new(conn: pbs_conn)
 
     # add dependencies
     comma=false # FIXME: better name?
+
     depends_on.each do |type, args|
       args = Array(args)
 
@@ -67,10 +73,13 @@ class OSC::Machete::TorqueHelper
     end
 
 
+
     #FIXME if command returns nil, this will crash
     # irb(main):007:0> nil.strip
     # NoMethodError: undefined method `strip' for nil:NilClass
-    `#{cmd}`.strip
+    #`#{cmd}`.strip
+    #pbs_job.submit
+    pbs_job.submit
   end
 
   # Performs a qstat -x command to return the xml output of a job.
