@@ -58,28 +58,31 @@ class OSC::Machete::TorqueHelper
     pbs_job    =   PBS::Job.new(conn: pbs_conn)
 
     # add dependencies
-    comma=false # FIXME: better name?
-
+    dependencies = Array.new
     depends_on.each do |type, args|
-      args = Array(args)
-
-      unless args.empty?
-        cmd += comma ? "," : " -W depend="
-        comma = true
-
-        # type is "afterany" or :afterany
-        cmd += type.to_s + ":" + args.join(":")
-      end
+      dependencies.push(args)
     end
 
+    #comma=false # FIXME: better name?
 
+    #depends_on.each do |type, args|
+    #  args = Array(args)
+
+    #  unless args.empty?
+    #    cmd += comma ? "," : " -W depend="
+    #    comma = true
+
+        # type is "afterany" or :afterany
+    #    cmd += type.to_s + ":" + args.join(":")
+    #  end
+    #end
 
     #FIXME if command returns nil, this will crash
     # irb(main):007:0> nil.strip
     # NoMethodError: undefined method `strip' for nil:NilClass
     #`#{cmd}`.strip
     #pbs_job.submit
-    pbs_job.submit
+    dependencies.empty? ? pbs_job.submit(string: script) : pbs_job(string: script, depend: dependencies)
   end
 
   # Performs a qstat -x command to return the xml output of a job.
@@ -105,6 +108,7 @@ class OSC::Machete::TorqueHelper
   #
   # @return [Status] The job state
   def qstat(pbsid)
+    
     output = qstat_xml pbsid
     output = parse_qstat_output(output) unless output.nil?
 
