@@ -108,7 +108,9 @@ class OSC::Machete::TorqueHelper
   #
   # @return [Status] The job state
   def qstat(pbsid)
-    
+
+    c = PBS::Conn.batch ''
+
     output = qstat_xml pbsid
     output = parse_qstat_output(output) unless output.nil?
 
@@ -151,6 +153,17 @@ class OSC::Machete::TorqueHelper
   end
 
   private
+
+  # Creates a pbs job object with the pbsid
+  def pbs_job(host, pbsid)
+    begin
+      c = PBS::Conn.batch host
+      q = PBS::Query.new conn: c, type: :job
+      q.find(id: pbsid).first
+    rescue
+      PBS::Job.new(conn: c)
+    end
+  end
 
   def cmd_exists?(cmd)
     `/usr/bin/which #{cmd} 2>/dev/null`
