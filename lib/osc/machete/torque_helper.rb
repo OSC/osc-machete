@@ -110,23 +110,6 @@ class OSC::Machete::TorqueHelper
     cmd.empty? ? pbs_job.submit(string: script, qsub: true).id : pbs_job.submit(string: script, depend: cmd, qsub: true).id
   end
 
-  # @Deprecated
-  #
-  # Performs a qstat -x command to return the xml output of a job.
-  #
-  #TODO: bridge to the python torque lib? is there a ruby torque lib?
-  # or external service?
-  #
-  # @param [String] pbsid
-  #
-  # @return [String] results of qstat -x pbsid
-  def qstat_xml(pbsid)
-    cmd = qstat_cmd
-    # Check if running on Oakley
-    prefix = pbsid =~ /oak-batch/ ? ". /etc/profile.d/modules-env.sh && module swap torque torque-4.2.8_vis &&" : ""
-    `#{prefix} #{cmd} #{pbsid} -x` unless cmd.nil?
-  end
-
   # Performs a qstat request on a single job.
   #
   # **FIXME: this might not belong here!**
@@ -164,35 +147,5 @@ class OSC::Machete::TorqueHelper
     pbs_job.delete
 
     true
-  end
-
-  # @Deprecated
-  #
-  # **FIXME: this might not belong here!**
-  # but not sure whether it should be here, on Job, or somewhere in between
-  #
-  # @param output  xml output from qstat -x pbsid
-  # @return [String, nil] nil, 'Q', 'H', 'R' for job state
-  def parse_qstat_output(output)
-    # FIXME: rescue nil - this is potentially recovering from an error silently
-    # which is bad
-    # FIXME: Nokogiri was removed from the gemspec and require, this is the only reference in machete.
-    Nokogiri::XML(output).xpath('//Data/Job/job_state').children.first.content unless output.empty? || output.nil? rescue nil
-  end
-
-  private
-
-  # @Deprecated
-  def cmd_exists?(cmd)
-    `/usr/bin/which #{cmd} 2>/dev/null`
-    $?.exitstatus == 0
-  end
-
-  # @Deprected
-  def qstat_cmd
-    $cmd = 'qstat'
-    $cmd = '/usr/local/torque-2.4.10/bin/qstat' unless cmd_exists?($cmd)
-    $cmd = '/usr/local/torque/2.5.12/bin/qstat' unless cmd_exists?($cmd)
-    cmd_exists?($cmd) ? $cmd : nil
   end
 end
