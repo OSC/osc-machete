@@ -37,6 +37,21 @@ class OSC::Machete::TorqueHelper
     open(script) { |f| f.read =~ /#PBS -q @oak-batch/ }
   end
 
+  def run_on_host(script)
+    if (open(script) { |f| f.read =~ /#PBS -q @oak-batch/ })
+      host = "oakley"
+    elsif (open(script) { |f| f.read =~ /#PBS -q @opt-batch/ })
+      host = "glenn"
+    elsif (open(script) { |f| f.read =~ /#PBS -q @ruby-batch/ })
+      host = "ruby"
+    elsif (open(script) { |f| f.read =~ /#PBS -q @quick-batch/ })
+      host = "quick"
+    else
+      host = "oakley"  # DEFAULT
+    end
+    host
+  end
+
   # usage: <tt>qsub("/path/to/script")</tt> or
   #        <tt>qsub("/path/to/script", depends_on: { afterany: ["1234.oak-batch.osc.edu"] })</tt>
   #
@@ -54,35 +69,31 @@ class OSC::Machete::TorqueHelper
 
     # FIXME: This is based on the previous code, however it is designed to operate exclusively on Oakley
     #        Will require modification to run on other clusters.
-    pbs_conn   =   run_on_oakley?(script) ? PBS::Conn.batch("oakley") : ""
+    pbs_conn   =   PBS::Conn.batch(run_on_host(script))
     pbs_job    =   PBS::Job.new(conn: pbs_conn)
 
     # add dependencies
-    dependencies = Array.new
+    comma=false # FIXME: better name?
+    cmd = ""
+
     depends_on.each do |type, args|
-      dependencies.push(args)
-    end
+      args = Array(args)
 
-    #comma=false # FIXME: better name?
-
-    #depends_on.each do |type, args|
-    #  args = Array(args)
-
-    #  unless args.empty?
-    #    cmd += comma ? "," : " -W depend="
-    #    comma = true
+      unless args.empty?
+        cmd += comma ? "," : ""
+        comma = true
 
         # type is "afterany" or :afterany
-    #    cmd += type.to_s + ":" + args.join(":")
-    #  end
-    #end
+        cmd += type.to_s + ":" + args.join(":")
+      end
+    end
 
     #FIXME if command returns nil, this will crash
     # irb(main):007:0> nil.strip
     # NoMethodError: undefined method `strip' for nil:NilClass
     #`#{cmd}`.strip
     #pbs_job.submit
-    dependencies.empty? ? pbs_job.submit(string: script) : pbs_job(string: script, depend: dependencies)
+    cmd.empty? ? pbs_job.submit(string: script, qsub: true).id : pbs_job.submit(string: script, depend: cmd, qsub: true).id
   end
 
   # Performs a qstat -x command to return the xml output of a job.
@@ -108,8 +119,6 @@ class OSC::Machete::TorqueHelper
   #
   # @return [Status] The job state
   def qstat(pbsid)
-
-    c = PBS::Conn.batch ''
 
     output = qstat_xml pbsid
     output = parse_qstat_output(output) unless output.nil?
@@ -155,7 +164,7 @@ class OSC::Machete::TorqueHelper
   private
 
   # Creates a pbs job object with the pbsid
-  def pbs_job(host, pbsid)
+  def pbs_job_obj(host, pbsid)
     begin
       c = PBS::Conn.batch host
       q = PBS::Query.new conn: c, type: :job
