@@ -105,14 +105,11 @@ class OSC::Machete::TorqueHelper
       end
     end
 
-    #FIXME if command returns nil, this will crash
-    # irb(main):007:0> nil.strip
-    # NoMethodError: undefined method `strip' for nil:NilClass
-    #`#{cmd}`.strip
-    #pbs_job.submit
     cmd.empty? ? pbs_job.submit(string: script, qsub: true).id : pbs_job.submit(string: script, depend: cmd, qsub: true).id
   end
 
+  # @Deprecated
+  #
   # Performs a qstat -x command to return the xml output of a job.
   #
   #TODO: bridge to the python torque lib? is there a ruby torque lib?
@@ -166,6 +163,8 @@ class OSC::Machete::TorqueHelper
     true
   end
 
+  # @Deprecated
+  #
   # **FIXME: this might not belong here!**
   # but not sure whether it should be here, on Job, or somewhere in between
   #
@@ -179,11 +178,13 @@ class OSC::Machete::TorqueHelper
 
   private
 
+  # @Deprecated
   def cmd_exists?(cmd)
     `/usr/bin/which #{cmd} 2>/dev/null`
     $?.exitstatus == 0
   end
 
+  # @Deprected
   def qstat_cmd
     $cmd = 'qstat'
     $cmd = '/usr/local/torque-2.4.10/bin/qstat' unless cmd_exists?($cmd)
