@@ -38,6 +38,7 @@ class OSC::Machete::TorqueHelper
   end
 
   # return the name of the host to use based on the pbs header
+  # TODO: Think of a more efficient way to do this.
   def run_on_host(script)
     if (open(script) { |f| f.read =~ /#PBS -q @oak-batch/ })
       host = "oakley"
@@ -53,6 +54,7 @@ class OSC::Machete::TorqueHelper
     host
   end
 
+  # Return the PBS host string based on a full pbsid string
   def pbsid_on_host(pbsid)
     #TODO Test on glenn
     #TODO Test on ruby
@@ -61,7 +63,7 @@ class OSC::Machete::TorqueHelper
       host = "oakley"
     elsif (pbsid =~ /opt-batch/ )
       host = "glenn"
-    elsif (pbsid =~ /^\d+/ )
+    elsif (pbsid =~ /^\d+$/ )
       host = "ruby"
     elsif (pbsid =~ /quick/ )
       host = "quick"
@@ -174,6 +176,7 @@ class OSC::Machete::TorqueHelper
   def parse_qstat_output(output)
     # FIXME: rescue nil - this is potentially recovering from an error silently
     # which is bad
+    # FIXME: Nokogiri was removed from the gemspec and require, this is the only reference in machete.
     Nokogiri::XML(output).xpath('//Data/Job/job_state').children.first.content unless output.empty? || output.nil? rescue nil
   end
 
