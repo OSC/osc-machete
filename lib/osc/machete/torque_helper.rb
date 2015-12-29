@@ -138,11 +138,24 @@ class OSC::Machete::TorqueHelper
   #
   # @return [Boolean] Returns true.
   def qdel(pbsid)
-    #TODO: testing on Oakley?
-    #TODO: testing on Glenn?
+
+    #TODO Test on glenn
+    #TODO Test on ruby
+    #TODO Test on quick
+    if (pbsid.include? /oak-batch/ )
+      host = "oakley"
+    elsif (pbsid.include? /opt-batch/ )
+      host = "glenn"
+    elsif (pbsid.include? /^\d+/ )
+      host = "ruby"
+    elsif (pbsid.include? /quick/ )
+      host = "quick"
+    else
+      host = "oakley"  # DEFAULT
+    end
+
     #TODO: error handling?
-    # Check if running on Oakley
-    pbs_conn   =   PBS::Conn.batch("oakley")
+    pbs_conn   =   PBS::Conn.batch(host)
     pbs_job    =   PBS::Job.new(conn: pbs_conn, id: pbsid)
 
     pbs_job.delete
