@@ -141,7 +141,8 @@ class OSC::Machete::TorqueHelper
     # We need a NULL qstat object (i.e. unknown)
     # when an error occurs. 
     # TODO: Status.unavailable
-    status_for_char(pbs_job.status[:attribs][:job_state])
+    status_char = pbs_job.status[:attribs][:job_state] rescue nil
+    status_for_char(status_char)
   end
 
   # Perform a qdel command on a single job.

@@ -39,7 +39,7 @@ class TestTorqueHelper < Minitest::Test
   end
   
   def test_qstat_state_no_job
-    @shell.stubs(:qstat_xml).returns("")
+    #@shell.stubs(:qstat_xml).returns("")
     assert_equal OSC::Machete::Status.completed, @shell.qstat('16376372.opt-batch.osc.edu')
   end
   
