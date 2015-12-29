@@ -37,42 +37,6 @@ class OSC::Machete::TorqueHelper
     open(script) { |f| f.read =~ /#PBS -q @oak-batch/ }
   end
 
-  # return the name of the host to use based on the pbs header
-  # TODO: Think of a more efficient way to do this.
-  def run_on_host(script)
-    if (open(script) { |f| f.read =~ /#PBS -q @oak-batch/ })
-      host = "oakley"
-    elsif (open(script) { |f| f.read =~ /#PBS -q @opt-batch/ })
-      host = "glenn"
-    elsif (open(script) { |f| f.read =~ /#PBS -q @ruby-batch/ })
-      host = "ruby"
-    elsif (open(script) { |f| f.read =~ /#PBS -q @quick-batch/ })
-      host = "quick"
-    else
-      host = "oakley"  # DEFAULT
-    end
-    host
-  end
-
-  # Return the PBS host string based on a full pbsid string
-  def pbsid_on_host(pbsid)
-    #TODO Test on glenn
-    #TODO Test on ruby
-    #TODO Test on quick
-    if (pbsid =~ /oak-batch/ )
-      host = "oakley"
-    elsif (pbsid =~ /opt-batch/ )
-      host = "glenn"
-    elsif (pbsid =~ /^\d+$/ )
-      host = "ruby"
-    elsif (pbsid =~ /quick/ )
-      host = "quick"
-    else
-      host = "oakley"  # DEFAULT
-    end
-    host
-  end
-
   # usage: <tt>qsub("/path/to/script")</tt> or
   #        <tt>qsub("/path/to/script", depends_on: { afterany: ["1234.oak-batch.osc.edu"] })</tt>
   #
@@ -88,7 +52,7 @@ class OSC::Machete::TorqueHelper
     #prefix = run_on_oakley?(script) ? ". /etc/profile.d/modules-env.sh && module swap torque torque-4.2.8_vis &&" : ""
     #cmd = "#{prefix} qsub #{queue} #{script}".squeeze(' ')
 
-    pbs_conn   =   PBS::Conn.batch(run_on_host(script))
+    pbs_conn   =   PBS::Conn.batch(host_from_script_pbs_header(script))
     pbs_job    =   PBS::Job.new(conn: pbs_conn)
 
     # add dependencies
@@ -119,7 +83,7 @@ class OSC::Machete::TorqueHelper
   # @return [Status] The job state
   def qstat(pbsid)
 
-    pbs_conn   =   PBS::Conn.batch(pbsid_on_host(pbsid))
+    pbs_conn   =   PBS::Conn.batch(host_from_pbsid(pbsid))
     pbs_job    =   PBS::Job.new(conn: pbs_conn, id: pbsid)
 
     # FIXME: handle errors when switching to qstat
@@ -141,11 +105,49 @@ class OSC::Machete::TorqueHelper
   def qdel(pbsid)
 
     #TODO: error handling?
-    pbs_conn   =   PBS::Conn.batch(pbsid_on_host(pbsid))
+    pbs_conn   =   PBS::Conn.batch(host_from_pbsid(pbsid))
     pbs_job    =   PBS::Job.new(conn: pbs_conn, id: pbsid)
 
     pbs_job.delete
 
     true
   end
+
+  private
+
+    # return the name of the host to use based on the pbs header
+    # TODO: Think of a more efficient way to do this.
+    def host_from_script_pbs_header(script)
+      if (open(script) { |f| f.read =~ /#PBS -q @oak-batch/ })
+        host = "oakley"
+      elsif (open(script) { |f| f.read =~ /#PBS -q @opt-batch/ })
+        host = "glenn"
+      elsif (open(script) { |f| f.read =~ /#PBS -q @ruby-batch/ })
+        host = "ruby"
+      elsif (open(script) { |f| f.read =~ /#PBS -q @quick-batch/ })
+        host = "quick"
+      else
+        host = "oakley"  # DEFAULT
+      end
+      host
+    end
+
+    # Return the PBS host string based on a full pbsid string
+    def host_from_pbsid(pbsid)
+      #TODO Test on glenn
+      #TODO Test on ruby
+      #TODO Test on quick
+      if (pbsid =~ /oak-batch/ )
+        host = "oakley"
+      elsif (pbsid =~ /opt-batch/ )
+        host = "glenn"
+      elsif (pbsid =~ /^\d+$/ )
+        host = "ruby"
+      elsif (pbsid =~ /quick/ )
+        host = "quick"
+      else
+        host = "oakley"  # DEFAULT
+      end
+      host
+    end
 end
