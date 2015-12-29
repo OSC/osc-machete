@@ -106,6 +106,17 @@ class TestJob < Minitest::Test
     job2.after job1
     job2.submit
   end
+
+  def test_job_status
+    torque1 = OSC::Machete::TorqueHelper.new
+    torque1.expects(:qstat).with(@id1).returns(OSC::Machete::Status.running)
+    job = OSC::Machete::Job.new pbsid: @id1, torque_helper: torque1
+
+    assert_equal job.status, OSC::Machete::Status.running
+
+    job = OSC::Machete::Job.new script: @scriptpath
+    assert_equal job.status, OSC::Machete::Status.not_submitted
+  end
   
   
   def test_job_delete
