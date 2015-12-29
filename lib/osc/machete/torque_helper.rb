@@ -53,6 +53,24 @@ class OSC::Machete::TorqueHelper
     host
   end
 
+  def pbsid_on_host(pbsid)
+    #TODO Test on glenn
+    #TODO Test on ruby
+    #TODO Test on quick
+    if (pbsid =~ /oak-batch/ )
+      host = "oakley"
+    elsif (pbsid =~ /opt-batch/ )
+      host = "glenn"
+    elsif (pbsid =~ /^\d+/ )
+      host = "ruby"
+    elsif (pbsid =~ /quick/ )
+      host = "quick"
+    else
+      host = "oakley"  # DEFAULT
+    end
+    host
+  end
+
   # usage: <tt>qsub("/path/to/script")</tt> or
   #        <tt>qsub("/path/to/script", depends_on: { afterany: ["1234.oak-batch.osc.edu"] })</tt>
   #
@@ -119,14 +137,14 @@ class OSC::Machete::TorqueHelper
   # @return [Status] The job state
   def qstat(pbsid)
 
-    output = qstat_xml pbsid
-    output = parse_qstat_output(output) unless output.nil?
+    pbs_conn   =   PBS::Conn.batch(pbsid_on_host(pbsid))
+    pbs_job    =   PBS::Job.new(conn: pbs_conn, id: pbsid)
 
     # FIXME: handle errors when switching to qstat
     # We need a NULL qstat object (i.e. unknown)
     # when an error occurs. 
     # TODO: Status.unavailable
-    status_for_char(output)
+    status_for_char(pbs_job.status[:attribs][:job_state])
   end
 
   # Perform a qdel command on a single job.
@@ -139,30 +157,11 @@ class OSC::Machete::TorqueHelper
   # @return [Boolean] Returns true.
   def qdel(pbsid)
 
-    #TODO Test on glenn
-    #TODO Test on ruby
-    #TODO Test on quick
-    if (pbsid.include? /oak-batch/ )
-      host = "oakley"
-    elsif (pbsid.include? /opt-batch/ )
-      host = "glenn"
-    elsif (pbsid.include? /^\d+/ )
-      host = "ruby"
-    elsif (pbsid.include? /quick/ )
-      host = "quick"
-    else
-      host = "oakley"  # DEFAULT
-    end
-
     #TODO: error handling?
-    pbs_conn   =   PBS::Conn.batch(host)
+    pbs_conn   =   PBS::Conn.batch(pbsid_on_host(pbsid))
     pbs_job    =   PBS::Job.new(conn: pbs_conn, id: pbsid)
 
     pbs_job.delete
-
-    #prefix = pbsid =~ /oak-batch/ ? ". /etc/profile.d/modules-env.sh && module swap torque torque-4.2.8_vis &&" : ""
-    #cmd = "#{prefix} qdel #{pbsid}"
-    #`#{cmd}`
 
     true
   end
@@ -179,17 +178,6 @@ class OSC::Machete::TorqueHelper
   end
 
   private
-
-  # Creates a pbs job object with the pbsid
-  def pbs_job_obj(host, pbsid)
-    begin
-      c = PBS::Conn.batch host
-      q = PBS::Query.new conn: c, type: :job
-      q.find(id: pbsid).first
-    rescue
-      PBS::Job.new(conn: c)
-    end
-  end
 
   def cmd_exists?(cmd)
     `/usr/bin/which #{cmd} 2>/dev/null`
