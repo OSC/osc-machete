@@ -37,6 +37,7 @@ class OSC::Machete::TorqueHelper
     open(script) { |f| f.read =~ /#PBS -q @oak-batch/ }
   end
 
+  # return the name of the host to use based on the pbs header
   def run_on_host(script)
     if (open(script) { |f| f.read =~ /#PBS -q @oak-batch/ })
       host = "oakley"
@@ -67,8 +68,6 @@ class OSC::Machete::TorqueHelper
     #prefix = run_on_oakley?(script) ? ". /etc/profile.d/modules-env.sh && module swap torque torque-4.2.8_vis &&" : ""
     #cmd = "#{prefix} qsub #{queue} #{script}".squeeze(' ')
 
-    # FIXME: This is based on the previous code, however it is designed to operate exclusively on Oakley
-    #        Will require modification to run on other clusters.
     pbs_conn   =   PBS::Conn.batch(run_on_host(script))
     pbs_job    =   PBS::Job.new(conn: pbs_conn)
 
@@ -143,9 +142,14 @@ class OSC::Machete::TorqueHelper
     #TODO: testing on Glenn?
     #TODO: error handling?
     # Check if running on Oakley
-    prefix = pbsid =~ /oak-batch/ ? ". /etc/profile.d/modules-env.sh && module swap torque torque-4.2.8_vis &&" : ""
-    cmd = "#{prefix} qdel #{pbsid}"
-    `#{cmd}`
+    pbs_conn   =   PBS::Conn.batch("oakley")
+    pbs_job    =   PBS::Job.new(conn: pbs_conn, id: pbsid)
+
+    pbs_job.delete
+
+    #prefix = pbsid =~ /oak-batch/ ? ". /etc/profile.d/modules-env.sh && module swap torque torque-4.2.8_vis &&" : ""
+    #cmd = "#{prefix} qdel #{pbsid}"
+    #`#{cmd}`
 
     true
   end
