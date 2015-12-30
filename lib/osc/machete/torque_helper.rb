@@ -62,7 +62,7 @@ class OSC::Machete::TorqueHelper
       end
     end
     headers = cmd.empty? ? {} : { depend: cmd }
-    
+
     pbs_job.submit(file: script, headers: headers, qsub: true).id
   end
 
