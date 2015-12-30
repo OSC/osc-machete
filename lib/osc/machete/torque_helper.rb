@@ -53,7 +53,7 @@ class OSC::Machete::TorqueHelper
     #cmd = "#{prefix} qsub #{queue} #{script}".squeeze(' ')
 
     #pbs_conn   =   PBS::Conn.batch(host_from_script_pbs_header(script))
-    pbs_job    =   get_pbs_job(conn: get_pbs_conn(script: script))
+    pbs_job    =   get_pbs_job(get_pbs_conn(script: script))
 
     # add dependencies
     comma=false # FIXME: better name?
@@ -142,17 +142,16 @@ class OSC::Machete::TorqueHelper
     # TODO: Think of a more efficient way to do this.
     def host_from_script_pbs_header(script)
       if (open(script) { |f| f.read =~ /#PBS -q @oak-batch/ })
-        host = "oakley"
+        "oakley"
       elsif (open(script) { |f| f.read =~ /#PBS -q @opt-batch/ })
-        host = "glenn"
+        "glenn"
       elsif (open(script) { |f| f.read =~ /#PBS -q @ruby-batch/ })
-        host = "ruby"
+        "ruby"
       elsif (open(script) { |f| f.read =~ /#PBS -q @quick-batch/ })
-        host = "quick"
+        "quick"
       else
-        host = "oakley"  # DEFAULT
+        "oakley"  # DEFAULT
       end
-      host
     end
 
     # Return the PBS host string based on a full pbsid string
@@ -161,16 +160,15 @@ class OSC::Machete::TorqueHelper
       #TODO Test on ruby
       #TODO Test on quick
       if (pbsid =~ /oak-batch/ )
-        host = "oakley"
+        "oakley"
       elsif (pbsid =~ /opt-batch/ )
-        host = "glenn"
+        "glenn"
       elsif (pbsid =~ /^\d+$/ )
-        host = "ruby"
+        "ruby"
       elsif (pbsid =~ /quick/ )
-        host = "quick"
+        "quick"
       else
-        host = "oakley"  # DEFAULT
+        "oakley"  # DEFAULT
       end
-      host
     end
 end
