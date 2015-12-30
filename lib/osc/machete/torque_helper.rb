@@ -32,11 +32,6 @@ class OSC::Machete::TorqueHelper
   # consider using cocaine gem
   # consider using Shellwords and other tools
 
-  # return true if script has PBS header specifying Oakley queue
-  #def run_on_oakley?(script)
-  #  open(script) { |f| f.read =~ /#PBS -q @oak-batch/ }
-  #end
-
   # usage: <tt>qsub("/path/to/script")</tt> or
   #        <tt>qsub("/path/to/script", depends_on: { afterany: ["1234.oak-batch.osc.edu"] })</tt>
   #
@@ -48,11 +43,6 @@ class OSC::Machete::TorqueHelper
     # this is to obviate current torque filter defect in which
     # a script with PBS header set to specify oak-batch ends
     # isn't properly handled and the job gets limited to 4GB
-    #queue = run_on_oakley?(script) ? "-q @oak-batch.osc.edu" : ""
-    #prefix = run_on_oakley?(script) ? ". /etc/profile.d/modules-env.sh && module swap torque torque-4.2.8_vis &&" : ""
-    #cmd = "#{prefix} qsub #{queue} #{script}".squeeze(' ')
-
-    #pbs_conn   =   PBS::Conn.batch(host_from_script_pbs_header(script))
     pbs_job    =   get_pbs_job(get_pbs_conn(script: script))
 
     # add dependencies
@@ -83,10 +73,8 @@ class OSC::Machete::TorqueHelper
   # @return [Status] The job state
   def qstat(pbsid)
 
-    pbs_conn   =   get_pbs_conn(pbsid: pbsid)
-    pbs_job    =   get_pbs_job(pbs_conn, pbsid)
+    pbs_job    =   get_pbs_job(get_pbs_conn(pbsid: pbsid), pbsid)
 
-    # FIXME: handle errors when switching to qstat
     # We need a NULL qstat object (i.e. unknown)
     # when an error occurs. 
     # TODO: Status.unavailable
@@ -96,7 +84,6 @@ class OSC::Machete::TorqueHelper
 
   # Perform a qdel command on a single job.
   #
-  # FIXME: Needs Testing on clusters
   # FIXME: Needs Error handling
   #
   # @param [String] pbsid The pbsid of the job to be deleted.
@@ -112,29 +99,28 @@ class OSC::Machete::TorqueHelper
     true
   end
 
-  # TODO make private
-  def get_pbs_job(conn, pbsid=nil)
-    pbsid.nil? ? PBS::Job.new(conn: conn) : PBS::Job.new(conn: conn, id: pbsid)
-  end
-
-  #TODO make private
-  # Returns a PBS connection object
-  #
-  # @option [:script] A PBS script with headers as string
-  # @option [:pbsid] A valid pbsid as string
-  #
-  # @return [PBS::Conn] A connection option for the PBS host (Default: Oakley)
-  def get_pbs_conn(options={})
-    if options[:script]
-      PBS::Conn.batch(host_from_script_pbs_header(options[:script]))
-    elsif options[:pbsid]
-      PBS::Conn.batch(host_from_pbsid(options[:pbsid]))
-    else
-      PBS::Conn.batch("oakley")
-    end
-  end
-
   private
+
+    # Factory to return a PBS::Job object
+    def get_pbs_job(conn, pbsid=nil)
+      pbsid.nil? ? PBS::Job.new(conn: conn) : PBS::Job.new(conn: conn, id: pbsid)
+    end
+
+    # Returns a PBS connection object
+    #
+    # @option [:script] A PBS script with headers as string
+    # @option [:pbsid] A valid pbsid as string
+    #
+    # @return [PBS::Conn] A connection option for the PBS host (Default: Oakley)
+    def get_pbs_conn(options={})
+      if options[:script]
+        PBS::Conn.batch(host_from_script_pbs_header(options[:script]))
+      elsif options[:pbsid]
+        PBS::Conn.batch(host_from_pbsid(options[:pbsid]))
+      else
+        PBS::Conn.batch("oakley")
+      end
+    end
 
     # return the name of the host to use based on the pbs header
     # TODO: Think of a more efficient way to do this.
