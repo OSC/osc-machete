@@ -53,6 +53,7 @@ class OSC::Machete::TorqueHelper
       args = Array(args)
 
       unless args.empty?
+
         cmd += comma ? "," : ""
         comma = true
 
@@ -61,7 +62,7 @@ class OSC::Machete::TorqueHelper
       end
     end
 
-    cmd.empty? ? pbs_job.submit(file: script, qsub: true).id : pbs_job.submit(file: script, depend: cmd, qsub: true).id
+    cmd.empty? ? pbs_job.submit(file: script, qsub: true).id : pbs_job.submit(file: script, headers: {:depend => cmd}, qsub: true).id
   end
 
   # Performs a qstat request on a single job.
