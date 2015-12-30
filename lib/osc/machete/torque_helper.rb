@@ -33,9 +33,9 @@ class OSC::Machete::TorqueHelper
   # consider using Shellwords and other tools
 
   # return true if script has PBS header specifying Oakley queue
-  def run_on_oakley?(script)
-    open(script) { |f| f.read =~ /#PBS -q @oak-batch/ }
-  end
+  #def run_on_oakley?(script)
+  #  open(script) { |f| f.read =~ /#PBS -q @oak-batch/ }
+  #end
 
   # usage: <tt>qsub("/path/to/script")</tt> or
   #        <tt>qsub("/path/to/script", depends_on: { afterany: ["1234.oak-batch.osc.edu"] })</tt>
@@ -71,7 +71,7 @@ class OSC::Machete::TorqueHelper
       end
     end
 
-    cmd.empty? ? pbs_job.submit(string: script, qsub: true).id : pbs_job.submit(string: script, depend: cmd, qsub: true).id
+    cmd.empty? ? pbs_job.submit(file: script, qsub: true).id : pbs_job.submit(file: script, depend: cmd, qsub: true).id
   end
 
   # Performs a qstat request on a single job.
@@ -83,8 +83,8 @@ class OSC::Machete::TorqueHelper
   # @return [Status] The job state
   def qstat(pbsid)
 
-    #pbs_conn   =   PBS::Conn.batch(host_from_pbsid(pbsid))
-    pbs_job    =   get_pbs_job(conn: get_pbs_conn(pbsid: pbsid), id: pbsid)
+    pbs_conn   =   get_pbs_conn(pbsid: pbsid)
+    pbs_job    =   get_pbs_job(pbs_conn, pbsid)
 
     # FIXME: handle errors when switching to qstat
     # We need a NULL qstat object (i.e. unknown)
@@ -105,12 +105,10 @@ class OSC::Machete::TorqueHelper
   def qdel(pbsid)
 
     #TODO: error handling?
-    #pbs_conn   =   PBS::Conn.batch(host_from_pbsid(pbsid))
-    #pbs_job    =   PBS::Job.new(conn: pbs_conn, id: pbsid)
-    pbs_job    =   get_pbs_job(conn: get_pbs_conn(pbsid: pbsid), id: pbsid)
+    pbs_conn   =   get_pbs_conn(pbsid: pbsid)
+    pbs_job    =   get_pbs_job(pbs_conn, pbsid)
 
     pbs_job.delete
-
     true
   end
 
@@ -156,9 +154,6 @@ class OSC::Machete::TorqueHelper
 
     # Return the PBS host string based on a full pbsid string
     def host_from_pbsid(pbsid)
-      #TODO Test on glenn
-      #TODO Test on ruby
-      #TODO Test on quick
       if (pbsid =~ /oak-batch/ )
         "oakley"
       elsif (pbsid =~ /opt-batch/ )
