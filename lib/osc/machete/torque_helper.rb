@@ -61,8 +61,9 @@ class OSC::Machete::TorqueHelper
         cmd += type.to_s + ":" + args.join(":")
       end
     end
-
-    cmd.empty? ? pbs_job.submit(file: script, qsub: true).id : pbs_job.submit(file: script, headers: {:depend => cmd}, qsub: true).id
+    headers = cmd.empty? ? {} : { depend: cmd }
+    
+    pbs_job.submit(file: script, headers: headers, qsub: true).id
   end
 
   # Performs a qstat request on a single job.
