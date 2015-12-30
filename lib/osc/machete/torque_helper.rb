@@ -52,8 +52,8 @@ class OSC::Machete::TorqueHelper
     #prefix = run_on_oakley?(script) ? ". /etc/profile.d/modules-env.sh && module swap torque torque-4.2.8_vis &&" : ""
     #cmd = "#{prefix} qsub #{queue} #{script}".squeeze(' ')
 
-    pbs_conn   =   PBS::Conn.batch(host_from_script_pbs_header(script))
-    pbs_job    =   PBS::Job.new(conn: pbs_conn)
+    #pbs_conn   =   PBS::Conn.batch(host_from_script_pbs_header(script))
+    pbs_job    =   get_pbs_job(conn: get_pbs_conn(script: script))
 
     # add dependencies
     comma=false # FIXME: better name?
@@ -83,8 +83,8 @@ class OSC::Machete::TorqueHelper
   # @return [Status] The job state
   def qstat(pbsid)
 
-    pbs_conn   =   PBS::Conn.batch(host_from_pbsid(pbsid))
-    pbs_job    =   PBS::Job.new(conn: pbs_conn, id: pbsid)
+    #pbs_conn   =   PBS::Conn.batch(host_from_pbsid(pbsid))
+    pbs_job    =   get_pbs_job(conn: get_pbs_conn(pbsid: pbsid), id: pbsid)
 
     # FIXME: handle errors when switching to qstat
     # We need a NULL qstat object (i.e. unknown)
@@ -105,12 +105,35 @@ class OSC::Machete::TorqueHelper
   def qdel(pbsid)
 
     #TODO: error handling?
-    pbs_conn   =   PBS::Conn.batch(host_from_pbsid(pbsid))
-    pbs_job    =   PBS::Job.new(conn: pbs_conn, id: pbsid)
+    #pbs_conn   =   PBS::Conn.batch(host_from_pbsid(pbsid))
+    #pbs_job    =   PBS::Job.new(conn: pbs_conn, id: pbsid)
+    pbs_job    =   get_pbs_job(conn: get_pbs_conn(pbsid: pbsid), id: pbsid)
 
     pbs_job.delete
 
     true
+  end
+
+  # TODO make private
+  def get_pbs_job(conn, pbsid=nil)
+    pbsid.nil? ? PBS::Job.new(conn: conn) : PBS::Job.new(conn: conn, id: pbsid)
+  end
+
+  #TODO make private
+  # Returns a PBS connection object
+  #
+  # @option [:script] A PBS script with headers as string
+  # @option [:pbsid] A valid pbsid as string
+  #
+  # @return [PBS::Conn] A connection option for the PBS host (Default: Oakley)
+  def get_pbs_conn(options={})
+    if options[:script]
+      PBS::Conn.batch(host_from_script_pbs_header(options[:script]))
+    elsif options[:pbsid]
+      PBS::Conn.batch(host_from_pbsid(options[:pbsid]))
+    else
+      PBS::Conn.batch("oakley")
+    end
   end
 
   private
