@@ -99,6 +99,9 @@ class OSC::Machete::TorqueHelper
 
     pbs_job.delete
     true
+
+    rescue
+      false
   end
 
   private
