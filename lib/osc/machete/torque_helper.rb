@@ -45,8 +45,8 @@ class OSC::Machete::TorqueHelper
     # isn't properly handled and the job gets limited to 4GB
     pbs_job    =   get_pbs_job(get_pbs_conn(script: script))
 
-    # add dependencies
     comma=false # FIXME: better name?
+    # add dependencies
     cmd = ""
 
     depends_on.each do |type, args|
@@ -83,30 +83,26 @@ class OSC::Machete::TorqueHelper
     status_for_char(job_state(pbs_job))
   end
 
-
-
   # Perform a qdel command on a single job.
-  #
-  # FIXME: Needs Error handling
   #
   # @param [String] pbsid The pbsid of the job to be deleted.
   #
-  # @return [Boolean] Returns true.
+  # @return [Boolean] Returns true if successfully deleted.
   def qdel(pbsid)
 
-    #TODO: error handling?
     pbs_conn   =   get_pbs_conn(pbsid: pbsid)
     pbs_job    =   get_pbs_job(pbs_conn, pbsid)
 
     pbs_job.delete
     true
 
-    rescue
-      false
+  rescue
+    false
   end
 
   private
 
+    # Get the char of the status from the PBS Job object.
     def job_state(job)
       job.status[:attribs][:job_state] rescue nil
     end
