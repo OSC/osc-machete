@@ -3,13 +3,14 @@ class OSC::Machete::Status
   
   attr_reader :char
   
-  # C Job is completed after having run.
+  # C Job is passed (completed successfully)
+  # F Job is failed (completed with errors)
   # H Job is held.
   # Q Job is queued, eligible to run or routed.
   # R Job is running.
   #
   # U Status is unavailable (null status object)
-  VALUES = [["U", "undetermined"], [nil, "not_submitted"], ["C", "completed"], ["F", "failed"],
+  VALUES = [["U", "undetermined"], [nil, "not_submitted"], ["C", "passed"], ["F", "failed"],
             ["H", "held"], ["Q", "queued"], ["R", "running"], ["S", "suspended"]]
   VALUES_HASH = Hash[VALUES]
   PRECENDENCE = VALUES.map(&:first)
@@ -28,7 +29,14 @@ class OSC::Machete::Status
     values.select(&:active?)
   end
 
-  # create self.completed, self.running, etc.
+  # Get an array of all the possible completed Status values
+  #
+  # @return [Array] - all possible completed Status values
+  def self.completed_values
+    values.select(&:completed?)
+  end
+
+  # create self.passed, self.running, etc.
   class << self
     VALUES_HASH.each do |char, name|
       define_method(name) do
@@ -37,7 +45,7 @@ class OSC::Machete::Status
     end
   end
   
-  # create completed?, running?, etc.
+  # create passed?, running?, etc.
   VALUES_HASH.each do |char, name|
     define_method("#{name}?") do
       self == OSC::Machete::Status.new(char)
@@ -58,6 +66,10 @@ class OSC::Machete::Status
 
   def active?
     running? || queued? || held? || suspended?
+  end
+
+  def completed?
+    passed? || failed?
   end
 
   def to_s

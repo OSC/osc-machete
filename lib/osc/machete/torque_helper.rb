@@ -15,7 +15,7 @@ class OSC::Machete::TorqueHelper
   def status_for_char(char)
     case char
     when "C", nil
-      OSC::Machete::Status.completed
+      OSC::Machete::Status.passed
     when "Q", "T", "W" # T W happen before job starts
       OSC::Machete::Status.queued
     when "H"
