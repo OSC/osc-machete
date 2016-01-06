@@ -85,4 +85,11 @@ class TestStatus < Minitest::Test
     assert_equal Status.values.sort, [@undetermined, @new, @passed, @failed, @held, @queued, @running, @suspended].sort
     assert_equal Status.active_values.sort, [@running, @queued, @held, @suspended].sort
   end
+
+  def test_completed
+    assert_equal Status.completed_values.sort, [@passed, @failed]
+    assert @passed.completed?
+    assert @failed.completed?
+    assert ! @running.completed?
+  end
 end
