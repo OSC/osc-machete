@@ -102,6 +102,9 @@ class TestTorqueHelper < Minitest::Test
 
   end
 
+  # FIXME:  The stubbed qsub tests actually don't tell us much.
+  #         Need to figure out how to test the input parameters for PBS::Job.submit
+
   # Test qstat parameters for completed job.
   def test_qsub_oakley_stub
     PBS::Job.any_instance.stubs(:submit).returns(PBS::Job.new(conn: 'oakley', id: '1234598.oak-batch.osc.edu'))
@@ -109,8 +112,9 @@ class TestTorqueHelper < Minitest::Test
   end
 
   # Test job state parser when returning queued
-  def test_qsub_params_oakley
-
+  def test_qsub_ruby_stub
+    PBS::Job.any_instance.stubs(:submit).returns(PBS::Job.new(conn: 'ruby', id: '1234598'))
+    assert_equal "1234598", @shell.qsub(@script_ruby)
   end
   
   def test_qstat_state_no_job
@@ -119,14 +123,14 @@ class TestTorqueHelper < Minitest::Test
   end
 
   # Test that qstat returns Running job StatusValue
-  def test_stat_state_running_oakley
+  def test_qstat_state_running_oakley
     PBS::Job.any_instance.stubs(:status).returns({ :attribs => { :job_state => "R" }})
     assert_equal @job_state_running, @shell.qstat("123.oak-batch.osc.edu")
 
   end
 
   # Test that qstat returns Queued job StatusValue
-  def test_stat_state_queued_oakley
+  def test_qstat_state_queued_oakley
 
     PBS::Job.any_instance.stubs(:status).returns({ :attribs => { :job_state => "Q" }})
     assert_equal @job_state_queued, @shell.qstat("123.oak-batch.osc.edu")
@@ -134,7 +138,7 @@ class TestTorqueHelper < Minitest::Test
   end
 
   # Test that qstat returns Queued job StatusValue
-  def test_stat_state_running_ruby
+  def test_qstat_state_running_ruby
 
     PBS::Job.any_instance.stubs(:status).returns({ :attribs => { :job_state => "Q" }})
     assert_equal @job_state_queued, @shell.qstat("12398765")
@@ -142,7 +146,7 @@ class TestTorqueHelper < Minitest::Test
   end
 
   # Test that qstat returns Completed job StatusValue when state is nil.
-  def test_stat_state_completed_oakley
+  def test_qstat_state_completed_oakley
 
     PBS::Job.any_instance.stubs(:status).returns({ :attribs => { :job_state => nil }})
     assert_equal @job_state_completed, @shell.qstat("123.oak-batch.osc.edu")
@@ -154,9 +158,6 @@ class TestTorqueHelper < Minitest::Test
     PBS::Job.any_instance.stubs(:status).returns(nil)
     assert_equal @job_state_completed, @shell.qstat("123.oak-batch.osc.edu")
   end
-
-
-
 
   # Test that qdel works for oakley
   def test_qdel_oakley
@@ -188,16 +189,6 @@ class TestTorqueHelper < Minitest::Test
     assert_equal false, @shell.qdel("123.quick-batch.osc.edu")
 
   end
-
-
-  def test_qsub_glenn
-    # test actual shell command used i.e. in backticks
-
-    # FIXME: This broke the test with PBS
-    # @shell.expects(:`).with() {|v| v.end_with? "qsub test/fixtures/glenn.sh"}.returns("16376372.opt-batch.osc.edu\n")
-    #@shell.qsub("test/fixtures/glenn.sh")
-    return true
-  end
   
   # assert helper method to verify that
   # the provided hash of dependencies to qsub command produces the desired
@@ -208,25 +199,27 @@ class TestTorqueHelper < Minitest::Test
   # 
   def assert_qsub_dependency_list(dependency_list, dependencies)
     #shell = OSC::Machete::TorqueHelper.new
-    # FIXME: Commented out because we're not using xml
-    #shell.stubs(:qstat_xml).returns(@xml)
-    
-    #shell.expects(:`).with() {|v| v.end_with? "qsub test/fixtures/glenn.sh -W depend=#{dependency_list}"}.returns("16376372.opt-batch.osc.edu\n")
-    #shell.qsub("test/fixtures/glenn.sh", depends_on: dependencies)
-    return true
+
+    #@shell.expects(:`).with() {|v| v.end_with? "#{dependency_list}"}.returns("16376372.opt-batch.osc.edu\n")
+
+    # FIXME: This needs to benefit from the .expects method.
+    PBS::Job.any_instance.stubs(:submit).returns(PBS::Job.new(conn: 'oakley', id: '16376372.opt-batch.osc.edu'))
+    @shell.qsub("test/fixtures/glenn.sh", depends_on: dependencies)
+
+    #return true
   end
   
   def test_qsub_afterany
-    #assert_qsub_dependency_list("afterany:1234.oakbatch.osc.edu", { afterany: ["1234.oakbatch.osc.edu"] })
-    #assert_qsub_dependency_list("afterany:1234.oakbatch.osc.edu", { afterany: "1234.oakbatch.osc.edu" })
-    #assert_qsub_dependency_list("afterany:1234.oakbatch.osc.edu:2345.oakbatch.osc.edu", { afterany: ["1234.oakbatch.osc.edu", "2345.oakbatch.osc.edu"] })
+    assert_qsub_dependency_list("afterany:1234.oak-batch.osc.edu", { afterany: ["1234.oak-batch.osc.edu"] })
+    assert_qsub_dependency_list("afterany:1234.oakbatch.osc.edu", { afterany: "1234.oakbatch.osc.edu" })
+    assert_qsub_dependency_list("afterany:1234.oakbatch.osc.edu:2345.oakbatch.osc.edu", { afterany: ["1234.oakbatch.osc.edu", "2345.oakbatch.osc.edu"] })
     return true
   end
   
 
   def test_qsub_afterok
-    #assert_qsub_dependency_list("afterok:1234.oakbatch.osc.edu", { afterok: ["1234.oakbatch.osc.edu"] })
-    #assert_qsub_dependency_list("afterok:1234.oakbatch.osc.edu:2345.oakbatch.osc.edu", { afterok: ["1234.oakbatch.osc.edu", "2345.oakbatch.osc.edu"] })
+    assert_qsub_dependency_list("afterok:1234.oakbatch.osc.edu", { afterok: ["1234.oakbatch.osc.edu"] })
+    assert_qsub_dependency_list("afterok:1234.oakbatch.osc.edu:2345.oakbatch.osc.edu", { afterok: ["1234.oakbatch.osc.edu", "2345.oakbatch.osc.edu"] })
     return true
   end
   
@@ -237,31 +230,31 @@ class TestTorqueHelper < Minitest::Test
   # 
   # See qsub manpage for details
   def test_qsub_afterok_and_afterany
-    #assert_qsub_dependency_list("afterany:1234.oakbatch.osc.edu,afterok:2345.oakbatch.osc.edu",
-    #  { afterany: "1234.oakbatch.osc.edu", afterok: "2345.oakbatch.osc.edu" })
+    assert_qsub_dependency_list("afterany:1234.oakbatch.osc.edu,afterok:2345.oakbatch.osc.edu",
+      { afterany: "1234.oakbatch.osc.edu", afterok: "2345.oakbatch.osc.edu" })
     return true
   end
   
   def test_qsub_other
-    #assert_qsub_dependency_list("after:1234.oakbatch.osc.edu", { after: ["1234.oakbatch.osc.edu"] })
-    #assert_qsub_dependency_list("afternotok:1234.oakbatch.osc.edu:2345.oakbatch.osc.edu", { afternotok: ["1234.oakbatch.osc.edu", "2345.oakbatch.osc.edu"] })
+    assert_qsub_dependency_list("after:1234.oakbatch.osc.edu", { after: ["1234.oakbatch.osc.edu"] })
+    assert_qsub_dependency_list("afternotok:1234.oakbatch.osc.edu:2345.oakbatch.osc.edu", { afternotok: ["1234.oakbatch.osc.edu", "2345.oakbatch.osc.edu"] })
     return true
   end
   
   def test_qsub_all_dependencies
-    #dependencies = {
-    #  afterany: "1234.oakbatch.osc.edu",
-    #  afterok: "2345.oakbatch.osc.edu",
-    #  after: ["2347.oakbatch.osc.edu", "2348.oakbatch.osc.edu"],
-    #  afternotok: ["2349.oakbatch.osc.edu", "2350.oakbatch.osc.edu", "2351.oakbatch.osc.edu"]
-    #}
+    dependencies = {
+      afterany: "1234.oakbatch.osc.edu",
+      afterok: "2345.oakbatch.osc.edu",
+      after: ["2347.oakbatch.osc.edu", "2348.oakbatch.osc.edu"],
+      afternotok: ["2349.oakbatch.osc.edu", "2350.oakbatch.osc.edu", "2351.oakbatch.osc.edu"]
+    }
     
-    #depencencies_str = "afterany:1234.oakbatch.osc.edu"
-    #depencencies_str += ",afterok:2345.oakbatch.osc.edu"
-    #depencencies_str += ",after:2347.oakbatch.osc.edu:2348.oakbatch.osc.edu"
-    #depencencies_str += ",afternotok:2349.oakbatch.osc.edu:2350.oakbatch.osc.edu:2351.oakbatch.osc.edu"
+    depencencies_str = "afterany:1234.oakbatch.osc.edu"
+    depencencies_str += ",afterok:2345.oakbatch.osc.edu"
+    depencencies_str += ",after:2347.oakbatch.osc.edu:2348.oakbatch.osc.edu"
+    depencencies_str += ",afternotok:2349.oakbatch.osc.edu:2350.oakbatch.osc.edu:2351.oakbatch.osc.edu"
     
-    #assert_qsub_dependency_list(depencencies_str, dependencies)
+    assert_qsub_dependency_list(depencencies_str, dependencies)
     return true
   end
   
