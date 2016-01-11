@@ -136,14 +136,13 @@ class OSC::Machete::Job
 
   # Perform a qstat and return a char representing the status of the job.
   #
-  # @return [String, nil] character representation of status such as "H", "Q", "R" or nil if not in the system
+  # @return [Status] value object representing status of a job
   def status
-    # FIXME: this method returns nil in two different cases for 2 different reasons
-    # 1. @pbsid is nil
-    # 2. qstat returns nil because qstat's output returned ""
-    # a solution to this problem is switching to using a StatusValue object.
-    # Then TorqueHelper#qstat will always return a StatusValue object (never nil)
-    @torque.qstat @pbsid unless @pbsid.nil?
+    if @pbsid.nil?
+      OSC::Machete::Status.not_submitted
+    else
+      @torque.qstat @pbsid
+    end
   end
 
   # Ensure Job starts only after the specified Job(s) complete

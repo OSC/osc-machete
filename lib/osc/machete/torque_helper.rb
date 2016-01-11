@@ -12,6 +12,22 @@ class OSC::Machete::TorqueHelper
     self::new()
   end
 
+  def status_for_char(char)
+    case char
+    when "C", nil
+      OSC::Machete::Status.completed
+    when "Q", "T", "W" # T W happen before job starts
+      OSC::Machete::Status.queued
+    when "H"
+      OSC::Machete::Status.held
+    else
+      # all other statuses considerd "running" state
+      # including S, E, etc.
+      # see http://docs.adaptivecomputing.com/torque/4-1-3/Content/topics/commands/qstat.htm
+      OSC::Machete::Status.running
+    end
+  end
+
   #*TODO:*
   # consider using cocaine gem
   # consider using Shellwords and other tools
@@ -78,12 +94,16 @@ class OSC::Machete::TorqueHelper
   #
   # @param [String] pbsid The pbsid of the job to inspect.
   #
-  # @return [nil, :Q, :H, :R] The job state
+  # @return [Status] The job state
   def qstat(pbsid)
     output = qstat_xml pbsid
     output = parse_qstat_output(output) unless output.nil?
 
-    output.to_sym unless output.nil?
+    # FIXME: handle errors when switching to qstat
+    # We need a NULL qstat object (i.e. unknown)
+    # when an error occurs. 
+    # TODO: Status.unavailable
+    status_for_char(output)
   end
 
   # Perform a qdel command on a single job.
