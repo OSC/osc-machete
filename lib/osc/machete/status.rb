@@ -13,9 +13,14 @@ class OSC::Machete::Status
   # U Status is unavailable (null status object)
   VALUES = [["U", "undetermined"], [nil, "not_submitted"], ["C", "completed"], ["F", "failed"],
             ["H", "held"], ["Q", "queued"], ["R", "running"], ["S", "suspended"]]
-  # A hashed version of the values array
+
+  # A hashed version of the values array.
   VALUES_HASH = Hash[VALUES]
 
+  # An array of status char values by precedence.
+  #
+  # @example
+  #   OSC::Machete::Status::PRECEDENCE #=> ["U", nil, "C", "F", "H", "Q", "R", "S"]
   PRECEDENCE = VALUES.map(&:first)
 
   # Get an array of all the possible Status values
