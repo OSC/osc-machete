@@ -12,6 +12,16 @@ class OSC::Machete::TorqueHelper
     self::new()
   end
 
+  # Returns an OSC::Machete::Status ValueObject for a char
+  #
+  # @param [String] :char The Torque status char
+  #
+  # @example Completed
+  #   status_for_char("C") #=> OSC::Machete::Status.completed
+  # @example Queued
+  #   status_for_char("W") #=> OSC::Machete::Status.queued
+  #
+  # @return [OSC::Machete::Status] The status corresponding to the char
   def status_for_char(char)
     case char
     when "C", nil
