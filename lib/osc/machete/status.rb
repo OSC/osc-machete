@@ -1,3 +1,5 @@
+# Class for storing an architecture-independent job status.
+#
 class OSC::Machete::Status
   include Comparable
   
@@ -11,7 +13,9 @@ class OSC::Machete::Status
   # U Status is unavailable (null status object)
   VALUES = [["U", "undetermined"], [nil, "not_submitted"], ["C", "completed"], ["F", "failed"],
             ["H", "held"], ["Q", "queued"], ["R", "running"], ["S", "suspended"]]
+  # A hashed version of the values array
   VALUES_HASH = Hash[VALUES]
+  
   PRECENDENCE = VALUES.map(&:first)
 
   # Get an array of all the possible Status values
