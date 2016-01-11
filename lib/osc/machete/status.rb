@@ -15,8 +15,8 @@ class OSC::Machete::Status
             ["H", "held"], ["Q", "queued"], ["R", "running"], ["S", "suspended"]]
   # A hashed version of the values array
   VALUES_HASH = Hash[VALUES]
-  
-  PRECENDENCE = VALUES.map(&:first)
+
+  PRECEDENCE = VALUES.map(&:first)
 
   # Get an array of all the possible Status values
   #
@@ -64,9 +64,13 @@ class OSC::Machete::Status
     running? || queued? || held? || suspended?
   end
 
+  # Returns the status as the char value.
+  #
+  # @return [String] The status char
   def to_s
     @char.to_s
   end
+
 
   def inspect
     # FIXME: ActiveSupport  replace with .humanize and simpler datastructure
@@ -78,7 +82,7 @@ class OSC::Machete::Status
   end
 
   def <=>(other)
-    precendence <=> other.precendence
+    precedence <=> other.precedence
   end
 
   def eql?(other)
@@ -93,8 +97,8 @@ class OSC::Machete::Status
     @char.hash
   end
 
-  def precendence
+  def precedence
     # Hashes enumerate their values in the order that the corresponding keys were inserted
-    PRECENDENCE.index(@char)
+    PRECEDENCE.index(@char)
   end
 end
