@@ -115,7 +115,9 @@ class TestTorqueHelper < Minitest::Test
   end
   
   def test_qstat_state_no_job
-    # FIXME: Add test
+
+    assert_equal @job_state_completed, @shell.qstat("")
+    assert_equal @job_state_completed, @shell.qstat(nil)
   end
 
   # Test that qstat returns Running job StatusValue
@@ -176,6 +178,7 @@ class TestTorqueHelper < Minitest::Test
 
     PBS::Job.any_instance.stubs(:delete).returns(true)
     assert_equal true, @shell.qdel("12365478")
+
   end
 
   # Test that qdel returns false on PBS exception
