@@ -10,6 +10,7 @@ require "osc/machete/staging"
 require "osc/machete/user"
 require "osc/machete/process"
 
+# The OSC namespace module.
 module OSC
   # The main osc-machete module.
   module Machete
