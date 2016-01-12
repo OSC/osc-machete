@@ -57,20 +57,10 @@ class OSC::Machete::TorqueHelper
 
     comma=false # FIXME: better name?
     # add dependencies
-    cmd = ""
+    cmd = depends_on.map { |x|
+      x.first.to_s + ":" + Array(x.last).join(":") unless Array(x.last).empty?
+    }.compact.join(",")
 
-    depends_on.each do |type, args|
-      args = Array(args)
-
-      unless args.empty?
-
-        cmd += comma ? "," : ""
-        comma = true
-
-        # type is "afterany" or :afterany
-        cmd += type.to_s + ":" + args.join(":")
-      end
-    end
     headers = cmd.empty? ? {} : { depend: cmd }
 
     pbs_job.submit(file: script, headers: headers, qsub: true).id
