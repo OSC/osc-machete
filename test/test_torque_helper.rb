@@ -102,18 +102,15 @@ class TestTorqueHelper < Minitest::Test
 
   end
 
-  # FIXME:  The stubbed qsub tests actually don't tell us much.
-  #         Need to figure out how to test the input parameters for PBS::Job.submit
-
   # Test qstat parameters for completed job.
   def test_qsub_oakley_stub
-    PBS::Job.any_instance.stubs(:submit).returns(PBS::Job.new(conn: 'oakley', id: '1234598.oak-batch.osc.edu'))
+    PBS::Job.any_instance.stubs(:submit).with(file: @script_oakley, headers: {}, qsub: true).returns(PBS::Job.new(conn: 'oakley', id: '1234598.oak-batch.osc.edu'))
     assert_equal "1234598.oak-batch.osc.edu", @shell.qsub(@script_oakley)
   end
 
   # Test job state parser when returning queued
   def test_qsub_ruby_stub
-    PBS::Job.any_instance.stubs(:submit).returns(PBS::Job.new(conn: 'ruby', id: '1234598'))
+    PBS::Job.any_instance.stubs(:submit).with(file: @script_ruby, headers: {}, qsub: true).returns(PBS::Job.new(conn: 'ruby', id: '1234598'))
     assert_equal "1234598", @shell.qsub(@script_ruby)
   end
   
