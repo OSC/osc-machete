@@ -1,4 +1,4 @@
-require 'nokogiri'
+require 'pbs'
 
 # == Helper object: ruby interface to torque shell commands
 # in the same vein as stdlib's Shell which
@@ -12,6 +12,16 @@ class OSC::Machete::TorqueHelper
     self::new()
   end
 
+  # Returns an OSC::Machete::Status ValueObject for a char
+  #
+  # @param [String] :char The Torque status char
+  #
+  # @example Completed
+  #   status_for_char("C") #=> OSC::Machete::Status.completed
+  # @example Queued
+  #   status_for_char("W") #=> OSC::Machete::Status.queued
+  #
+  # @return [OSC::Machete::Status] The status corresponding to the char
   def status_for_char(char)
     case char
     when "C", nil
@@ -32,11 +42,6 @@ class OSC::Machete::TorqueHelper
   # consider using cocaine gem
   # consider using Shellwords and other tools
 
-  # return true if script has PBS header specifying Oakley queue
-  def run_on_oakley?(script)
-    open(script) { |f| f.read =~ /#PBS -q @oak-batch/ }
-  end
-
   # usage: <tt>qsub("/path/to/script")</tt> or
   #        <tt>qsub("/path/to/script", depends_on: { afterany: ["1234.oak-batch.osc.edu"] })</tt>
   #
@@ -48,44 +53,27 @@ class OSC::Machete::TorqueHelper
     # this is to obviate current torque filter defect in which
     # a script with PBS header set to specify oak-batch ends
     # isn't properly handled and the job gets limited to 4GB
-    queue = run_on_oakley?(script) ? "-q @oak-batch.osc.edu" : ""
-    prefix = run_on_oakley?(script) ? ". /etc/profile.d/modules-env.sh && module swap torque torque-4.2.8_vis &&" : ""
-    cmd = "#{prefix} qsub #{queue} #{script}".squeeze(' ')
+    pbs_job    =   get_pbs_job(get_pbs_conn(script: script))
 
-    # add dependencies
     comma=false # FIXME: better name?
+    # add dependencies
+    cmd = ""
+
     depends_on.each do |type, args|
       args = Array(args)
 
       unless args.empty?
-        cmd += comma ? "," : " -W depend="
+
+        cmd += comma ? "," : ""
         comma = true
 
         # type is "afterany" or :afterany
         cmd += type.to_s + ":" + args.join(":")
       end
     end
+    headers = cmd.empty? ? {} : { depend: cmd }
 
-
-    #FIXME if command returns nil, this will crash
-    # irb(main):007:0> nil.strip
-    # NoMethodError: undefined method `strip' for nil:NilClass
-    `#{cmd}`.strip
-  end
-
-  # Performs a qstat -x command to return the xml output of a job.
-  #
-  #TODO: bridge to the python torque lib? is there a ruby torque lib?
-  # or external service?
-  #
-  # @param [String] pbsid
-  #
-  # @return [String] results of qstat -x pbsid
-  def qstat_xml(pbsid)
-    cmd = qstat_cmd
-    # Check if running on Oakley
-    prefix = pbsid =~ /oak-batch/ ? ". /etc/profile.d/modules-env.sh && module swap torque torque-4.2.8_vis &&" : ""
-    `#{prefix} #{cmd} #{pbsid} -x` unless cmd.nil?
+    pbs_job.submit(file: script, headers: headers, qsub: true).id
   end
 
   # Performs a qstat request on a single job.
@@ -96,58 +84,88 @@ class OSC::Machete::TorqueHelper
   #
   # @return [Status] The job state
   def qstat(pbsid)
-    output = qstat_xml pbsid
-    output = parse_qstat_output(output) unless output.nil?
 
-    # FIXME: handle errors when switching to qstat
+    pbs_job    =   get_pbs_job(get_pbs_conn(pbsid: pbsid), pbsid)
+
     # We need a NULL qstat object (i.e. unknown)
     # when an error occurs. 
     # TODO: Status.unavailable
-    status_for_char(output)
+    status_for_char(job_state(pbs_job))
   end
 
   # Perform a qdel command on a single job.
   #
-  # FIXME: Needs Testing on clusters
-  # FIXME: Needs Error handling
-  #
   # @param [String] pbsid The pbsid of the job to be deleted.
   #
-  # @return [Boolean] Returns true.
+  # @return [Boolean] Returns true if successfully deleted.
   def qdel(pbsid)
-    #TODO: testing on Oakley?
-    #TODO: testing on Glenn?
-    #TODO: error handling?
-    # Check if running on Oakley
-    prefix = pbsid =~ /oak-batch/ ? ". /etc/profile.d/modules-env.sh && module swap torque torque-4.2.8_vis &&" : ""
-    cmd = "#{prefix} qdel #{pbsid}"
-    `#{cmd}`
 
+    pbs_conn   =   get_pbs_conn(pbsid: pbsid)
+    pbs_job    =   get_pbs_job(pbs_conn, pbsid)
+
+    pbs_job.delete
     true
-  end
 
-  # **FIXME: this might not belong here!**
-  # but not sure whether it should be here, on Job, or somewhere in between
-  #
-  # @param output  xml output from qstat -x pbsid
-  # @return [String, nil] nil, 'Q', 'H', 'R' for job state
-  def parse_qstat_output(output)
-    # FIXME: rescue nil - this is potentially recovering from an error silently
-    # which is bad
-    Nokogiri::XML(output).xpath('//Data/Job/job_state').children.first.content unless output.empty? || output.nil? rescue nil
+  rescue Exception
+    false
   end
 
   private
 
-  def cmd_exists?(cmd)
-    `/usr/bin/which #{cmd} 2>/dev/null`
-    $?.exitstatus == 0
-  end
+    # Get the char of the status from the PBS Job object.
+    def job_state(job)
+      job.status[:attribs][:job_state] rescue nil
+    end
 
-  def qstat_cmd
-    $cmd = 'qstat'
-    $cmd = '/usr/local/torque-2.4.10/bin/qstat' unless cmd_exists?($cmd)
-    $cmd = '/usr/local/torque/2.5.12/bin/qstat' unless cmd_exists?($cmd)
-    cmd_exists?($cmd) ? $cmd : nil
-  end
+    # Factory to return a PBS::Job object
+    def get_pbs_job(conn, pbsid=nil)
+      pbsid.nil? ? PBS::Job.new(conn: conn) : PBS::Job.new(conn: conn, id: pbsid)
+    end
+
+    # Returns a PBS connection object
+    #
+    # @option [:script] A PBS script with headers as string
+    # @option [:pbsid] A valid pbsid as string
+    #
+    # @return [PBS::Conn] A connection option for the PBS host (Default: Oakley)
+    def get_pbs_conn(options={})
+      if options[:script]
+        PBS::Conn.batch(host_from_script_pbs_header(options[:script]))
+      elsif options[:pbsid]
+        PBS::Conn.batch(host_from_pbsid(options[:pbsid]))
+      else
+        PBS::Conn.batch("oakley")
+      end
+    end
+
+    # return the name of the host to use based on the pbs header
+    # TODO: Think of a more efficient way to do this.
+    def host_from_script_pbs_header(script)
+      if (open(script) { |f| f.read =~ /#PBS -q @oak-batch/ })
+        "oakley"
+      elsif (open(script) { |f| f.read =~ /#PBS -q @opt-batch/ })
+        "glenn"
+      elsif (open(script) { |f| f.read =~ /#PBS -q @ruby-batch/ })
+        "ruby"
+      elsif (open(script) { |f| f.read =~ /#PBS -q @quick-batch/ })
+        "quick"
+      else
+        "oakley"  # DEFAULT
+      end
+    end
+
+    # Return the PBS host string based on a full pbsid string
+    def host_from_pbsid(pbsid)
+      if (pbsid =~ /oak-batch/ )
+        "oakley"
+      elsif (pbsid =~ /opt-batch/ )
+        "glenn"
+      elsif (pbsid =~ /^\d+$/ )
+        "ruby"
+      elsif (pbsid =~ /quick/ )
+        "quick"
+      else
+        "oakley"  # DEFAULT
+      end
+    end
 end
