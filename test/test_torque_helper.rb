@@ -193,19 +193,16 @@ class TestTorqueHelper < Minitest::Test
   # the provided hash of dependencies to qsub command produces the desired
   # dependency_list string
   # 
-  # dependency_list: the desired string to follow  -W depend= in the qsub shell command
+  # dependency_list: the desired string to follow  :depend in the pbs command
   # dependencies: the hash to pass as an argument with keyword depends_on: to qsub
   # 
   def assert_qsub_dependency_list(dependency_list, dependencies)
-    #shell = OSC::Machete::TorqueHelper.new
 
-    #@shell.expects(:`).with() {|v| v.end_with? "#{dependency_list}"}.returns("16376372.opt-batch.osc.edu\n")
-
-    # FIXME: This needs to benefit from the .expects method.
-    PBS::Job.any_instance.stubs(:submit).returns(PBS::Job.new(conn: 'oakley', id: '16376372.opt-batch.osc.edu'))
+    PBS::Job.any_instance.stubs(:submit)
+        .with(:file => 'test/fixtures/glenn.sh', :headers => {:depend => dependency_list}, :qsub => true)
+        .returns(PBS::Job.new(conn: 'oakley', id: '16376372.opt-batch.osc.edu'))
     @shell.qsub("test/fixtures/glenn.sh", depends_on: dependencies)
 
-    #return true
   end
   
   def test_qsub_afterany
@@ -229,8 +226,7 @@ class TestTorqueHelper < Minitest::Test
   # 
   # See qsub manpage for details
   def test_qsub_afterok_and_afterany
-    assert_qsub_dependency_list("afterany:1234.oakbatch.osc.edu,afterok:2345.oakbatch.osc.edu",
-      { afterany: "1234.oakbatch.osc.edu", afterok: "2345.oakbatch.osc.edu" })
+    assert_qsub_dependency_list("afterany:1234.oakbatch.osc.edu,afterok:2345.oakbatch.osc.edu", { afterany: "1234.oakbatch.osc.edu", afterok: "2345.oakbatch.osc.edu" } )
     return true
   end
   
@@ -256,11 +252,5 @@ class TestTorqueHelper < Minitest::Test
     assert_qsub_dependency_list(depencencies_str, dependencies)
     return true
   end
-  
-  # TODO: test when nil is returned from qsub
-  # def test_qsub_nil
-  #   @shell.expects(:`).returns(nil)
-  #   @shell.qsub("test/fixtures/glenn.sh")
-  # end
   
 end

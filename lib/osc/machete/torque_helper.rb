@@ -55,7 +55,6 @@ class OSC::Machete::TorqueHelper
     # isn't properly handled and the job gets limited to 4GB
     pbs_job    =   get_pbs_job(get_pbs_conn(script: script))
 
-    comma=false # FIXME: better name?
     # add dependencies
     cmd = depends_on.map { |x|
       x.first.to_s + ":" + Array(x.last).join(":") unless Array(x.last).empty?
