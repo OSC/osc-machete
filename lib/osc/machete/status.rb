@@ -45,7 +45,7 @@ class OSC::Machete::Status
   end
 
   def initialize(char)
-    @char = char.to_s
+    @char = char.to_s.upcase
     @char = nil if @char.empty?
 
     # if invalid status value char, default to undetermined
