@@ -48,29 +48,18 @@ class OSC::Machete::TorqueHelper
   # Where depends_on is a hash with key being dependency type and array containing the
   # arguments. See documentation on dependency_list in qsub man pages for details.
   #
-  def qsub(script, depends_on: {})
+  def qsub( script, depends_on: {}, host: nil)
     # if the script is set to run on Oakley in PBS headers
     # this is to obviate current torque filter defect in which
     # a script with PBS header set to specify oak-batch ends
     # isn't properly handled and the job gets limited to 4GB
-    pbs_job    =   get_pbs_job(get_pbs_conn(script: script))
+    pbs_job = get_pbs_job( host.nil? ? get_pbs_conn(script: script) : get_pbs_conn(host: host) )
 
-    comma=false # FIXME: better name?
     # add dependencies
-    cmd = ""
+    cmd = depends_on.map { |x|
+      x.first.to_s + ":" + Array(x.last).join(":") unless Array(x.last).empty?
+    }.compact.join(",")
 
-    depends_on.each do |type, args|
-      args = Array(args)
-
-      unless args.empty?
-
-        cmd += comma ? "," : ""
-        comma = true
-
-        # type is "afterany" or :afterany
-        cmd += type.to_s + ":" + args.join(":")
-      end
-    end
     headers = cmd.empty? ? {} : { depend: cmd }
 
     pbs_job.submit(file: script, headers: headers, qsub: true).id
@@ -83,9 +72,9 @@ class OSC::Machete::TorqueHelper
   # @param [String] pbsid The pbsid of the job to inspect.
   #
   # @return [Status] The job state
-  def qstat(pbsid)
+  def qstat(pbsid, host: nil)
 
-    pbs_job    =   get_pbs_job(get_pbs_conn(pbsid: pbsid), pbsid)
+    pbs_job = get_pbs_job( host.nil? ? get_pbs_conn(pbsid: pbsid) : get_pbs_conn(host: host) )
 
     # We need a NULL qstat object (i.e. unknown)
     # when an error occurs. 
@@ -98,9 +87,9 @@ class OSC::Machete::TorqueHelper
   # @param [String] pbsid The pbsid of the job to be deleted.
   #
   # @return [Boolean] Returns true if successfully deleted.
-  def qdel(pbsid)
+  def qdel(pbsid, host: nil)
 
-    pbs_conn   =   get_pbs_conn(pbsid: pbsid)
+    pbs_conn   =   host.nil? ? get_pbs_conn(pbsid: pbsid) : get_pbs_conn(host: host)
     pbs_job    =   get_pbs_job(pbs_conn, pbsid)
 
     pbs_job.delete
@@ -133,6 +122,8 @@ class OSC::Machete::TorqueHelper
         PBS::Conn.batch(host_from_script_pbs_header(options[:script]))
       elsif options[:pbsid]
         PBS::Conn.batch(host_from_pbsid(options[:pbsid]))
+      elsif options[:host]
+        PBS::Conn.batch(options[:host])
       else
         PBS::Conn.batch("oakley")
       end
