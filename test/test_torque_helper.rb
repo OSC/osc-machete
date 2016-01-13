@@ -29,7 +29,7 @@ class TestTorqueHelper < Minitest::Test
     raise "Run this test on the batch system from #{@submit_host}." unless Socket.gethostname == @submit_host
 
     @job_state_queued = OSC::Machete::Status.queued
-    @job_state_completed = OSC::Machete::Status.completed
+    @job_state_completed = OSC::Machete::Status.passed
     @job_state_running = OSC::Machete::Status.running
 
     @shell = OSC::Machete::TorqueHelper.new
