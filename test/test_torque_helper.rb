@@ -26,7 +26,6 @@ class TestTorqueHelper < Minitest::Test
     #   correct host, comment out the raise to skip the live tests.
     #   Maybe this would be better accomplished with a separate rake task.
     @submit_host = "websvcs02.osc.edu"
-    raise "Run this test on the batch system from #{@submit_host}." unless Socket.gethostname == @submit_host
 
     @job_state_queued = OSC::Machete::Status.queued
     @job_state_completed = OSC::Machete::Status.passed
@@ -48,70 +47,19 @@ class TestTorqueHelper < Minitest::Test
     @script_ruby = 'test/fixtures/ruby.sh'
   end
 
-  # This tests an actual live workflow by
-  #   submitting a job to oakley,
-  #   checking it's status, and
-  #   deleting it.
-  #
-  # Only works on the current submit host.
-  def test_qsub_oakley
-
-    # Don't run the tests if the host doesn't match.
-    if Socket.gethostname == @submit_host
-
-      # Submit a small job.
-      live_job = @shell.qsub(@script_oakley)
-      assert_match /\d+.oak-batch.osc.edu/, live_job
-
-      # Qstat it to make sure it's queued.
-      live_status = @shell.qstat(live_job)
-      assert_equal @job_state_queued, live_status
-
-      # Delete it and assert true returned.
-      live_delete_status = @shell.qdel(live_job)
-      assert_equal true, live_delete_status
-
-    end
-
-  end
-
-  # This tests an actual live workflow by
-  #   submitting a job to ruby,
-  #   checking it's status, and
-  #   deleting it.
-  #
-  # Only works on the current submit host.
-  def test_qsub_ruby
-
-    # Don't run the tests if the host doesn't match.
-    if Socket.gethostname == @submit_host
-
-      # Submit a small job.
-      live_job = @shell.qsub(@script_ruby)
-      assert_match /^\d+$/, live_job
-
-      # Qstat it to make sure it's queued.
-      live_status = @shell.qstat(live_job)
-      assert_equal @job_state_queued, live_status
-
-      # Delete it and assert true returned.
-      live_delete_status = @shell.qdel(live_job)
-      assert_equal true, live_delete_status
-
-    end
-
-  end
-
   # Test qstat parameters for completed job.
   def test_qsub_oakley_stub
     PBS::Job.any_instance.stubs(:submit).with(file: @script_oakley, headers: {}, qsub: true).returns(PBS::Job.new(conn: 'oakley', id: '1234598.oak-batch.osc.edu'))
     assert_equal "1234598.oak-batch.osc.edu", @shell.qsub(@script_oakley)
+    PBS::Job.any_instance.unstub(:submit)
   end
 
   # Test job state parser when returning queued
   def test_qsub_ruby_stub
     PBS::Job.any_instance.stubs(:submit).with(file: @script_ruby, headers: {}, qsub: true).returns(PBS::Job.new(conn: 'ruby', id: '1234598'))
     assert_equal "1234598", @shell.qsub(@script_ruby)
+    PBS::Job.any_instance.unstub(:submit)
+
   end
   
   def test_qstat_state_no_job
@@ -124,7 +72,7 @@ class TestTorqueHelper < Minitest::Test
   def test_qstat_state_running_oakley
     PBS::Job.any_instance.stubs(:status).returns({ :attribs => { :job_state => "R" }})
     assert_equal @job_state_running, @shell.qstat("123.oak-batch.osc.edu")
-
+    PBS::Job.any_instance.unstub(:status)
   end
 
   # Test that qstat returns Queued job StatusValue
@@ -132,7 +80,7 @@ class TestTorqueHelper < Minitest::Test
 
     PBS::Job.any_instance.stubs(:status).returns({ :attribs => { :job_state => "Q" }})
     assert_equal @job_state_queued, @shell.qstat("123.oak-batch.osc.edu")
-
+    PBS::Job.any_instance.unstub(:status)
   end
 
   # Test that qstat returns Queued job StatusValue
@@ -140,6 +88,7 @@ class TestTorqueHelper < Minitest::Test
 
     PBS::Job.any_instance.stubs(:status).returns({ :attribs => { :job_state => "Q" }})
     assert_equal @job_state_queued, @shell.qstat("12398765")
+    PBS::Job.any_instance.unstub(:status)
 
   end
 
@@ -148,6 +97,7 @@ class TestTorqueHelper < Minitest::Test
 
     PBS::Job.any_instance.stubs(:status).returns({ :attribs => { :job_state => nil }})
     assert_equal @job_state_completed, @shell.qstat("123.oak-batch.osc.edu")
+    PBS::Job.any_instance.unstub(:status)
   end
 
   # Test that qstat returns Completed job when job is nil.
@@ -155,13 +105,15 @@ class TestTorqueHelper < Minitest::Test
 
     PBS::Job.any_instance.stubs(:status).returns(nil)
     assert_equal @job_state_completed, @shell.qstat("123.oak-batch.osc.edu")
+    PBS::Job.any_instance.unstub(:status)
   end
 
   # Test that qdel works for oakley
   def test_qdel_oakley
 
-    PBS::Job.any_instance.stubs(:delete).returns(true)
+    PBS::Job.any_instance.stubs(:delete).with("123.oak-batch.osc.edu").returns(true)
     assert_equal true, @shell.qdel("123.oak-batch.osc.edu")
+    PBS::Job.any_instance.unstub(:delete)
 
   end
 
@@ -170,6 +122,7 @@ class TestTorqueHelper < Minitest::Test
 
     PBS::Job.any_instance.stubs(:delete).returns(true)
     assert_equal true, @shell.qdel("123.quick-batch.osc.edu")
+    PBS::Job.any_instance.unstub(:delete)
 
   end
 
@@ -178,14 +131,16 @@ class TestTorqueHelper < Minitest::Test
 
     PBS::Job.any_instance.stubs(:delete).returns(true)
     assert_equal true, @shell.qdel("12365478")
+    PBS::Job.any_instance.unstub(:delete)
 
   end
 
   # Test that qdel returns false on PBS exception
   def test_qdel_oakley
 
-    PBS::Job.any_instance.stubs(:delete).raises(Exception)
+    PBS::Job.any_instance.stubs(:delete).raises(PBS::Error)
     assert_equal false, @shell.qdel("123.quick-batch.osc.edu")
+    PBS::Job.any_instance.unstub(:delete)
 
   end
   
@@ -196,12 +151,13 @@ class TestTorqueHelper < Minitest::Test
   # dependency_list: the desired string to follow  :depend in the pbs command
   # dependencies: the hash to pass as an argument with keyword depends_on: to qsub
   # 
-  def assert_qsub_dependency_list(dependency_list, dependencies)
+  def assert_qsub_dependency_list(dependency_list, dependencies, host=nil)
 
     PBS::Job.any_instance.stubs(:submit)
         .with(:file => 'test/fixtures/glenn.sh', :headers => {:depend => dependency_list}, :qsub => true)
         .returns(PBS::Job.new(conn: 'oakley', id: '16376372.opt-batch.osc.edu'))
     @shell.qsub("test/fixtures/glenn.sh", depends_on: dependencies)
+    PBS::Job.any_instance.unstub(:submit)
 
   end
   
