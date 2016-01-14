@@ -45,6 +45,7 @@ class TestTorqueHelperLive < Minitest::Test
     @script_glenn = 'test/fixtures/glenn.sh'
     @script_oakley = 'test/fixtures/oakley.sh'
     @script_ruby = 'test/fixtures/ruby.sh'
+    @script_quick = 'test/fixtures/quick.sh'
   end
 
   # This tests an actual live workflow by
@@ -73,7 +74,40 @@ class TestTorqueHelperLive < Minitest::Test
 
     else
 
-      puts "Run test #{caller[0] =~ /`([^']*)'/ and $1} on the batch system from #{@submit_host}."
+      puts "Run test #{caller[0][/`.*'/][1..-2]} on the batch system from #{@submit_host}."
+
+    end
+
+  end
+
+  # This tests an actual live workflow by
+  #   submitting a job to ruby with an oakley script,
+  #   checking it's status, and
+  #   deleting it.
+  #
+  # Only works on the current submit host.
+  def test_qsub_ruby_with_oakley_script
+    torque = OSC::Machete::TorqueHelper.new
+
+    # Don't run the tests if the host doesn't match.
+    if Socket.gethostname == @submit_host
+
+      # Submit a small job to ruby using an Oakley script,
+      # ensuring that we are no longer evaluating the headers.
+      live_job = torque.qsub(@script_oakley, host: "ruby")
+      assert_match(/\d+$/, live_job)
+
+      # Qstat it to make sure it's queued.
+      live_status = torque.qstat(live_job)
+      assert_equal @job_state_queued, live_status
+
+      # Delete it and assert true returned.
+      live_delete_status = torque.qdel(live_job)
+      assert_equal true, live_delete_status
+
+    else
+
+      puts "Run test #{caller[0][/`.*'/][1..-2]} on the batch system from #{@submit_host}."
 
     end
 
@@ -105,7 +139,39 @@ class TestTorqueHelperLive < Minitest::Test
 
     else
 
-      puts "Run test #{caller[0] =~ /`([^']*)'/ and $1} on the batch system from #{@submit_host}."
+      puts "Run test #{caller[0][/`.*'/][1..-2]} on the batch system from #{@submit_host}."
+
+    end
+
+  end
+
+  # This tests an actual live workflow by
+  #   submitting a job to quick,
+  #   checking it's status, and
+  #   deleting it.
+  #
+  # Only works on the current submit host.
+  def test_qsub_quick
+    torque = OSC::Machete::TorqueHelper.new
+
+    # Don't run the tests if the host doesn't match.
+    if Socket.gethostname == @submit_host
+
+      # Submit a small job.
+      live_job = torque.qsub(@script_quick, host: 'quick')
+      assert_match /\d+.quick-batch.osc.edu/, live_job
+
+      # Qstat it to make sure it's queued.
+      live_status = torque.qstat(live_job)
+      assert_equal @job_state_queued, live_status
+
+      # Delete it and assert true returned.
+      live_delete_status = torque.qdel(live_job)
+      assert_equal true, live_delete_status
+
+    else
+
+      puts "Run test #{caller[0][/`.*'/][1..-2]} on the batch system from #{@submit_host}."
 
     end
 
