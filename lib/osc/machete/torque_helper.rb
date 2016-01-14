@@ -30,6 +30,8 @@ class OSC::Machete::TorqueHelper
       OSC::Machete::Status.queued
     when "H"
       OSC::Machete::Status.held
+    when "U"
+      OSC::Machete::Status.undetermined
     else
       # all other statuses considerd "running" state
       # including S, E, etc.
@@ -74,13 +76,33 @@ class OSC::Machete::TorqueHelper
   # @return [Status] The job state
   def qstat(pbsid, host: nil)
 
+    job_char = "U"
+
+    # Create a PBS::Job object based on the pbsid or the optional host param
     pbs_job = get_pbs_job host.nil? ? get_pbs_conn(pbsid: pbsid.to_s) : get_pbs_conn(host: host) , pbsid
-    status_char = job_state(pbs_job)
 
     # We need a NULL qstat object (i.e. unknown)
     # when an error occurs. 
     # TODO: Status.unavailable
-    status_for_char(status_char)
+    begin
+      job_status = pbs_job.status
+      # Get the status char value from the job.
+      job_char   = job_status[:attribs][:job_state][0]
+    rescue PBS::Error => err
+      if err.to_s.include?("Unknown Job Id Error")
+        # Common use-case, job with this pbsid is no longer in the system/
+        job_char = "C"
+      else
+        # PBS Error not related to a PBSID not found.
+        # qstat will return unavailable.
+        # TODO Log this error somewhere.
+      end
+    rescue
+        # Some other error not related to PBS.
+        # qstat will return unavailable.
+        # TODO Log this error somewhere.
+    end
+    status_for_char job_char
   end
 
   # Perform a qdel command on a single job.
@@ -101,11 +123,6 @@ class OSC::Machete::TorqueHelper
   end
 
   private
-
-    # Get the char of the status from the PBS Job object.
-    def job_state(job)
-      job.status[:attribs][:job_state][0] rescue nil
-    end
 
     # Factory to return a PBS::Job object
     def get_pbs_job(conn, pbsid=nil)
