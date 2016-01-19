@@ -74,7 +74,8 @@ class OSC::Machete::TorqueHelper
   # @return [Status] The job state
   def qstat(pbsid, host: nil)
 
-    pbs_job = get_pbs_job host.nil? ? get_pbs_conn(pbsid: pbsid.to_s) : get_pbs_conn(host: host) , pbsid
+    pbs_conn = host.nil? ? get_pbs_conn(pbsid: pbsid.to_s) : get_pbs_conn(host: host)
+    pbs_job = get_pbs_job(pbs_conn, pbsid)
     status_char = job_state(pbs_job)
 
     # We need a NULL qstat object (i.e. unknown)
