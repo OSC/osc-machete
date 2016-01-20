@@ -90,14 +90,8 @@ class OSC::Machete::TorqueHelper
           # Common use-case, job with this pbsid is no longer in the system/
           status = OSC::Machete::Status.passed
         else
-          # PBS Error not related to a PBSID not found.
-          # qstat will return unavailable.
-          # TODO Log this error somewhere.
+          raise err
         end
-      rescue
-        # Some other error not related to PBS.
-        # qstat will return unavailable.
-        # TODO Log this error somewhere.
       end
 
       status
