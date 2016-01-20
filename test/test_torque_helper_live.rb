@@ -74,7 +74,7 @@ class TestTorqueHelperLive < Minitest::Test
 
     else
 
-      puts "Run test #{caller[0][/`.*'/][1..-2]} on the batch system from #{@submit_host}."
+      puts "Run test 'test_qsub_oakley' on the batch system from #{@submit_host}."
 
     end
 
@@ -107,7 +107,7 @@ class TestTorqueHelperLive < Minitest::Test
 
     else
 
-      puts "Run test #{caller[0][/`.*'/][1..-2]} on the batch system from #{@submit_host}."
+      puts "Run test 'test_qsub_ruby_with_oakley_script' on the batch system from #{@submit_host}."
 
     end
 
@@ -139,7 +139,7 @@ class TestTorqueHelperLive < Minitest::Test
 
     else
 
-      puts "Run test #{caller[0][/`.*'/][1..-2]} on the batch system from #{@submit_host}."
+      puts "Run test 'test_qsub_ruby' on the batch system from #{@submit_host}."
 
     end
 
@@ -171,7 +171,7 @@ class TestTorqueHelperLive < Minitest::Test
 
     else
 
-      puts "Run test #{caller[0][/`.*'/][1..-2]} on the batch system from #{@submit_host}."
+      puts "Run test 'test_qsub_quick' on the batch system from #{@submit_host}."
 
     end
 
