@@ -1,6 +1,6 @@
 module OSC
   module Machete
     # The current gem version
-    VERSION = "0.6.3"
+    VERSION = "1.0.0.pre5"
   end
 end
