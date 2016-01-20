@@ -73,26 +73,21 @@ class OSC::Machete::TorqueHelper
   #
   # @return [Status] The job state
   def qstat(pbsid, host: nil)
-      status = OSC::Machete::Status.undetermined
 
-      # Create a PBS::Job object based on the pbsid or the optional host param
-      pbs_conn = host.nil? ? get_pbs_conn(pbsid: pbsid.to_s) : get_pbs_conn(host: host)
-      pbs_job = get_pbs_job(pbs_conn, pbsid)
+    # Create a PBS::Job object based on the pbsid or the optional host param
+    pbs_conn = host.nil? ? get_pbs_conn(pbsid: pbsid.to_s) : get_pbs_conn(host: host)
+    pbs_job = get_pbs_job(pbs_conn, pbsid)
 
-      begin
-        job_status = pbs_job.status
-        # Get the status char value from the job.
-        status = status_for_char job_status[:attribs][:job_state][0]
-      rescue PBS::Error => err
-        if err.to_s.include?("Unknown Job Id Error")
-          # Common use-case, job with this pbsid is no longer in the system/
-          status = OSC::Machete::Status.passed
-        else
-          raise err
-        end
-      end
-
-      status
+      job_status = pbs_job.status
+      # Get the status char value from the job.
+    status_for_char job_status[:attribs][:job_state][0]
+  rescue PBS::Error => err
+    if err.to_s.include?("Unknown Job Id Error")
+      # Common use-case, job with this pbsid is no longer in the system/
+      status = OSC::Machete::Status.passed
+    else
+      raise err 
+    end
   end
 
 
