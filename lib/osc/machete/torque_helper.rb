@@ -30,8 +30,6 @@ class OSC::Machete::TorqueHelper
       OSC::Machete::Status.queued
     when "H"
       OSC::Machete::Status.held
-    when "U"
-      OSC::Machete::Status.undetermined
     else
       # all other statuses considerd "running" state
       # including S, E, etc.

@@ -65,8 +65,8 @@ class TestTorqueHelper < Minitest::Test
   
   def test_qstat_state_no_job
 
-    assert_equal @job_state_undetermined, @shell.qstat("")
-    assert_equal @job_state_undetermined, @shell.qstat(nil)
+    assert_equal @job_state_completed, @shell.qstat("")
+    assert_equal @job_state_completed, @shell.qstat(nil)
   end
 
   # Test that qstat returns Running job StatusValue
