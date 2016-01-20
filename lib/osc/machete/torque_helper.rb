@@ -88,7 +88,7 @@ class OSC::Machete::TorqueHelper
       rescue PBS::Error => err
         if err.to_s.include?("Unknown Job Id Error")
           # Common use-case, job with this pbsid is no longer in the system/
-          status = OSC::Machete::Status.completed
+          status = OSC::Machete::Status.passed
         else
           # PBS Error not related to a PBSID not found.
           # qstat will return unavailable.
