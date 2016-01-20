@@ -101,14 +101,6 @@ class TestTorqueHelper < Minitest::Test
     PBS::Job.any_instance.unstub(:status)
   end
 
-  # Test that qstat returns Completed job when job is nil.
-  def test_qstat_state_no_job
-
-    PBS::Job.any_instance.stubs(:status).returns(nil)
-    assert_equal @job_state_undetermined, @shell.qstat("123.oak-batch.osc.edu")
-    PBS::Job.any_instance.unstub(:status)
-  end
-
   # Test that qdel works for oakley
   def test_qdel_oakley
 
