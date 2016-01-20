@@ -85,6 +85,7 @@ class OSC::Machete::Job
     # @script_path = @script_path.expand_path would change this to absolute path
 
     @pbsid =  args[:pbsid]
+    @host =   args[:host]
     @torque = args[:torque_helper] || OSC::Machete::TorqueHelper.default
 
     @dependencies = {} # {:afterany => [Job, Job], :afterok => [Job]}
@@ -123,7 +124,7 @@ class OSC::Machete::Job
     #
     #TODO: what if you want to submit via piping to qsub i.e. without creating a file?
     Dir.chdir(path.to_s) do
-      @pbsid = @torque.qsub script_name, depends_on: dependency_ids
+      @pbsid = @torque.qsub script_name, depends_on: dependency_ids, host: @host
     end
   end
 
@@ -141,7 +142,7 @@ class OSC::Machete::Job
     if @pbsid.nil?
       OSC::Machete::Status.not_submitted
     else
-      @torque.qstat @pbsid
+      @torque.qstat @pbsid, host: @host
     end
   end
 
@@ -187,7 +188,7 @@ class OSC::Machete::Job
     # FIXME: rethink this interface... should qdel be idempotent?
     # After first call, no errors thrown after?
 
-    if pbsid && @torque.qdel(pbsid)
+    if pbsid && @torque.qdel(pbsid, host: @host)
       # FIXME: removing a directory is always a dangerous action.
       # I wonder if we can add more tests to make sure we don't delete
       # something if the script name is munged
