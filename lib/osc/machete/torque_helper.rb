@@ -75,35 +75,34 @@ class OSC::Machete::TorqueHelper
   #
   # @return [Status] The job state
   def qstat(pbsid, host: nil)
+      status = OSC::Machete::Status.undetermined
 
-    job_char = "U"
+      # Create a PBS::Job object based on the pbsid or the optional host param
+      pbs_conn = host.nil? ? get_pbs_conn(pbsid: pbsid.to_s) : get_pbs_conn(host: host)
+      pbs_job = get_pbs_job(pbs_conn, pbsid)
 
-    # Create a PBS::Job object based on the pbsid or the optional host param
-    pbs_job = get_pbs_job host.nil? ? get_pbs_conn(pbsid: pbsid.to_s) : get_pbs_conn(host: host) , pbsid
-
-    # We need a NULL qstat object (i.e. unknown)
-    # when an error occurs. 
-    # TODO: Status.unavailable
-    begin
-      job_status = pbs_job.status
-      # Get the status char value from the job.
-      job_char   = job_status[:attribs][:job_state][0]
-    rescue PBS::Error => err
-      if err.to_s.include?("Unknown Job Id Error")
-        # Common use-case, job with this pbsid is no longer in the system/
-        job_char = "C"
-      else
-        # PBS Error not related to a PBSID not found.
-        # qstat will return unavailable.
-        # TODO Log this error somewhere.
-      end
-    rescue
+      begin
+        job_status = pbs_job.status
+        # Get the status char value from the job.
+        status = status_for_char job_status[:attribs][:job_state][0]
+      rescue PBS::Error => err
+        if err.to_s.include?("Unknown Job Id Error")
+          # Common use-case, job with this pbsid is no longer in the system/
+          status = OSC::Machete::Status.completed
+        else
+          # PBS Error not related to a PBSID not found.
+          # qstat will return unavailable.
+          # TODO Log this error somewhere.
+        end
+      rescue
         # Some other error not related to PBS.
         # qstat will return unavailable.
         # TODO Log this error somewhere.
-    end
-    status_for_char job_char
+      end
+
+      status
   end
+
 
   # Perform a qdel command on a single job.
   #
