@@ -78,15 +78,15 @@ class OSC::Machete::TorqueHelper
     pbs_conn = host.nil? ? get_pbs_conn(pbsid: pbsid.to_s) : get_pbs_conn(host: host)
     pbs_job = get_pbs_job(pbs_conn, pbsid)
 
-      job_status = pbs_job.status
-      # Get the status char value from the job.
+    job_status = pbs_job.status
+    # Get the status char value from the job.
     status_for_char job_status[:attribs][:job_state][0]
   rescue PBS::Error => err
     if err.to_s.include?("Unknown Job Id Error")
       # Common use-case, job with this pbsid is no longer in the system/
       status = OSC::Machete::Status.passed
     else
-      raise err 
+      raise err
     end
   end
 
