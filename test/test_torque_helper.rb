@@ -30,6 +30,7 @@ class TestTorqueHelper < Minitest::Test
     @job_state_queued = OSC::Machete::Status.queued
     @job_state_completed = OSC::Machete::Status.passed
     @job_state_running = OSC::Machete::Status.running
+    @job_state_undetermined = OSC::Machete::Status.undetermined
 
     @shell = OSC::Machete::TorqueHelper.new
 
@@ -64,8 +65,8 @@ class TestTorqueHelper < Minitest::Test
   
   def test_qstat_state_no_job
 
-    assert_equal @job_state_completed, @shell.qstat("")
-    assert_equal @job_state_completed, @shell.qstat(nil)
+    assert_equal @job_state_undetermined, @shell.qstat("")
+    assert_equal @job_state_undetermined, @shell.qstat(nil)
   end
 
   # Test that qstat returns Running job StatusValue
@@ -95,7 +96,7 @@ class TestTorqueHelper < Minitest::Test
   # Test that qstat returns Completed job StatusValue when state is nil.
   def test_qstat_state_completed_oakley
 
-    PBS::Job.any_instance.stubs(:status).returns({ :attribs => { :job_state => nil }})
+    PBS::Job.any_instance.stubs(:status).raises(PBS::Error, "Unknown Job Id Error")
     assert_equal @job_state_completed, @shell.qstat("123.oak-batch.osc.edu")
     PBS::Job.any_instance.unstub(:status)
   end
@@ -104,7 +105,7 @@ class TestTorqueHelper < Minitest::Test
   def test_qstat_state_no_job
 
     PBS::Job.any_instance.stubs(:status).returns(nil)
-    assert_equal @job_state_completed, @shell.qstat("123.oak-batch.osc.edu")
+    assert_equal @job_state_undetermined, @shell.qstat("123.oak-batch.osc.edu")
     PBS::Job.any_instance.unstub(:status)
   end
 
