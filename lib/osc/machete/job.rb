@@ -106,10 +106,10 @@ class OSC::Machete::Job
   # Submitting includes cd-ing into the script's directory and qsub-ing from
   # that location, ensuring that environment variable PBS_O_WORKDIR is
   # set to the directory containing the script.
+  #
+  # @raise [ScriptMissingError] Raised when the path to the script is invalid.
   def submit
     return if submitted?
-
-    #TODO: needs more robust solution here, for error checking, etc.
 
     # submit any dependent jobs that have not yet been submitted
     submit_dependencies
@@ -125,6 +125,12 @@ class OSC::Machete::Job
     #TODO: what if you want to submit via piping to qsub i.e. without creating a file?
     Dir.chdir(path.to_s) do
       @pbsid = @torque.qsub script_name, depends_on: dependency_ids, host: @host
+    end
+  rescue Errno::ENOENT => err
+    if err.to_s.include?("No such file or directory")
+      raise ScriptMissingError, "#{script_name} is not a valid path."
+    else
+      raise err
     end
   end
 
@@ -197,6 +203,9 @@ class OSC::Machete::Job
       Pathname.new(path).rmtree if path && rmdir && File.exists?(path)
     end
   end
+
+  # Error class thrown when script is not available.
+  class ScriptMissingError < StandardError; end
 
   private
 
