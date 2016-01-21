@@ -83,13 +83,12 @@ class OSC::Machete::TorqueHelper
     status_for_char job_status[:attribs][:job_state][0]
   rescue PBS::Error => err
     if err.to_s.include?("Unknown Job Id Error")
-      # Common use-case, job with this pbsid is no longer in the system/
+      # Common use-case, job with this pbsid is no longer in the system.
       OSC::Machete::Status.passed
     else
       raise err
     end
   end
-
 
   # Perform a qdel command on a single job.
   #
@@ -102,10 +101,16 @@ class OSC::Machete::TorqueHelper
     pbs_job    =   get_pbs_job(pbs_conn, pbsid.to_s)
 
     pbs_job.delete
-    true
 
-  rescue PBS::Error
-    false
+  rescue PBS::Error => err
+    # Common use case where trying to delete a job that is no longer in the system.
+    # FIXME: This error could also happen when the string is wildly incorrect.
+    #        We may want to return false after this exception is caught and true
+    #        above. Any unexpected errors will continue to be passed up the chain.
+    #        These methods may be used by developers independently of the job model
+    #        and should probably provide a response.
+    #        PBS::Job#delete returns nil
+    raise err unless err.to_s.include?("Unknown Job Id Error")
   end
 
   private
