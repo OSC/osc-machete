@@ -94,7 +94,7 @@ class OSC::Machete::TorqueHelper
   #
   # @param [String] pbsid The pbsid of the job to be deleted.
   #
-  # @return [Boolean] Returns true if successfully deleted.
+  # @return [nil]
   def qdel(pbsid, host: nil)
 
     pbs_conn   =   host.nil? ? get_pbs_conn(pbsid: pbsid.to_s) : get_pbs_conn(host: host)

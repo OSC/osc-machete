@@ -130,6 +130,7 @@ class OSC::Machete::Job
     if err.to_s.include?("No such file or directory")
       raise ScriptMissingError, "#{script_name} is not a valid path."
     else
+      # An unexpected problem.
       raise err
     end
   end
@@ -188,7 +189,9 @@ class OSC::Machete::Job
 
   # Kill the currently running batch job
   #
-  # @param [Boolean] rmdir (false) if true, recursively remove the containing directory of the job script if killing the job succeeded
+  # @param [Boolean] rmdir (false) if true, recursively remove the containing directory
+  #                                of the job script if killing the job succeeded
+  #
   # @return [nil]
   def delete(rmdir: false)
     # FIXME: rethink this interface... should qdel be idempotent?
