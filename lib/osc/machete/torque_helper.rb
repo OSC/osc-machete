@@ -8,6 +8,7 @@ require 'pbs'
 # == FIXME: This contains no state whatsoever. It should probably be changed into a module.
 class OSC::Machete::TorqueHelper
 
+  # Alias to initialize a new object.
   def self.default
     self::new()
   end
