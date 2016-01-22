@@ -110,7 +110,7 @@ class OSC::Machete::Job
   # @raise [ScriptMissingError] Raised when the path to the script does not exist or cannot be read.
   def submit
     return if submitted?
-    raise ScriptMissingError, "#{script_path} does not exist or cannot be read" if script_path.file? && script_path.readable?
+    raise ScriptMissingError, "#{script_path} does not exist or cannot be read" unless script_path.file? && script_path.readable?
 
     # submit any dependent jobs that have not yet been submitted
     submit_dependencies
