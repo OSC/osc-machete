@@ -106,10 +106,11 @@ class OSC::Machete::Job
   # Submitting includes cd-ing into the script's directory and qsub-ing from
   # that location, ensuring that environment variable PBS_O_WORKDIR is
   # set to the directory containing the script.
+  #
+  # @raise [ScriptMissingError] Raised when the path to the script does not exist or cannot be read.
   def submit
     return if submitted?
-
-    #TODO: needs more robust solution here, for error checking, etc.
+    raise ScriptMissingError, "#{script_path} does not exist or cannot be read" unless script_path.file? && script_path.readable?
 
     # submit any dependent jobs that have not yet been submitted
     submit_dependencies
@@ -182,13 +183,17 @@ class OSC::Machete::Job
 
   # Kill the currently running batch job
   #
-  # @param [Boolean] rmdir (false) if true, recursively remove the containing directory of the job script if killing the job succeeded
+  # @param [Boolean] rmdir (false) if true, recursively remove the containing directory
+  #                                of the job script if killing the job succeeded
+  #
   # @return [nil]
   def delete(rmdir: false)
     # FIXME: rethink this interface... should qdel be idempotent?
     # After first call, no errors thrown after?
 
-    if pbsid && @torque.qdel(pbsid, host: @host)
+    if pbsid
+
+      @torque.qdel(pbsid, host: @host)
       # FIXME: removing a directory is always a dangerous action.
       # I wonder if we can add more tests to make sure we don't delete
       # something if the script name is munged
@@ -197,6 +202,9 @@ class OSC::Machete::Job
       Pathname.new(path).rmtree if path && rmdir && File.exists?(path)
     end
   end
+
+  # Error class thrown when script is not available.
+  class ScriptMissingError < StandardError; end
 
   private
 

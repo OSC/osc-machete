@@ -70,7 +70,7 @@ class TestTorqueHelperLive < Minitest::Test
 
       # Delete it and assert true returned.
       live_delete_status = torque.qdel(live_job)
-      assert_equal true, live_delete_status
+      assert_equal nil, live_delete_status
 
     else
 
@@ -103,7 +103,7 @@ class TestTorqueHelperLive < Minitest::Test
 
       # Delete it and assert true returned.
       live_delete_status = torque.qdel(live_job)
-      assert_equal true, live_delete_status
+      assert_equal nil, live_delete_status
 
     else
 
@@ -135,7 +135,7 @@ class TestTorqueHelperLive < Minitest::Test
 
       # Delete it and assert true returned.
       live_delete_status = torque.qdel(live_job)
-      assert_equal true, live_delete_status
+      assert_equal nil, live_delete_status
 
     else
 
@@ -167,7 +167,7 @@ class TestTorqueHelperLive < Minitest::Test
 
       # Delete it and assert true returned.
       live_delete_status = torque.qdel(live_job)
-      assert_equal true, live_delete_status
+      assert_equal nil, live_delete_status
 
     else
 

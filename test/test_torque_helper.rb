@@ -102,9 +102,9 @@ class TestTorqueHelper < Minitest::Test
   end
 
   # Test that qdel works for oakley
-  def test_qdel_oakley
+  def test_qdel_oakley_ok
 
-    PBS::Job.any_instance.stubs(:delete).with("123.oak-batch.osc.edu").returns(true)
+    PBS::Job.any_instance.stubs(:delete).returns(true)
     assert_equal true, @shell.qdel("123.oak-batch.osc.edu")
     PBS::Job.any_instance.unstub(:delete)
 
@@ -132,7 +132,7 @@ class TestTorqueHelper < Minitest::Test
   def test_qdel_oakley
 
     PBS::Job.any_instance.stubs(:delete).raises(PBS::Error)
-    assert_equal false, @shell.qdel("123.quick-batch.osc.edu")
+    assert_raises(PBS::Error) { @shell.qdel("123.quick-batch.osc.edu") }
     PBS::Job.any_instance.unstub(:delete)
 
   end

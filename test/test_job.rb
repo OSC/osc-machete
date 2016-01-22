@@ -9,6 +9,7 @@ class TestJob < Minitest::Test
     @jobdir = Pathname.new(Dir.mktmpdir)
     @scriptname = "main.sh"
     @scriptpath = @jobdir.join(@scriptname)
+    FileUtils.touch(@scriptpath)
   end
   
   def teardown
