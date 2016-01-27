@@ -9,6 +9,7 @@ class TestJob < Minitest::Test
     @jobdir = Pathname.new(Dir.mktmpdir)
     @scriptname = "main.sh"
     @scriptpath = @jobdir.join(@scriptname)
+    FileUtils.touch(@scriptpath)
   end
   
   def teardown
@@ -26,13 +27,13 @@ class TestJob < Minitest::Test
   def test_job_dependency_afterany
     # create first job and expect qsub to work as it does before
     torque1 = OSC::Machete::TorqueHelper.new
-    torque1.expects(:qsub).with(@scriptname, depends_on: {}).returns(@id1)
+    torque1.expects(:qsub).with(@scriptname, depends_on: {}, host: nil).returns(@id1)
     job1 = OSC::Machete::Job.new script: @scriptpath, torque_helper: torque1
     
     # create second job that depends on the first and expect qsub to send pbsid of the first job
     # which will not be known until the first job qsub-ed and 16376371.opt-batch.osc.edu is returned
     torque2 = OSC::Machete::TorqueHelper.new
-    torque2.expects(:qsub).with(@scriptname, depends_on: { afterany: [@id1] }).returns(@id2)
+    torque2.expects(:qsub).with(@scriptname, depends_on: { afterany: [@id1] }, host: nil).returns(@id2)
     job2 = OSC::Machete::Job.new script: @scriptpath, torque_helper: torque2
     
     # add the dependency and submit the job
@@ -52,13 +53,13 @@ class TestJob < Minitest::Test
   def test_job_dependency_afterok
     # create first job and expect qsub to work as it does before
     torque1 = OSC::Machete::TorqueHelper.new
-    torque1.expects(:qsub).with(@scriptname, depends_on: {}).returns(@id1)
+    torque1.expects(:qsub).with(@scriptname, depends_on: {}, host: nil).returns(@id1)
     job1 = OSC::Machete::Job.new script: @scriptpath, torque_helper: torque1
 
     # create second job that depends on the first and expect qsub to send pbsid of the first job
     # which will not be known until the first job qsub-ed and 16376371.opt-batch.osc.edu is returned
     torque2 = OSC::Machete::TorqueHelper.new
-    torque2.expects(:qsub).with(@scriptname, depends_on: { afterok: [@id1] }).returns(@id2)
+    torque2.expects(:qsub).with(@scriptname, depends_on: { afterok: [@id1] }, host: nil).returns(@id2)
     job2 = OSC::Machete::Job.new script: @scriptpath, torque_helper: torque2
 
     # add the dependency and submit the job
@@ -79,13 +80,13 @@ class TestJob < Minitest::Test
   def test_job_dependency_afterok_chaining
     # create first job and expect qsub to work as it does before
     torque1 = OSC::Machete::TorqueHelper.new
-    torque1.expects(:qsub).with(@scriptname, depends_on: {}).returns(@id1)
+    torque1.expects(:qsub).with(@scriptname, depends_on: {}, host: nil).returns(@id1)
     job1 = OSC::Machete::Job.new script: @scriptpath, torque_helper: torque1
 
     # create second job that depends on the first and expect qsub to send pbsid of the first job
     # which will not be known until the first job qsub-ed and 16376371.opt-batch.osc.edu is returned
     torque2 = OSC::Machete::TorqueHelper.new
-    torque2.expects(:qsub).with(@scriptname, depends_on: { afterok: [@id1] }).returns(@id2)
+    torque2.expects(:qsub).with(@scriptname, depends_on: { afterok: [@id1] }, host: nil).returns(@id2)
     job2 = OSC::Machete::Job.new(script: @scriptpath, torque_helper: torque2).afterok(job1)
     job2.submit
   end
@@ -93,18 +94,29 @@ class TestJob < Minitest::Test
   def test_job_dependency_after
     # create first job and expect qsub to work as it does before
     torque1 = OSC::Machete::TorqueHelper.new
-    torque1.expects(:qsub).with(@scriptname, depends_on: {}).returns(@id1)
+    torque1.expects(:qsub).with(@scriptname, depends_on: {}, host: nil).returns(@id1)
     job1 = OSC::Machete::Job.new script: @scriptpath, torque_helper: torque1
 
     # create second job that depends on the first and expect qsub to send pbsid of the first job
     # which will not be known until the first job qsub-ed and 16376371.opt-batch.osc.edu is returned
     torque2 = OSC::Machete::TorqueHelper.new
-    torque2.expects(:qsub).with(@scriptname, depends_on: { after: [@id1] }).returns(@id2)
+    torque2.expects(:qsub).with(@scriptname, depends_on: { after: [@id1] }, host: nil).returns(@id2)
     job2 = OSC::Machete::Job.new script: @scriptpath, torque_helper: torque2
 
     # add the dependency and submit the job
     job2.after job1
     job2.submit
+  end
+
+  def test_job_status
+    torque1 = OSC::Machete::TorqueHelper.new
+    torque1.expects(:qstat).with(@id1, {:host => nil}).returns(OSC::Machete::Status.running)
+    job = OSC::Machete::Job.new pbsid: @id1, torque_helper: torque1
+
+    assert_equal job.status, OSC::Machete::Status.running
+
+    job = OSC::Machete::Job.new script: @scriptpath
+    assert_equal job.status, OSC::Machete::Status.not_submitted
   end
   
   
@@ -113,13 +125,13 @@ class TestJob < Minitest::Test
     # FIXME: rethink the interface: should delete return true if a job was actually deleted?
     
     torque1 = OSC::Machete::TorqueHelper.new
-    torque1.expects(:qdel).with(@id1).returns(true)
+    torque1.expects(:qdel).with(@id1, host: nil).returns(true)
     job = OSC::Machete::Job.new(script: @scriptpath, pbsid: @id1, torque_helper: torque1)
     job.delete
     assert @jobdir.exist?, "deleting job by default should not deleted the directory too"
     
     torque2 = OSC::Machete::TorqueHelper.new
-    torque2.expects(:qdel).with(@id1).returns(true)
+    torque2.expects(:qdel).with(@id1, host: nil).returns(true)
     job = OSC::Machete::Job.new(script: @scriptpath, pbsid: @id1, torque_helper: torque2)
     job.delete(rmdir: true)
     
@@ -128,8 +140,8 @@ class TestJob < Minitest::Test
   
   def test_job_dependency_delete
     torque1 = OSC::Machete::TorqueHelper.new
-    torque1.expects(:qdel).with(@id1).returns(true)
-    torque1.expects(:qdel).with(@id2).returns(true)
+    torque1.expects(:qdel).with(@id1, host: nil).returns(true)
+    torque1.expects(:qdel).with(@id2, host: nil).returns(true)
     job1 = OSC::Machete::Job.new(script: @scriptpath, pbsid: @id1, torque_helper: torque1)
     job2 = OSC::Machete::Job.new(script: @scriptpath, pbsid: @id2, torque_helper: torque1)
     

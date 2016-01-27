@@ -1,7 +1,8 @@
 #PBS -l walltime=00:30:00
-#PBS -l nodes=1:ppn=10
+#PBS -l nodes=1:ppn=12
+#PBS -S /bin/bash
+#PBS -q @quick-batch.osc.edu
 #PBS -N foobar
-#PBS -q @opt-batch.osc.edu
 #PBS -j oe
 #PBS -r n
 
