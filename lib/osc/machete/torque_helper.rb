@@ -15,7 +15,7 @@ class OSC::Machete::TorqueHelper
 
   # Returns an OSC::Machete::Status ValueObject for a char
   #
-  # @param [String] :char The Torque status char
+  # @param [String] char The Torque status char
   #
   # @example Completed
   #   status_for_char("C") #=> OSC::Machete::Status.completed
