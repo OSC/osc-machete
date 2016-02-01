@@ -92,12 +92,10 @@ Example using pry:
 
 ```sh
 -bash-3.2$ pry -rosc/machete
-[24] pry(main)> OSC::Machete::Job.new(pbsid:
-"17711768.opt-batch.osc.edu").status
-=> Running
+[24] pry(main)> puts OSC::Machete::Job.new(pbsid: "17711768.opt-batch.osc.edu").status
+Running
+=> nil
 ```
-
-**TODO: redo after updating to_char, to_s, and inspect**
 
 Or you could write your own ruby script that  that does something using the gem:
 
