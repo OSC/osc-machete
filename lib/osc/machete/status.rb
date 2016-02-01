@@ -66,7 +66,7 @@ class OSC::Machete::Status
     @char = nil if @char.empty?
 
     # if invalid status value char, default to undetermined
-    @char = self.class.undetermined.to_s unless VALUES_HASH.has_key?(@char)
+    @char = self.class.undetermined.char unless VALUES_HASH.has_key?(@char)
   end
 
   def submitted?
@@ -81,23 +81,13 @@ class OSC::Machete::Status
     passed? || failed?
   end
 
-  # Returns the status as the char value.
-  #
-  # @example Running
-  #     OSC::Machete::Status.running.to_s #=> "R"
-  #
-  # @return [String] The status char
-  def to_s
-    @char.to_s
-  end
-
   # Return a readable string of the status
   #
   # @example Running
-  #     OSC::Machete::Status.running.inspect #=> "Running"
+  #     OSC::Machete::Status.running.to_s #=> "Running"
   #
   # @return [String] The status value as a formatted string
-  def inspect
+  def to_s
     # FIXME: ActiveSupport  replace with .humanize and simpler datastructure
      VALUES_HASH[@char].split("_").map(&:capitalize).join(" ")
   end
@@ -123,7 +113,8 @@ class OSC::Machete::Status
   #
   # @return [Boolean] True if the values are the same
   def eql?(other)
-    other.to_s == to_s
+    # compare Status to Status OR "C" to Status
+    (other.respond_to?(:char) ? other.char : other) == char
   end
 
   # Boolean evaluation of Status object equality.

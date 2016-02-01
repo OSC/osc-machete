@@ -33,10 +33,10 @@ class TestStatus < Minitest::Test
     assert_nil @new.char
   end
   
-  def test_inspect
-    assert_equal "Passed", @passed.inspect
-    assert_equal "Not Submitted", @new.inspect
-    assert_equal "Running", @running.inspect
+  def test_to_s
+    assert_equal "Passed", @passed.to_s
+    assert_equal "Not Submitted", @new.to_s
+    assert_equal "Running", @running.to_s
   end
   
   def test_helpers
