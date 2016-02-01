@@ -38,6 +38,10 @@ class TestStatus < Minitest::Test
     assert_equal "Not Submitted", @new.to_s
     assert_equal "Running", @running.to_s
   end
+
+  def test_create_status_value_from_status_value
+    assert_equal @passed, OSC::Machete::Status.new(@passed)
+  end
   
   def test_helpers
     assert_equal false, @passed.active?

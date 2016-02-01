@@ -62,7 +62,8 @@ class OSC::Machete::Status
   end
 
   def initialize(char)
-    @char = char.to_s.upcase
+    # char could be a status object or a string
+    @char = (char.respond_to?(:char) ? char.char : char).to_s.upcase
     @char = nil if @char.empty?
 
     # if invalid status value char, default to undetermined
