@@ -48,7 +48,6 @@ class OSC::Machete::Status
     values.select(&:completed?)
   end
 
-  # create self.passed, self.running, etc.
   class << self
     VALUES_HASH.each do |char, name|
       define_method(name) do
@@ -56,8 +55,24 @@ class OSC::Machete::Status
       end
     end
   end
-  
-  # create passed?, running?, etc.
+
+  # @!method undetermined?
+  #   the Status value Null object
+  #   @return [Boolean] true if undetermined
+  # @!method not_submitted?
+  #   @return [Boolean] true if not_submitted
+  # @!method failed?
+  #   @return [Boolean] true if failed
+  # @!method passed?
+  #   @return [Boolean] true if passed
+  # @!method held?
+  #   @return [Boolean] true if held
+  # @!method queued?
+  #   @return [Boolean] true if queued
+  # @!method running?
+  #   @return [Boolean] true if running
+  # @!method suspended?
+  #   @return [Boolean] true if suspended
   VALUES_HASH.each do |char, name|
     define_method("#{name}?") do
       self == OSC::Machete::Status.new(char)
@@ -73,14 +88,17 @@ class OSC::Machete::Status
     @char = self.class.undetermined.char unless VALUES_HASH.has_key?(@char)
   end
 
+  # @return [Boolean] true if submitted
   def submitted?
     ! (not_submitted? || undetermined?)
   end
 
+  # @return [Boolean] true if in active state (running, queued, held, suspended)
   def active?
     running? || queued? || held? || suspended?
   end
 
+  # @return [Boolean] true if in completed state (passed or failed)
   def completed?
     passed? || failed?
   end
