@@ -29,24 +29,45 @@ class OSC::Machete::Status
 
   # Get an array of all the possible Status values
   #
-  # @return [Array] - all possible Status values
+  # @return [Array<Status>] - all possible Status values
   def self.values
     VALUES.map{ |v| OSC::Machete::Status.new(v.first) }
   end
 
   # Get an array of all the possible active Status values
   #
-  # @return [Array] - all possible active Status values
+  # @return [Array<Status>] - all possible active Status values
   def self.active_values
     values.select(&:active?)
   end
 
   # Get an array of all the possible completed Status values
   #
-  # @return [Array] - all possible completed Status values
+  # @return [Array<Status>] - all possible completed Status values
   def self.completed_values
     values.select(&:completed?)
   end
+
+
+  # TODO: these methods are previously declared so we can document them easily
+  # if there is a better way to document class methods we'll do that
+
+  # @return [Status]
+  def self.undetermined() end
+  # @return [Status] 
+  def self.not_submitted() end
+  # @return [Status]
+  def self.passed() end
+  # @return [Status] 
+  def self.failed() end
+  # @return [Status]
+  def self.running() end
+  # @return [Status] 
+  def self.queued() end
+  # @return [Status] 
+  def self.held() end
+  # @return [Status] 
+  def self.suspended() end
 
   class << self
     VALUES_HASH.each do |char, name|
