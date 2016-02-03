@@ -4,7 +4,7 @@ class OSC::Machete::Status
   include Comparable
   
   attr_reader :char
-  
+
   # C Job is passed (completed successfully)
   # F Job is failed (completed with errors)
   # H Job is held.
@@ -14,15 +14,18 @@ class OSC::Machete::Status
   # U Status is unavailable (null status object)
   VALUES = [["U", "undetermined"], [nil, "not_submitted"], ["C", "passed"], ["F", "failed"],
             ["H", "held"], ["Q", "queued"], ["R", "running"], ["S", "suspended"]]
+  private_constant :VALUES
 
   # A hashed version of the values array.
   VALUES_HASH = Hash[VALUES]
+  private_constant :VALUES_HASH
 
   # An array of status char values by precedence.
   #
   # @example
   #   OSC::Machete::Status::PRECEDENCE #=> ["U", nil, "C", "F", "H", "Q", "R", "S"]
   PRECEDENCE = VALUES.map(&:first)
+  private_constant :PRECEDENCE
 
   # Get an array of all the possible Status values
   #
