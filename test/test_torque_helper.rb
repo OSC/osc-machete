@@ -99,6 +99,10 @@ class TestTorqueHelper < Minitest::Test
     PBS::Job.any_instance.stubs(:status).raises(PBS::Error, "Unknown Job Id Error")
     assert_equal @job_state_completed, @shell.qstat("123.oak-batch.osc.edu")
     PBS::Job.any_instance.unstub(:status)
+
+    PBS::Job.any_instance.stubs(:status).raises(PBS::Error, "Unknown Job Id")
+    assert_equal @job_state_completed, @shell.qstat("123.oak-batch.osc.edu")
+    PBS::Job.any_instance.unstub(:status)
   end
 
   # Test that qdel works for oakley

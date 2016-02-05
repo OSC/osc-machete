@@ -83,7 +83,7 @@ class OSC::Machete::TorqueHelper
     # Get the status char value from the job.
     status_for_char job_status[:attribs][:job_state][0]
   rescue PBS::Error => err
-    if err.to_s.include?("Unknown Job Id Error")
+    if err.to_s.include?("Unknown Job Id")
       # Common use-case, job with this pbsid is no longer in the system.
       OSC::Machete::Status.passed
     else
@@ -111,7 +111,7 @@ class OSC::Machete::TorqueHelper
     #        These methods may be used by developers independently of the job model
     #        and should probably provide a response.
     #        PBS::Job#delete returns nil
-    raise err unless err.to_s.include?("Unknown Job Id Error")
+    raise err unless err.to_s.include?("Unknown Job Id")
   end
 
   private
