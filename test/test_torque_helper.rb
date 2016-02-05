@@ -64,9 +64,10 @@ class TestTorqueHelper < Minitest::Test
   end
   
   def test_qstat_state_no_job
-
+    PBS::Job.any_instance.stubs(:status).raises(PBS::Error, "Unknown Job Id")
     assert_equal @job_state_completed, @shell.qstat("")
     assert_equal @job_state_completed, @shell.qstat(nil)
+    PBS::Job.any_instance.unstub(:status)
   end
 
   # Test that qstat returns Running job StatusValue

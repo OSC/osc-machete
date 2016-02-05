@@ -18,6 +18,10 @@ class TestTorqueHelperLive < Minitest::Test
   #
   # 2016/01/08  Implemented this in `test_qsub_oakley` and `test_qsub_ruby`. The test only runs when rake
   #             is called on the correct submit host. On all other systems, only the stubs are used.
+  #
+  def live_test_enabled?
+    ! ENV['LIVETEST'].nil?
+  end
 
   def setup
 
@@ -74,7 +78,7 @@ class TestTorqueHelperLive < Minitest::Test
 
     else
 
-      puts "Run test 'test_qsub_oakley' on the batch system from #{@submit_host}."
+      puts "Run test 'test_qsub_oakley' on the batch system from #{@submit_host}." if live_test_enabled?
 
     end
 
@@ -107,7 +111,7 @@ class TestTorqueHelperLive < Minitest::Test
 
     else
 
-      puts "Run test 'test_qsub_ruby_with_oakley_script' on the batch system from #{@submit_host}."
+      puts "Run test 'test_qsub_ruby_with_oakley_script' on the batch system from #{@submit_host}." if live_test_enabled?
 
     end
 
@@ -139,7 +143,7 @@ class TestTorqueHelperLive < Minitest::Test
 
     else
 
-      puts "Run test 'test_qsub_ruby' on the batch system from #{@submit_host}."
+      puts "Run test 'test_qsub_ruby' on the batch system from #{@submit_host}." if live_test_enabled?
 
     end
 
@@ -171,7 +175,7 @@ class TestTorqueHelperLive < Minitest::Test
 
     else
 
-      puts "Run test 'test_qsub_quick' on the batch system from #{@submit_host}."
+      puts "Run test 'test_qsub_quick' on the batch system from #{@submit_host}." if live_test_enabled?
 
     end
 
