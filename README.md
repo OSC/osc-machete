@@ -35,7 +35,54 @@ The other are support classes for these three.
 This is the main class and is a utility class for managing batch simulations. It
 uses pbs-ruby to submit jobs, check the status of jobs, and stop running jobs.
 
-**TODO PRY EXAMPLES**
+Submit a job:
+
+* TODO
+* if a shell script is not found, OSC::Machete::Job::ScriptMissingError error is raised
+
+Check the status of a job:
+
+```ruby
+s = OSC::Machete::Job.new(pbsid: "117711759.opt-batch.osc.edu").status
+#=> #<OSC::Machete::Status:0x002ba824829e50 @char="R">
+puts s #=> "Running"
+```
+
+* returns an `OSC::Machete::Status` value object
+
+
+Delete a job:
+
+* TODO
+
+`Job#submit`, `Job#status`, `Job#delete` all raise a `PBS::Error` if something
+goes wrong with interacting with Torque.
+
+
+Create depenencies:
+
+* TODO
+
+
+
+### OSC::Machete::Status
+
+See [Martin Fowler on value objects](http://martinfowler.com/bliki/ValueObject.html)
+
+```ruby
+s = OSC::Machete::Job.new(pbsid: "117711759.opt-batch.osc.edu").status
+#=> #<OSC::Machete::Status:0x002ba824829e50 @char="R">
+puts s #=> "Running"
+
+s.passed? #=> true
+s.completed? #=> true
+s.failed? #=> false
+s.submitted? #=> true
+
+f = OSC::Machete::Status.failed #=> #<OSC::Machete::Status:0x002ba8274334d8 @char="F">
+f.failed? #=> true
+f.completed? #=> true
+```
 
 ### OSC::Machete::Process
 
