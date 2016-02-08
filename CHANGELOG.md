@@ -9,6 +9,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
+- qstat would return nil if the job completed or if an error occurred with qstat; now qstat throws exception in error cases and returns a valid Status value otherwise
+- using qstat with a Ruby job would fail because Ruby pbsid's don't include the host; fixed by adding host arg and if thats omitted inspecting the script first or else assuming its Ruby if the host is omitted from the job id
+
 ### Added
 
 - lib/osc/machete/status.rb: Status value object
