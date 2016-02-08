@@ -5,37 +5,53 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
-## [1.0.0.pre3] - 2015-12-28
+## [1.0.0] - 2016-02-03
+
 ### Fixed
-- Job#status was broken
 
-## [1.0.0.pre2] - 2015-12-28
 ### Added
-- Status value object
-- `User.from_uid` factory method
-- `TorqueHelper#status_for_char` to determine what Status value to create based on Torque's symbol for the job's status.
 
-### Changed
-- `Job#status` now returns Status value
+- lib/osc/machete/status.rb: Status value object
+- lib/osc/machete/process.rb: Provides helper methods wrapping Etc and Process modules to inspect user info from the currently running process.
 
-
-## [1.0.0.pre1] - 2015-12-18
-### Added
-- Process utility class
-- Util methods `member_of_group?` and `groups` to User
 
 
 ### Changed
-- Removed `OSC::Machete::SimpleJob` from gem
-- User class now determines user using Etc module
 
+lib/osc/machete/user.rb
+
+- uses Etc instead of the environment variables to determine the current user by default (but any username can be passed in)
+- provides information about the specified user from Etc and inspecting the system's groups file
+- new methods include User#groups, User#member_of_group?, and a factory method to get an instance from the uid: User.from_uid
+
+lib/osc/machete/job.rb
+
+- host can be past in as an argument to the initializer; if this is not provided, torque_helper internally will try to determine what OSC system the PBSID corresponds to, or try inspecting the script for PBS headers
+- Job#submit now throws ScriptMissingError or PBS::Error
+- Job#status now returns an OSC::Machete::Status object instead of a character
+- Job#delete now throws PBS::Error
+
+lib/osc/machete/torque_helper.rb _(still an internal class right now, not meant to be used directly)_
+
+- try to determine what OSC system the PBSID corresponds to, or try inspecting the script for PBS headers
+- returns OSC::Machete::Status for qsub, qstat, qdel
+- uses pbs gem instead of shelling out for qsub, qstat, qdel
+- throws PBS::Error for qsub, qstat, qdel in erroneous cases
+- handles mapping between Torque specific status values and the generic OSC::Machete::Status
+- if host not provided, tries to determine host from pbsid and job script
+
+### Removed
+
+- lib/osc/machete/simple_job.rb - module is now alias for OscMacheteRails in the os_machete_rails gem; but including SimpleJob no longer results in including Statutable and Submittable
+- lib/osc/machete/simple_job/statusable.rb - moved to osc_machete_rails
+- lib/osc/machete/simple_job/workflow.rb - moved to osc_machete_rails
+- lib/osc/machete/simple_job/submittable.rb - removed! use has_workflow_of instead
+- lib/osc/machete/staging.rb - removed!
 
 ## 0.6.3 - 2015-11-23
 
 Previous release of osc-machete
 
-[Unreleased]: https://github.com/AweSim-OSC/osc-machete/compare/v1.0.0.pre3...release/1.0
-[1.0.0.pre3]: https://github.com/AweSim-OSC/osc-machete/compare/v1.0.0.pre2...v1.0.0.pre3
-[1.0.0.pre2]: https://github.com/AweSim-OSC/osc-machete/compare/v1.0.0.pre1...v1.0.0.pre2
-[1.0.0.pre1]: https://github.com/AweSim-OSC/osc-machete/compare/v0.6.3...v1.0.0.pre1
+[Unreleased]: https://github.com/AweSim-OSC/osc-machete/compare/v1.0.0...master
+[1.0.0]: https://github.com/AweSim-OSC/osc-machete/compare/v0.6.3...v1.0.0
 
