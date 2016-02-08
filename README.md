@@ -35,10 +35,6 @@ The other are support classes for these three.
 This is the main class and is a utility class for managing batch simulations. It
 uses pbs-ruby to submit jobs, check the status of jobs, and stop running jobs.
 
-Submit a job:
-
-* TODO
-* if a shell script is not found, OSC::Machete::Job::ScriptMissingError error is raised
 
 Check the status of a job:
 
@@ -47,23 +43,29 @@ s = OSC::Machete::Job.new(pbsid: "117711759.opt-batch.osc.edu").status
 #=> #<OSC::Machete::Status:0x002ba824829e50 @char="R">
 puts s #=> "Running"
 ```
+* status returns an `OSC::Machete::Status` value object
 
-* returns an `OSC::Machete::Status` value object
+Setup dependencies, submit, and delete a job:
 
+```ruby
+solve_job = OSC::Machete::Job.new(script: path_to_solve_script)
+post_job = OSC::Machete::Job.new(script: path_to_post_script)
 
-Delete a job:
+# ensure that post_job doesn't start till solve_job ends (with any exit status)
+post_job.afterany(solve_job)
 
-* TODO
+# submit both jobs (can do it in any order, dependencies will be managed for you)
+post_job.submit
+solve_job.submit
 
-`Job#submit`, `Job#status`, `Job#delete` all raise a `PBS::Error` if something
+# if you want to qdel both jobs:
+solve_job.delete
+post_job.delete
+```
+
+* when submitting a job, if a shell script is not found, OSC::Machete::Job::ScriptMissingError error is raised
+* `Job#submit`, `Job#status`, `Job#delete` all raise a `PBS::Error` if something
 goes wrong with interacting with Torque.
-
-
-Create depenencies:
-
-* TODO
-
-
 
 ### OSC::Machete::Status
 
@@ -82,6 +84,16 @@ s.submitted? #=> true
 f = OSC::Machete::Status.failed #=> #<OSC::Machete::Status:0x002ba8274334d8 @char="F">
 f.failed? #=> true
 f.completed? #=> true
+```
+
+To get an array of all the possible values:
+
+```ruby
+irb(main):001:0> OSC::Machete::Status.values
+=> [#<OSC::Machete::Status:0x002ba201079918 @char="U">, #<OSC::Machete::Status:0x002ba2010798a0 @char=nil>, #<OSC::Machete::Status:0x002ba201079710 @char="C">, #<OSC::Machete::Status:0x002ba201079620 @char="F">, #<OSC::Machete::Status:0x002ba201079558 @char="H">, #<OSC::Machete::Status:0x002ba2010794e0 @char="Q">, #<OSC::Machete::Status:0x002ba2010793c8 @char="R">, #<OSC::Machete::Status:0x002ba201079328 @char="S">]
+irb(main):002:0> OSC::Machete::Status.values.map(&:to_s)
+=> ["Undetermined", "Not Submitted", "Passed", "Failed", "Held", "Queued", "Running", "Suspended"]
+irb(main):003:0>
 ```
 
 ### OSC::Machete::Process
