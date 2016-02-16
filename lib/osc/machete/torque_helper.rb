@@ -49,6 +49,7 @@ class OSC::Machete::TorqueHelper
   # Where depends_on is a hash with key being dependency type and array containing the
   # arguments. See documentation on dependency_list in qsub man pages for details.
   #
+  # Bills against the project specified by the primary group of the user.
   def qsub( script, host: nil, depends_on: {})
     # if the script is set to run on Oakley in PBS headers
     # this is to obviate current torque filter defect in which
@@ -62,6 +63,12 @@ class OSC::Machete::TorqueHelper
     }.compact.join(",")
 
     headers = cmd.empty? ? {} : { depend: cmd }
+
+    # currently we set the billable project to the name of the primary group
+    # this will probably be both SUPERCOMPUTER CENTER SPECIFIC and must change
+    # when we want to enable our users at OSC to specify which billable project
+    # to bill against
+    headers[PBS::ATTR[:A]] = OSC::Machete::Process.new.groupname
 
     pbs_job.submit(file: script, headers: headers, qsub: true).id
   end
