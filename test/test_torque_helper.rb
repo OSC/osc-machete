@@ -43,7 +43,6 @@ class TestTorqueHelper < Minitest::Test
     #@target = Dir.mktmpdir
     #@script = 'GLO_job'
 
-    @script_glenn = 'test/fixtures/glenn.sh'
     @script_oakley = 'test/fixtures/oakley.sh'
     @script_ruby = 'test/fixtures/ruby.sh'
   end
@@ -149,9 +148,9 @@ class TestTorqueHelper < Minitest::Test
   # 
   def assert_qsub_dependency_list(dependency_list, dependencies, host=nil)
     PBS::Job.any_instance.stubs(:submit)
-        .with(:file => 'test/fixtures/glenn.sh', :headers => {:depend => dependency_list}, :qsub => true)
-        .returns(PBS::Job.new(conn: 'oakley', id: '16376372.opt-batch.osc.edu'))
-    @shell.qsub("test/fixtures/glenn.sh", depends_on: dependencies)
+        .with(:file => 'test/fixtures/oakley.sh', :headers => {:depend => dependency_list}, :qsub => true)
+        .returns(PBS::Job.new(conn: 'oakley', id: '16376372.oak-batch.osc.edu'))
+    @shell.qsub("test/fixtures/oakley.sh", depends_on: dependencies)
     PBS::Job.any_instance.unstub(:submit)
   end
   
