@@ -5,6 +5,12 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [1.0.1] - 2016-02-16
+
+### Fixed
+
+- use latest version of pbs gem and its custom Error classes to catch the common cases for qdel and qstat when the pbsid is unknown
+
 ## [1.0.0] - 2016-02-03
 
 ### Fixed
@@ -55,6 +61,7 @@ lib/osc/machete/torque_helper.rb _(still an internal class right now, not meant 
 
 Previous release of osc-machete
 
-[Unreleased]: https://github.com/AweSim-OSC/osc-machete/compare/v1.0.0...master
+[Unreleased]: https://github.com/AweSim-OSC/osc-machete/compare/v1.0.1...master
+[1.0.1]: https://github.com/AweSim-OSC/osc-machete/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/AweSim-OSC/osc-machete/compare/v0.6.3...v1.0.0
 
