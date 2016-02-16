@@ -46,7 +46,6 @@ class TestTorqueHelperLive < Minitest::Test
     #@target = Dir.mktmpdir
     #@script = 'GLO_job'
 
-    @script_glenn = 'test/fixtures/glenn.sh'
     @script_oakley = 'test/fixtures/oakley.sh'
     @script_ruby = 'test/fixtures/ruby.sh'
     @script_quick = 'test/fixtures/quick.sh'
