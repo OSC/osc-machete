@@ -50,27 +50,34 @@ class OSC::Machete::TorqueHelper
   # arguments. See documentation on dependency_list in qsub man pages for details.
   #
   # Bills against the project specified by the primary group of the user.
-  def qsub( script, host: nil, depends_on: {}, account_string: nil)
+  def qsub(script, host: nil, depends_on: {}, account_string: nil)
     # if the script is set to run on Oakley in PBS headers
     # this is to obviate current torque filter defect in which
     # a script with PBS header set to specify oak-batch ends
     # isn't properly handled and the job gets limited to 4GB
     pbs_job = get_pbs_job( host.nil? ? get_pbs_conn(script: script) : get_pbs_conn(host: host) )
 
-    # add dependencies
-    cmd = depends_on.map { |x|
-      x.first.to_s + ":" + Array(x.last).join(":") unless Array(x.last).empty?
-    }.compact.join(",")
-
-    headers = cmd.empty? ? {} : { depend: cmd }
+    dependency_header = qsub_dependencies_header(depends_on)
+    headers = dependency_header.empty? ? {} : { depend: dependency_header }
 
     # currently we set the billable project to the name of the primary group
     # this will probably be both SUPERCOMPUTER CENTER SPECIFIC and must change
     # when we want to enable our users at OSC to specify which billable project
     # to bill against
-    headers[PBS::ATTR[:A]] = account_string || default_account_string
+    headers[PBS::ATTR[:A]] = account_string if account_string
+
+    headers = qsub_headers(depends_on: depends_on, account_string: (account_string || default_account_string))
 
     pbs_job.submit(file: script, headers: headers, qsub: true).id
+  end
+
+  # convert dependencies hash to a PBS header string
+  def qsub_dependencies_header(depends_on = {})
+    header = depends_on.map { |x|
+      x.first.to_s + ":" + Array(x.last).join(":") unless Array(x.last).empty?
+    }.compact.join(",")
+
+    header
   end
 
   # return the account string required for accounting purposes
