@@ -67,6 +67,34 @@ post_job.delete
 * `Job#submit`, `Job#status`, `Job#delete` all raise a `PBS::Error` if something
 goes wrong with interacting with Torque.
 
+#### Account String for submitting jobs
+
+By default, the account string will be set as a command line argument to qsub
+using the `-A` flag, which means setting this in a PBS header in the shell
+scripts will not work. The default account_string is the primary group of the
+process, which in our case happens to be the user.
+
+If you need to change the default account_string, you can do so by providing an
+extra argument to the OSC::Machete::Job initializer:
+
+```ruby
+j = OSC::Machete::Job.new(script: path_to_script)
+j.account_string # nil - so when the job submits the primary group will be used
+
+j = OSC::Machete::Job.new(script: path_to_script, account_string: "PZS0530")
+j.account_string # "PZS0530" - so when the job submits "PZS0530" will be used
+```
+
+You can also set a class variable on the job object so that all future job
+objects are instantiated using the specified account string:
+
+```ruby
+OSC::Machete::Job.default_account_string = "PZS0530"
+
+j = OSC::Machete::Job.new(script: path_to_script)
+j.account_string # "PZS0530" - so when the job submits "PZS0530" will be used
+```
+
 ### OSC::Machete::Status
 
 See [Martin Fowler on value objects](http://martinfowler.com/bliki/ValueObject.html)
