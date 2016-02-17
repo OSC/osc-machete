@@ -7,6 +7,12 @@ require 'pbs'
 #
 # == FIXME: This contains no state whatsoever. It should probably be changed into a module.
 class OSC::Machete::TorqueHelper
+  class << self
+    # set this to change the billable_account that is used
+    # if no default is set, the primary group name of the process is used
+    # for the account string
+    attr_accessor :default_billable_account
+  end
 
   # Alias to initialize a new object.
   def self.default
@@ -68,9 +74,20 @@ class OSC::Machete::TorqueHelper
     # this will probably be both SUPERCOMPUTER CENTER SPECIFIC and must change
     # when we want to enable our users at OSC to specify which billable project
     # to bill against
-    headers[PBS::ATTR[:A]] = OSC::Machete::Process.new.groupname
+    headers[PBS::ATTR[:A]] = billable_account
 
     pbs_job.submit(file: script, headers: headers, qsub: true).id
+  end
+
+  # return the account string required for accounting purposes
+  # having this in a separate method is useful for monkeypatching in short term
+  # or overridding with a subclass you pass into OSC::Machete::Job
+  #
+  # FIXME: this may belong on OSC::Machete::User; but it is OSC specific...
+  #
+  # @return [String] the project name that job submission should be billed against
+  def billable_account
+    self.class.default_billable_account || OSC::Machete::Process.new.groupname
   end
 
   # Performs a qstat request on a single job.
