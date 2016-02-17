@@ -56,7 +56,12 @@ require 'pathname'
 #   @return [String, nil] path of the job script, or nil if not set
 #
 class OSC::Machete::Job
-  attr_reader :pbsid, :script_path
+  attr_reader :pbsid, :script_path, :account_string
+
+  class << self
+    # set this to change the billable account that is used by default
+    attr_accessor :default_account_string
+  end
 
   # Create Job instance to represent an unsubmitted batch job from the specified
   # script, or an existing, already submitted batch job from the specified pbsid
@@ -87,6 +92,7 @@ class OSC::Machete::Job
     @pbsid =  args[:pbsid]
     @host =   args[:host]
     @torque = args[:torque_helper] || OSC::Machete::TorqueHelper.default
+    @account_string = args[:account_string] || self.class.default_account_string
 
     @dependencies = {} # {:afterany => [Job, Job], :afterok => [Job]}
   end
@@ -125,7 +131,7 @@ class OSC::Machete::Job
     #
     #TODO: what if you want to submit via piping to qsub i.e. without creating a file?
     Dir.chdir(path.to_s) do
-      @pbsid = @torque.qsub script_name, depends_on: dependency_ids, host: @host
+      @pbsid = @torque.qsub script_name, depends_on: dependency_ids, host: @host, account_string: account_string
     end
   end
 
