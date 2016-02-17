@@ -57,16 +57,14 @@ class OSC::Machete::TorqueHelper
     # isn't properly handled and the job gets limited to 4GB
     pbs_job = get_pbs_job( host.nil? ? get_pbs_conn(script: script) : get_pbs_conn(host: host) )
 
-    dependency_header = qsub_dependencies_header(depends_on)
-    headers = dependency_header.empty? ? {} : { depend: dependency_header }
+    headers = { depend: qsub_dependencies_header(depends_on) }
+    headers.clear if headers[:depend].empty?
 
     # currently we set the billable project to the name of the primary group
     # this will probably be both SUPERCOMPUTER CENTER SPECIFIC and must change
     # when we want to enable our users at OSC to specify which billable project
     # to bill against
-    headers[PBS::ATTR[:A]] = account_string if account_string
-
-    headers = qsub_headers(depends_on: depends_on, account_string: (account_string || default_account_string))
+    headers[PBS::ATTR[:A]] = account_string || default_account_string
 
     pbs_job.submit(file: script, headers: headers, qsub: true).id
   end
