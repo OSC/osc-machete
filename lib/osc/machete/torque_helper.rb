@@ -49,21 +49,42 @@ class OSC::Machete::TorqueHelper
   # Where depends_on is a hash with key being dependency type and array containing the
   # arguments. See documentation on dependency_list in qsub man pages for details.
   #
-  def qsub( script, host: nil, depends_on: {})
+  # Bills against the project specified by the primary group of the user.
+  def qsub(script, host: nil, depends_on: {}, account_string: nil)
     # if the script is set to run on Oakley in PBS headers
     # this is to obviate current torque filter defect in which
     # a script with PBS header set to specify oak-batch ends
     # isn't properly handled and the job gets limited to 4GB
     pbs_job = get_pbs_job( host.nil? ? get_pbs_conn(script: script) : get_pbs_conn(host: host) )
 
-    # add dependencies
-    cmd = depends_on.map { |x|
-      x.first.to_s + ":" + Array(x.last).join(":") unless Array(x.last).empty?
-    }.compact.join(",")
+    headers = { depend: qsub_dependencies_header(depends_on) }
+    headers.clear if headers[:depend].empty?
 
-    headers = cmd.empty? ? {} : { depend: cmd }
+    # currently we set the billable project to the name of the primary group
+    # this will probably be both SUPERCOMPUTER CENTER SPECIFIC and must change
+    # when we want to enable our users at OSC to specify which billable project
+    # to bill against
+    headers[PBS::ATTR[:A]] = account_string || default_account_string
 
     pbs_job.submit(file: script, headers: headers, qsub: true).id
+  end
+
+  # convert dependencies hash to a PBS header string
+  def qsub_dependencies_header(depends_on = {})
+    depends_on.map { |x|
+      x.first.to_s + ":" + Array(x.last).join(":") unless Array(x.last).empty?
+    }.compact.join(",")
+  end
+
+  # return the account string required for accounting purposes
+  # having this in a separate method is useful for monkeypatching in short term
+  # or overridding with a subclass you pass into OSC::Machete::Job
+  #
+  # FIXME: this may belong on OSC::Machete::User; but it is OSC specific...
+  #
+  # @return [String] the project name that job submission should be billed against
+  def default_account_string
+    OSC::Machete::Process.new.groupname
   end
 
   # Performs a qstat request on a single job.

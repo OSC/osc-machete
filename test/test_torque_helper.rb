@@ -7,10 +7,6 @@ require 'mocha/setup'
 class TestTorqueHelper < Minitest::Test
 
   # FIXME:
-  #   All of our tests here are broken after updating to PBS
-  #   Everything will need to be revisited.
-  
-  # FIXME:
   # will be replacing with programmatic access to torque
   # however... we should have our tests actually submit tiny jobs on a queue that can respond immediately,
   # run for a minute, and die
@@ -20,7 +16,6 @@ class TestTorqueHelper < Minitest::Test
   #             is called on the correct submit host. On all other systems, only the stubs are used.
 
   def setup
-
     # FIXME: Torque only works from websvsc02
     #   This raises an issue mentioning that it is not being submitted on the
     #   correct host, comment out the raise to skip the live tests.
@@ -47,19 +42,20 @@ class TestTorqueHelper < Minitest::Test
     @script_ruby = 'test/fixtures/ruby.sh'
   end
 
-  # Test qstat parameters for completed job.
-  def test_qsub_oakley_stub
-    PBS::Job.any_instance.stubs(:submit).with(file: @script_oakley, headers: {}, qsub: true).returns(PBS::Job.new(conn: 'oakley', id: '1234598.oak-batch.osc.edu'))
-    assert_equal "1234598.oak-batch.osc.edu", @shell.qsub(@script_oakley)
-    PBS::Job.any_instance.unstub(:submit)
-  end
+  # FIXME: what is the purpose of these tests?
+  # # Test qstat parameters for completed job.
+  # def test_qsub_oakley_stub
+  #   PBS::Job.any_instance.stubs(:submit).with(file: @script_oakley, headers: {}, qsub: true).returns(PBS::Job.new(conn: 'oakley', id: '1234598.oak-batch.osc.edu'))
+  #   assert_equal "1234598.oak-batch.osc.edu", @shell.qsub(@script_oakley)
+  #   PBS::Job.any_instance.unstub(:submit)
+  # end
 
-  # Test job state parser when returning queued
-  def test_qsub_ruby_stub
-    PBS::Job.any_instance.stubs(:submit).with(file: @script_ruby, headers: {}, qsub: true).returns(PBS::Job.new(conn: 'ruby', id: '1234598'))
-    assert_equal "1234598", @shell.qsub(@script_ruby)
-    PBS::Job.any_instance.unstub(:submit)
-  end
+  # # Test job state parser when returning queued
+  # def test_qsub_ruby_stub
+  #   PBS::Job.any_instance.stubs(:submit).with(file: @script_ruby, headers: {}, qsub: true).returns(PBS::Job.new(conn: 'ruby', id: '1234598'))
+  #   assert_equal "1234598", @shell.qsub(@script_ruby)
+  #   PBS::Job.any_instance.unstub(:submit)
+  # end
   
   def test_qstat_state_no_job
     PBS::Job.any_instance.stubs(:status).raises(PBS::UnkjobidError, "Unknown Job Id")
@@ -139,19 +135,8 @@ class TestTorqueHelper < Minitest::Test
     PBS::Job.any_instance.unstub(:delete)
   end
   
-  # assert helper method to verify that
-  # the provided hash of dependencies to qsub command produces the desired
-  # dependency_list string
-  # 
-  # dependency_list: the desired string to follow  :depend in the pbs command
-  # dependencies: the hash to pass as an argument with keyword depends_on: to qsub
-  # 
   def assert_qsub_dependency_list(dependency_list, dependencies, host=nil)
-    PBS::Job.any_instance.stubs(:submit)
-        .with(:file => 'test/fixtures/oakley.sh', :headers => {:depend => dependency_list}, :qsub => true)
-        .returns(PBS::Job.new(conn: 'oakley', id: '16376372.oak-batch.osc.edu'))
-    @shell.qsub("test/fixtures/oakley.sh", depends_on: dependencies)
-    PBS::Job.any_instance.unstub(:submit)
+    assert_equal dependency_list, @shell.qsub_dependencies_header(dependencies)
   end
   
   def test_qsub_afterany
@@ -200,6 +185,18 @@ class TestTorqueHelper < Minitest::Test
     
     assert_qsub_dependency_list(depencencies_str, dependencies)
     return true
+  end
+
+  def test_account_string_passed_into_qsub_used_during_submit_call
+    PBS::Job.any_instance.expects(:submit).with(has_entry(headers: {Account_Name: "XXX"})).returns(PBS::Job.new(conn: 'oakley', id: '1234598.oak-batch.osc.edu'))
+    @shell.qsub(@script_oakley, account_string: "XXX")
+    PBS::Job.any_instance.unstub(:submit)
+  end
+
+  def test_default_account_string_used_in_qsub_during_submit_call
+    PBS::Job.any_instance.expects(:submit).with(has_entry(headers: {Account_Name: @shell.default_account_string})).returns(PBS::Job.new(conn: 'oakley', id: '1234598.oak-batch.osc.edu'))
+    @shell.qsub(@script_oakley)
+    PBS::Job.any_instance.unstub(:submit)
   end
   
 end
