@@ -5,6 +5,18 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [1.1.0] - 2016-02-18
+
+### Changed
+
+- Account string by default is specified as being the primary group name of the
+process running the app. This corresponds to OSC's convention that the primary
+group is the project of the user.
+- OSC::Machete::Job is updated to change the default account string used for all
+instances via setting OSC::Machete::Job.default_account_string
+- OSC::Machete::Job is updated to accept account_string as an argument to the
+initializer to use for that instance.
+
 ## [1.0.1] - 2016-02-16
 
 ### Fixed
@@ -61,7 +73,8 @@ lib/osc/machete/torque_helper.rb _(still an internal class right now, not meant 
 
 Previous release of osc-machete
 
-[Unreleased]: https://github.com/AweSim-OSC/osc-machete/compare/v1.0.1...master
+[Unreleased]: https://github.com/AweSim-OSC/osc-machete/compare/v1.1.0...master
+[1.1.0]: https://github.com/AweSim-OSC/osc-machete/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/AweSim-OSC/osc-machete/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/AweSim-OSC/osc-machete/compare/v0.6.3...v1.0.0
 
