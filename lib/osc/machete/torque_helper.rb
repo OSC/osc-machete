@@ -71,11 +71,9 @@ class OSC::Machete::TorqueHelper
 
   # convert dependencies hash to a PBS header string
   def qsub_dependencies_header(depends_on = {})
-    header = depends_on.map { |x|
+    depends_on.map { |x|
       x.first.to_s + ":" + Array(x.last).join(":") unless Array(x.last).empty?
     }.compact.join(",")
-
-    header
   end
 
   # return the account string required for accounting purposes
