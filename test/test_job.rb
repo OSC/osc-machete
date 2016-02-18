@@ -154,4 +154,26 @@ class TestJob < Minitest::Test
     job1.delete(rmdir: true)
     job2.delete(rmdir: true)
   end
+
+
+  def assert_submit_qsubs_with_account_string(args, account_string: nil)
+    # create first job and expect qsub to work as it does before
+    torque1 = OSC::Machete::TorqueHelper.new
+    torque1.expects(:qsub).with(@scriptname, has_entry(account_string: account_string)).returns(@id1)
+    OSC::Machete::Job.new(args.merge({script: @scriptpath, torque_helper: torque1})).submit
+  end
+
+  def test_account_string_not_set
+    # with default to nil we ensure that if we pass in account_string to
+    # initializer its used in qsub
+    assert_submit_qsubs_with_account_string({}, account_string: nil)
+    assert_submit_qsubs_with_account_string({account_string: "PZ3"}, account_string: "PZ3")
+
+    # if default set, we use default unless account_string is passed
+    OSC::Machete::Job.default_account_string = "FOO"
+    assert_submit_qsubs_with_account_string({account_string: "PZ3"}, account_string: "PZ3")
+    assert_submit_qsubs_with_account_string({}, account_string: "FOO")
+
+    OSC::Machete::Job.default_account_string = nil
+  end
 end
