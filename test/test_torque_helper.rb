@@ -186,5 +186,17 @@ class TestTorqueHelper < Minitest::Test
     assert_qsub_dependency_list(depencencies_str, dependencies)
     return true
   end
+
+  def test_account_string_passed_into_qsub_used_during_submit_call
+    PBS::Job.any_instance.expects(:submit).with(has_entry(headers: {Account_Name: "XXX"})).returns(PBS::Job.new(conn: 'oakley', id: '1234598.oak-batch.osc.edu'))
+    @shell.qsub(@script_oakley, account_string: "XXX")
+    PBS::Job.any_instance.unstub(:submit)
+  end
+
+  def test_default_account_string_used_in_qsub_during_submit_call
+    PBS::Job.any_instance.expects(:submit).with(has_entry(headers: {Account_Name: @shell.default_account_string})).returns(PBS::Job.new(conn: 'oakley', id: '1234598.oak-batch.osc.edu'))
+    @shell.qsub(@script_oakley)
+    PBS::Job.any_instance.unstub(:submit)
+  end
   
 end
