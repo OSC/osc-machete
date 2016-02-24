@@ -194,9 +194,16 @@ class TestTorqueHelper < Minitest::Test
   end
 
   def test_default_account_string_used_in_qsub_during_submit_call
+    @shell.stubs(:default_account_string).returns("PZS3000")
+
     PBS::Job.any_instance.expects(:submit).with(has_entry(headers: {Account_Name: @shell.default_account_string})).returns(PBS::Job.new(conn: 'oakley', id: '1234598.oak-batch.osc.edu'))
     @shell.qsub(@script_oakley)
+
+    @shell.stubs(:default_account_string).returns("appl")
+    PBS::Job.any_instance.expects(:submit).with(has_entry(headers: {})).returns(PBS::Job.new(conn: 'oakley', id: '1234598.oak-batch.osc.edu'))
+    @shell.qsub(@script_oakley)
+
     PBS::Job.any_instance.unstub(:submit)
+    @shell.unstub(:default_account_string)
   end
-  
 end

@@ -64,7 +64,11 @@ class OSC::Machete::TorqueHelper
     # this will probably be both SUPERCOMPUTER CENTER SPECIFIC and must change
     # when we want to enable our users at OSC to specify which billable project
     # to bill against
-    headers[PBS::ATTR[:A]] = account_string || default_account_string
+    if account_string
+      headers[PBS::ATTR[:A]] = account_string
+    elsif account_string_valid_project?(default_account_string)
+      headers[PBS::ATTR[:A]] = default_account_string
+    end
 
     pbs_job.submit(file: script, headers: headers, qsub: true).id
   end
@@ -85,6 +89,10 @@ class OSC::Machete::TorqueHelper
   # @return [String] the project name that job submission should be billed against
   def default_account_string
     OSC::Machete::Process.new.groupname
+  end
+
+  def account_string_valid_project?(account_string)
+    /^P./ =~ account_string
   end
 
   # Performs a qstat request on a single job.
