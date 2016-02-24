@@ -5,6 +5,12 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [1.1.1] - 2016-02-24
+
+### Fixed
+
+- Omit account string when submitting a job if using default account string that is an invalid project i.e. `appl`
+
 ## [1.1.0] - 2016-02-18
 
 ### Changed
@@ -73,7 +79,8 @@ lib/osc/machete/torque_helper.rb _(still an internal class right now, not meant 
 
 Previous release of osc-machete
 
-[Unreleased]: https://github.com/AweSim-OSC/osc-machete/compare/v1.1.0...master
+[Unreleased]: https://github.com/AweSim-OSC/osc-machete/compare/v1.1.1...master
+[1.1.1]: https://github.com/AweSim-OSC/osc-machete/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/AweSim-OSC/osc-machete/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/AweSim-OSC/osc-machete/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/AweSim-OSC/osc-machete/compare/v0.6.3...v1.0.0
