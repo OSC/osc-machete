@@ -9,8 +9,8 @@ Gem::Specification.new do |spec|
   spec.platform      = Gem::Platform::RUBY
   spec.authors       = ["Eric Franz"]
   spec.email         = ["efranz@osc.edu"]
-  spec.summary       = "Common interface for working with HPC batch jobs"
-  spec.description   = "Common interface for PBS (and eventually other resource managers and batch schedulers)"
+  spec.summary       = "Common interface for working with HPC batch jobs (currently OSC specific)"
+  spec.description   = "Common interface for PBS (and eventually other resource managers and batch schedulers - currently OSC specific)"
   spec.homepage      = "https://github.com/OSC/osc-machete"
   spec.license       = "MIT"
 
