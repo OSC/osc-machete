@@ -11,18 +11,8 @@ To use, add this line to your application's Gemfile:
 
 And then execute:
 
-    $ bundle install --local
+    $ bundle install
 
-
-If you don't have osc-machete installed, you can do so by:
-
-1. clone this repo
-2. checkout the tag you want to build
-3. `rake install`
-
-Alternatively, you can use the latest version of the repo via bundler's git option:
-
-    gem 'osc-machete', :git => 'git@github.com:AweSim-OSC/osc-machete.git'
 
 ## Usage
 
