@@ -1,4 +1,10 @@
-# Class for storing an architecture-independent job status.
+# Value object representing job status independent of underlying resource manager.
+#
+# All of the possible Torque statuses are not represented here. Its the
+# responsibility of the Torque adapter (TorqueHelper) to create the appropriate
+# Status object to represent the Torque status.
+#
+# The possible values are: Undetermined, Not Submitted, Passed, Failed, Held, Queued, Running, Suspended
 #
 class OSC::Machete::Status
   include Comparable

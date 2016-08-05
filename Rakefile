@@ -6,7 +6,13 @@ Rake::TestTask.new(:test) do |test|
 end
 
 desc "Run tests"
-task :default => :test
+task :default do
+
+  puts "\nIf you want to run tests that submit simple jobs to batch system, " \
+    "set the environment variable LIVETEST.\n\n" unless ENV['LIVETEST']
+
+  Rake::Task['test'].invoke
+end
 
 task :console do
   require 'irb'

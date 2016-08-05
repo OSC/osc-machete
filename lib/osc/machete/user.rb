@@ -45,6 +45,14 @@ class OSC::Machete::User
     `id -G $USER`.strip.split.map(&:to_i).uniq.sort
   end
 
+  # get list of projects the user is part of
+  # FIXME: OSC specific
+  #
+  # @return [Array<String>] of projects the user is part of
+  def projects
+    `id -Gn`.split.grep(/^P./)
+  end
+
   # FIXME: should we be using Pathnames here?
   #
   # Return Pathname for home directory

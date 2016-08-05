@@ -6,11 +6,12 @@ require 'osc/machete/version'
 Gem::Specification.new do |spec|
   spec.name          = "osc-machete"
   spec.version       = OSC::Machete::VERSION
+  spec.platform      = Gem::Platform::RUBY
   spec.authors       = ["Eric Franz"]
   spec.email         = ["efranz@osc.edu"]
-  spec.description   = "Appkit to interact with HPC resources"
-  spec.summary       = "AweSim!"
-  spec.homepage      = "http://www.awesim.org"
+  spec.summary       = "Common interface for working with HPC batch jobs (currently OSC specific)"
+  spec.description   = "Common interface for PBS (and eventually other resource managers and batch schedulers - currently OSC specific)"
+  spec.homepage      = "https://github.com/OSC/osc-machete"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files`.split($/)
@@ -24,6 +25,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "minitest", ">= 5.0"
 
   spec.add_runtime_dependency "mustache"
-  spec.add_runtime_dependency "pbs", "~> 1.0"
+  spec.add_runtime_dependency "pbs", "~> 1.1"
 end
 
