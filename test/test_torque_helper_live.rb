@@ -2,6 +2,7 @@ require 'minitest/autorun'
 require 'osc/machete'
 require 'pbs'
 require 'mocha/setup'
+require 'socket'
 
 # test helper class
 class TestTorqueHelperLive < Minitest::Test
@@ -29,7 +30,7 @@ class TestTorqueHelperLive < Minitest::Test
     #   This raises an issue mentioning that it is not being submitted on the
     #   correct host, comment out the raise to skip the live tests.
     #   Maybe this would be better accomplished with a separate rake task.
-    @submit_host = "websvcs02.osc.edu"
+    @submit_host = "websvcs08.osc.edu"
 
     @job_state_queued = OSC::Machete::Status.queued
     @job_state_completed = OSC::Machete::Status.passed
@@ -74,7 +75,7 @@ class TestTorqueHelperLive < Minitest::Test
 
       # Delete it and assert true returned.
       live_delete_status = torque.qdel(live_job)
-      assert_equal nil, live_delete_status
+      assert_equal 0, live_delete_status
     else
       puts "Run test 'test_qsub_oakley' on the batch system from #{@submit_host}."
     end
@@ -105,7 +106,7 @@ class TestTorqueHelperLive < Minitest::Test
 
       # Delete it and assert true returned.
       live_delete_status = torque.qdel(live_job)
-      assert_equal nil, live_delete_status
+      assert_equal 0, live_delete_status
     else
       puts "Run test 'test_qsub_ruby_with_oakley_script' on the batch system from #{@submit_host}."
     end
@@ -135,7 +136,7 @@ class TestTorqueHelperLive < Minitest::Test
 
       # Delete it and assert true returned.
       live_delete_status = torque.qdel(live_job)
-      assert_equal nil, live_delete_status
+      assert_equal 0, live_delete_status
     else
       puts "Run test 'test_qsub_ruby' on the batch system from #{@submit_host}."
     end
@@ -164,7 +165,7 @@ class TestTorqueHelperLive < Minitest::Test
 
       # Delete it and assert true returned.
       live_delete_status = torque.qdel(live_job)
-      assert_equal nil, live_delete_status
+      assert_equal 0, live_delete_status
     else
       puts "Run test 'test_qsub_quick' on the batch system from #{@submit_host}."
     end

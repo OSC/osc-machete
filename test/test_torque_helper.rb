@@ -58,81 +58,81 @@ class TestTorqueHelper < Minitest::Test
   # end
   
   def test_qstat_state_no_job
-    PBS::Job.any_instance.stubs(:status).raises(PBS::UnkjobidError, "Unknown Job Id")
+    PBS::Batch.any_instance.stubs(:get_job).raises(PBS::UnkjobidError, "Unknown Job Id")
     assert_equal @job_state_completed, @shell.qstat("")
     assert_equal @job_state_completed, @shell.qstat(nil)
-    PBS::Job.any_instance.unstub(:status)
+    PBS::Batch.any_instance.unstub(:get_job)
   end
 
   # Test that qstat returns Running job StatusValue
   def test_qstat_state_running_oakley
-    PBS::Job.any_instance.stubs(:status).returns({ :attribs => { :job_state => "R" }})
+    PBS::Batch.any_instance.stubs(:get_job).returns({ "123.oak-batch.osc.edu" => { :job_state => "R" }})
     assert_equal @job_state_running, @shell.qstat("123.oak-batch.osc.edu")
-    PBS::Job.any_instance.unstub(:status)
+    PBS::Batch.any_instance.unstub(:get_job)
   end
 
   # Test that qstat returns Queued job StatusValue
   def test_qstat_state_queued_oakley
-    PBS::Job.any_instance.stubs(:status).returns({ :attribs => { :job_state => "Q" }})
+    PBS::Batch.any_instance.stubs(:get_job).returns({ "123.oak-batch.osc.edu" => { :job_state => "Q" }})
     assert_equal @job_state_queued, @shell.qstat("123.oak-batch.osc.edu")
-    PBS::Job.any_instance.unstub(:status)
+    PBS::Batch.any_instance.unstub(:get_job)
   end
 
   # Test that qstat returns Queued job StatusValue
   def test_qstat_state_running_ruby
-    PBS::Job.any_instance.stubs(:status).returns({ :attribs => { :job_state => "Q" }})
+    PBS::Batch.any_instance.stubs(:get_job).returns({ "12398765" => { :job_state => "Q" }})
     assert_equal @job_state_queued, @shell.qstat("12398765")
-    PBS::Job.any_instance.unstub(:status)
+    PBS::Batch.any_instance.unstub(:get_job)
   end
 
   # Test that qstat returns Completed job StatusValue when state is nil.
   def test_qstat_state_completed_oakley
-    PBS::Job.any_instance.stubs(:status).raises(PBS::UnkjobidError, "Unknown Job Id Error")
+    PBS::Batch.any_instance.stubs(:get_job).raises(PBS::UnkjobidError, "Unknown Job Id Error")
     assert_equal @job_state_completed, @shell.qstat("123.oak-batch.osc.edu")
-    PBS::Job.any_instance.unstub(:status)
+    PBS::Batch.any_instance.unstub(:get_job)
 
-    PBS::Job.any_instance.stubs(:status).raises(PBS::UnkjobidError, "Unknown Job Id")
+    PBS::Batch.any_instance.stubs(:get_job).raises(PBS::UnkjobidError, "Unknown Job Id")
     assert_equal @job_state_completed, @shell.qstat("123.oak-batch.osc.edu")
-    PBS::Job.any_instance.unstub(:status)
+    PBS::Batch.any_instance.unstub(:get_job)
   end
 
   # Test that qdel works for oakley
   def test_qdel_oakley_ok
-    PBS::Job.any_instance.stubs(:delete).returns(true)
+    PBS::Batch.any_instance.stubs(:delete_job).returns(true)
     assert_equal true, @shell.qdel("123.oak-batch.osc.edu")
-    PBS::Job.any_instance.unstub(:delete)
+    PBS::Batch.any_instance.unstub(:delete_job)
   end
 
   # Test that qdel works for quick batch
   def test_qdel_quick
-    PBS::Job.any_instance.stubs(:delete).returns(true)
+    PBS::Batch.any_instance.stubs(:delete_job).returns(true)
     assert_equal true, @shell.qdel("123.quick-batch.osc.edu")
-    PBS::Job.any_instance.unstub(:delete)
+    PBS::Batch.any_instance.unstub(:delete_job)
   end
 
   # Test that qdel works for Ruby cluster
   def test_qdel_ruby
-    PBS::Job.any_instance.stubs(:delete).returns(true)
+    PBS::Batch.any_instance.stubs(:delete_job).returns(true)
     assert_equal true, @shell.qdel("12365478")
-    PBS::Job.any_instance.unstub(:delete)
+    PBS::Batch.any_instance.unstub(:delete_job)
   end
 
   # Test that qdel throws exception on PBS exception
   def test_qdel_throws_exception
-    PBS::Job.any_instance.stubs(:delete).raises(PBS::Error)
+    PBS::Batch.any_instance.stubs(:delete_job).raises(PBS::Error)
     assert_raises(PBS::Error) { @shell.qdel("123.quick-batch.osc.edu") }
-    PBS::Job.any_instance.unstub(:delete)
+    PBS::Batch.any_instance.unstub(:delete_job)
 
-    PBS::Job.any_instance.stubs(:delete).raises(PBS::SystemError)
+    PBS::Batch.any_instance.stubs(:delete_job).raises(PBS::SystemError)
     assert_raises(PBS::SystemError) { @shell.qdel("123.quick-batch.osc.edu") }
-    PBS::Job.any_instance.unstub(:delete)
+    PBS::Batch.any_instance.unstub(:delete_job)
   end
 
   # Test that qdel doesn't throw exception if Unknown Job Id exception
   def test_qdel_doesnt_throw_exception_on_unknown_job_id
-    PBS::Job.any_instance.stubs(:delete).raises(PBS::UnkjobidError)
+    PBS::Batch.any_instance.stubs(:delete_job).raises(PBS::UnkjobidError)
     @shell.qdel("123.quick-batch.osc.edu")
-    PBS::Job.any_instance.unstub(:delete)
+    PBS::Batch.any_instance.unstub(:delete_job)
   end
   
   def assert_qsub_dependency_list(dependency_list, dependencies, host=nil)
@@ -188,22 +188,22 @@ class TestTorqueHelper < Minitest::Test
   end
 
   def test_account_string_passed_into_qsub_used_during_submit_call
-    PBS::Job.any_instance.expects(:submit).with(has_entry(headers: {Account_Name: "XXX"})).returns(PBS::Job.new(conn: 'oakley', id: '1234598.oak-batch.osc.edu'))
+    PBS::Batch.any_instance.expects(:submit_script).with(@script_oakley, has_entry(headers: {Account_Name: "XXX"})).returns('1234598.oak-batch.osc.edu')
     @shell.qsub(@script_oakley, account_string: "XXX")
-    PBS::Job.any_instance.unstub(:submit)
+    PBS::Batch.any_instance.unstub(:submit_script)
   end
 
   def test_default_account_string_used_in_qsub_during_submit_call
     @shell.stubs(:default_account_string).returns("PZS3000")
 
-    PBS::Job.any_instance.expects(:submit).with(has_entry(headers: {Account_Name: @shell.default_account_string})).returns(PBS::Job.new(conn: 'oakley', id: '1234598.oak-batch.osc.edu'))
+    PBS::Batch.any_instance.expects(:submit_script).with(@script_oakley, has_entry(headers: {Account_Name: @shell.default_account_string})).returns('1234598.oak-batch.osc.edu')
     @shell.qsub(@script_oakley)
 
     @shell.stubs(:default_account_string).returns("appl")
-    PBS::Job.any_instance.expects(:submit).with(has_entry(headers: {})).returns(PBS::Job.new(conn: 'oakley', id: '1234598.oak-batch.osc.edu'))
+    PBS::Batch.any_instance.expects(:submit_script).with(@script_oakley, has_entry(headers: {})).returns('1234598.oak-batch.osc.edu')
     @shell.qsub(@script_oakley)
 
-    PBS::Job.any_instance.unstub(:submit)
+    PBS::Batch.any_instance.unstub(:submit_script)
     @shell.unstub(:default_account_string)
   end
 end
