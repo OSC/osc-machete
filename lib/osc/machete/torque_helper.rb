@@ -7,6 +7,13 @@ require 'pbs'
 #
 # == FIXME: This contains no state whatsoever. It should probably be changed into a module.
 class OSC::Machete::TorqueHelper
+  # FIXME: Use ood_cluster gem
+  PREFIX = '/usr/local/torque/default'
+  HOSTS = {
+    'oakley' => 'oak-batch.osc.edu',
+    'ruby'   => 'ruby-batch.osc.edu',
+    'quick'  => 'quick-batch.osc.edu'
+  }
 
   # Alias to initialize a new object.
   def self.default
@@ -55,7 +62,10 @@ class OSC::Machete::TorqueHelper
     # this is to obviate current torque filter defect in which
     # a script with PBS header set to specify oak-batch ends
     # isn't properly handled and the job gets limited to 4GB
-    pbs_job = get_pbs_job( host.nil? ? get_pbs_conn(script: script) : get_pbs_conn(host: host) )
+    pbs = PBS::Batch.new(
+      host: HOSTS.fetch( host || host_from_script_pbs_header(script) ),
+      prefix: PREFIX
+    )
 
     headers = { depend: qsub_dependencies_header(depends_on) }
     headers.clear if headers[:depend].empty?
@@ -70,7 +80,7 @@ class OSC::Machete::TorqueHelper
       headers[PBS::ATTR[:A]] = default_account_string
     end
 
-    pbs_job.submit(file: script, headers: headers, qsub: true).id
+    pbs.submit_script(script, headers: headers, qsub: true)
   end
 
   # convert dependencies hash to a PBS header string
@@ -103,16 +113,15 @@ class OSC::Machete::TorqueHelper
   #
   # @return [Status] The job state
   def qstat(pbsid, host: nil)
+    id = pbsid.to_s
+    pbs = PBS::Batch.new(
+      host: HOSTS.fetch( host || host_from_pbsid(id) ),
+      prefix: PREFIX
+    )
 
-    # Create a PBS::Job object based on the pbsid or the optional host param
-    pbs_conn = host.nil? ? get_pbs_conn(pbsid: pbsid.to_s) : get_pbs_conn(host: host)
-    pbs_job = get_pbs_job(pbs_conn, pbsid)
-
-    job_status = pbs_job.status
-    # Get the status char value from the job.
-    status_for_char job_status[:attribs][:job_state][0]
-
-  rescue PBS::UnkjobidError => err
+    status = pbs.get_job(id, filters: [:job_state])
+    status_for_char status[id][:job_state][0] # get status from status char value
+  rescue PBS::UnkjobidError
     OSC::Machete::Status.passed
   end
 
@@ -122,48 +131,23 @@ class OSC::Machete::TorqueHelper
   #
   # @return [nil]
   def qdel(pbsid, host: nil)
+    id = pbsid.to_s
+    pbs = PBS::Batch.new(
+      host: HOSTS.fetch( host || host_from_pbsid(id) ),
+      prefix: PREFIX
+    )
 
-    pbs_conn   =   host.nil? ? get_pbs_conn(pbsid: pbsid.to_s) : get_pbs_conn(host: host)
-    pbs_job    =   get_pbs_job(pbs_conn, pbsid.to_s)
-
-    pbs_job.delete
-
-  rescue PBS::UnkjobidError => err
+    pbs.delete_job(id)
+  rescue PBS::UnkjobidError
     # Common use case where trying to delete a job that is no longer in the system.
   end
 
   private
-
-    # Factory to return a PBS::Job object
-    def get_pbs_job(conn, pbsid=nil)
-      pbsid.nil? ? PBS::Job.new(conn: conn) : PBS::Job.new(conn: conn, id: pbsid.to_s)
-    end
-
-    # Returns a PBS connection object
-    #
-    # @option [:script] A PBS script with headers as string
-    # @option [:pbsid] A valid pbsid as string
-    #
-    # @return [PBS::Conn] A connection option for the PBS host (Default: Oakley)
-    def get_pbs_conn(options={})
-      if options[:script]
-        PBS::Conn.batch(host_from_script_pbs_header(options[:script]))
-      elsif options[:pbsid]
-        PBS::Conn.batch(host_from_pbsid(options[:pbsid]))
-      elsif options[:host]
-        PBS::Conn.batch(options[:host])
-      else
-        PBS::Conn.batch("oakley")
-      end
-    end
-
     # return the name of the host to use based on the pbs header
     # TODO: Think of a more efficient way to do this.
     def host_from_script_pbs_header(script)
       if (File.open(script) { |f| f.read =~ /#PBS -q @oak-batch/ })
         "oakley"
-      elsif (File.open(script) { |f| f.read =~ /#PBS -q @opt-batch/ })
-        "glenn"
       elsif (File.open(script) { |f| f.read =~ /#PBS -q @ruby-batch/ })
         "ruby"
       elsif (File.open(script) { |f| f.read =~ /#PBS -q @quick-batch/ })
@@ -177,8 +161,6 @@ class OSC::Machete::TorqueHelper
     def host_from_pbsid(pbsid)
       if (pbsid =~ /oak-batch/ )
         "oakley"
-      elsif (pbsid =~ /opt-batch/ )
-        "glenn"
       elsif (pbsid.to_s =~ /^\d+$/ )
         "ruby"
       elsif (pbsid =~ /quick/ )
