@@ -12,7 +12,8 @@ class OSC::Machete::TorqueHelper
   HOSTS = {
     'oakley' => 'oak-batch.osc.edu',
     'ruby'   => 'ruby-batch.osc.edu',
-    'quick'  => 'quick-batch.osc.edu'
+    'quick'  => 'quick-batch.osc.edu',
+    'owens'  => 'owens-batch.ten.osc.edu'
   }
 
   # Alias to initialize a new object.
