@@ -8,7 +8,8 @@ require 'pbs'
 # == FIXME: This contains no state whatsoever. It should probably be changed into a module.
 class OSC::Machete::TorqueHelper
   # FIXME: Use ood_cluster gem
-  PREFIX = '/opt/torque'
+  LIB = '/opt/torque/lib64'
+  BIN = '/opt/torque/bin'
   HOSTS = {
     'oakley' => 'oak-batch.osc.edu',
     'ruby'   => 'ruby-batch.osc.edu',
@@ -65,7 +66,8 @@ class OSC::Machete::TorqueHelper
     # isn't properly handled and the job gets limited to 4GB
     pbs = PBS::Batch.new(
       host: HOSTS.fetch( host || host_from_script_pbs_header(script) ),
-      prefix: PREFIX
+      lib: LIB,
+      bin: BIN
     )
 
     headers = { depend: qsub_dependencies_header(depends_on) }
@@ -117,7 +119,8 @@ class OSC::Machete::TorqueHelper
     id = pbsid.to_s
     pbs = PBS::Batch.new(
       host: HOSTS.fetch( host || host_from_pbsid(id) ),
-      prefix: PREFIX
+      lib: LIB,
+      bin: BIN
     )
 
     status = pbs.get_job(id, filters: [:job_state])
@@ -135,7 +138,8 @@ class OSC::Machete::TorqueHelper
     id = pbsid.to_s
     pbs = PBS::Batch.new(
       host: HOSTS.fetch( host || host_from_pbsid(id) ),
-      prefix: PREFIX
+      lib: LIB,
+      bin: BIN
     )
 
     pbs.delete_job(id)

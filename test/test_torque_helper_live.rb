@@ -30,7 +30,7 @@ class TestTorqueHelperLive < Minitest::Test
     #   This raises an issue mentioning that it is not being submitted on the
     #   correct host, comment out the raise to skip the live tests.
     #   Maybe this would be better accomplished with a separate rake task.
-    @submit_host = "websvcs08.osc.edu"
+    @submit_host = "webdev02.hpc.osc.edu"
 
     @job_state_queued = OSC::Machete::Status.queued
     @job_state_completed = OSC::Machete::Status.passed
