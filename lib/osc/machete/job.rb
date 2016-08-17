@@ -56,7 +56,7 @@ require 'pathname'
 #   @return [String, nil] path of the job script, or nil if not set
 #
 class OSC::Machete::Job
-  attr_reader :pbsid, :script_path, :account_string
+  attr_reader :pbsid, :script_path, :account_string, :host
 
   class << self
     # set this to change the billable account that is used by default
