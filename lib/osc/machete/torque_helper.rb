@@ -153,6 +153,8 @@ class OSC::Machete::TorqueHelper
         "ruby"
       elsif (File.open(script) { |f| f.read =~ /#PBS -q @quick-batch/ })
         "quick"
+      elsif (File.open(script) { |f| f.read =~ /#PBS -q @owens-batch/ })
+        "owens"
       else
         "oakley"  # DEFAULT
       end
@@ -166,6 +168,8 @@ class OSC::Machete::TorqueHelper
         "ruby"
       elsif (pbsid =~ /quick/ )
         "quick"
+      elsif (pbsid =~ /owens/ )
+        "owens"
       else
         "oakley"  # DEFAULT
       end
