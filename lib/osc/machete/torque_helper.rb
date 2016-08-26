@@ -26,8 +26,8 @@ class OSC::Machete::TorqueHelper
   #
   # @param [String] char The Torque status char
   #
-  # @example Completed
-  #   status_for_char("C") #=> OSC::Machete::Status.completed
+  # @example Passed
+  #   status_for_char("C") #=> OSC::Machete::Status.passed
   # @example Queued
   #   status_for_char("W") #=> OSC::Machete::Status.queued
   #
@@ -60,16 +60,6 @@ class OSC::Machete::TorqueHelper
   #
   # Bills against the project specified by the primary group of the user.
   def qsub(script, host: nil, depends_on: {}, account_string: nil)
-    # if the script is set to run on Oakley in PBS headers
-    # this is to obviate current torque filter defect in which
-    # a script with PBS header set to specify oak-batch ends
-    # isn't properly handled and the job gets limited to 4GB
-    pbs = PBS::Batch.new(
-      host: HOSTS.fetch( host || host_from_script_pbs_header(script) ),
-      lib: LIB,
-      bin: BIN
-    )
-
     headers = { depend: qsub_dependencies_header(depends_on) }
     headers.clear if headers[:depend].empty?
 
@@ -83,7 +73,7 @@ class OSC::Machete::TorqueHelper
       headers[PBS::ATTR[:A]] = default_account_string
     end
 
-    pbs.submit_script(script, headers: headers, qsub: true)
+    pbs(host: host, script: script).submit_script(script, headers: headers, qsub: true)
   end
 
   # convert dependencies hash to a PBS header string
@@ -117,13 +107,7 @@ class OSC::Machete::TorqueHelper
   # @return [Status] The job state
   def qstat(pbsid, host: nil)
     id = pbsid.to_s
-    pbs = PBS::Batch.new(
-      host: HOSTS.fetch( host || host_from_pbsid(id) ),
-      lib: LIB,
-      bin: BIN
-    )
-
-    status = pbs.get_job(id, filters: [:job_state])
+    status = pbs(host: host, id: id).get_job(id, filters: [:job_state])
     status_for_char status[id][:job_state][0] # get status from status char value
   rescue PBS::UnkjobidError
     OSC::Machete::Status.passed
@@ -136,18 +120,21 @@ class OSC::Machete::TorqueHelper
   # @return [nil]
   def qdel(pbsid, host: nil)
     id = pbsid.to_s
-    pbs = PBS::Batch.new(
-      host: HOSTS.fetch( host || host_from_pbsid(id) ),
-      lib: LIB,
-      bin: BIN
-    )
-
-    pbs.delete_job(id)
+    pbs(host: host, id: id).delete_job(id)
   rescue PBS::UnkjobidError
     # Common use case where trying to delete a job that is no longer in the system.
   end
 
   private
+    def pbs(host: nil, id: nil, script: nil)
+      host ||= ( (id && host_from_pbsid(id)) || (script && host_from_script_pbs_header(script)))
+      pbs = PBS::Batch.new(
+        host: HOSTS.fetch(host),
+        lib: LIB,
+        bin: BIN
+      )
+    end
+
     # return the name of the host to use based on the pbs header
     # TODO: Think of a more efficient way to do this.
     def host_from_script_pbs_header(script)
