@@ -7,15 +7,17 @@ require 'pbs'
 #
 # == FIXME: This contains no state whatsoever. It should probably be changed into a module.
 class OSC::Machete::TorqueHelper
-  # FIXME: Use ood_cluster gem
-  LIB = '/opt/torque/lib64'
-  BIN = '/opt/torque/bin'
-  HOSTS = {
-    'oakley' => 'oak-batch.osc.edu',
-    'ruby'   => 'ruby-batch.osc.edu',
-    'quick'  => 'quick-batch.osc.edu',
-    'owens'  => 'owens-batch.ten.osc.edu'
-  }
+  # in an initializer, set TorqueHelper.servers to a hash
+  # of cluster ids as keys => servers and hosts to servers
+  # where a server is a object that responds to
+  # lib, bin, host
+  class << self
+    attr_writer :servers
+
+    def servers
+      @servers ||= {}
+    end
+  end
 
   # Alias to initialize a new object.
   def self.default
@@ -128,11 +130,18 @@ class OSC::Machete::TorqueHelper
   private
     def pbs(host: nil, id: nil, script: nil)
       host ||= ( (id && host_from_pbsid(id)) || (script && host_from_script_pbs_header(script)))
+      server = self.class.servers.fetch(host.to_s.to_sym)
+
       pbs = PBS::Batch.new(
-        host: HOSTS.fetch(host),
-        lib: LIB,
-        bin: BIN
+        host: server.host,
+        lib: server.lib,
+        bin: server.bin
       )
+    rescue KeyError
+      #FIXME: PBS::Error is caught by osc_machete_rails but KeyError is not
+      # so to fail gradefully we have to raise a PBS::Error
+      # raise KeyError, "Host or cluster id not recognized as key in OSC::Machete::TorqueHelper.servers hash: #{host.to_s}"
+      raise PBS::BadhostError, "Host or cluster id not recognized as key in OSC::Machete::TorqueHelper.servers hash: #{host.to_s}"
     end
 
     # return the name of the host to use based on the pbs header
