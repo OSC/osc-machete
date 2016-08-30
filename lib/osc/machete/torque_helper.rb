@@ -8,8 +8,8 @@ require 'pbs'
 # == FIXME: This contains no state whatsoever. It should probably be changed into a module.
 class OSC::Machete::TorqueHelper
   # FIXME: Use ood_cluster gem
-  LIB = '/opt/torque/lib64'
-  BIN = '/opt/torque/bin'
+  LIB = ENV['TORQUE_LIB'] || '/opt/torque/lib64'
+  BIN = ENV['TORQUE_BIN'] || '/opt/torque/bin'
   HOSTS = {
     'oakley' => 'oak-batch.osc.edu',
     'ruby'   => 'ruby-batch.osc.edu',
