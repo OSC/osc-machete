@@ -128,7 +128,7 @@ class TestTorqueHelperLive < Minitest::Test
     if Socket.gethostname == @submit_host
       # Submit a small job.
       live_job = torque.qsub(@script_ruby)
-      assert_match /^\d+$/, live_job
+      assert_match(/^\d+$/, live_job)
 
       # Qstat it to make sure it's queued.
       live_status = torque.qstat(live_job)
@@ -157,7 +157,7 @@ class TestTorqueHelperLive < Minitest::Test
     if Socket.gethostname == @submit_host
       # Submit a small job.
       live_job = torque.qsub(@script_quick, host: 'quick')
-      assert_match /\d+.quick-batch.osc.edu/, live_job
+      assert_match(/\d+.quick-batch.osc.edu/, live_job)
 
       # Qstat it to make sure it's queued.
       live_status = torque.qstat(live_job)
