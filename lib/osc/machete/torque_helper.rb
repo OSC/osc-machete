@@ -14,7 +14,8 @@ class OSC::Machete::TorqueHelper
     'oakley' => 'oak-batch.osc.edu',
     'ruby'   => 'ruby-batch.osc.edu',
     'quick'  => 'quick-batch.osc.edu',
-    'owens'  => 'owens-batch.ten.osc.edu'
+    'owens'  => 'owens-batch.ten.osc.edu',
+    :default => 'oak-batch.osc.edu'
   }
 
   # Alias to initialize a new object.
@@ -127,19 +128,22 @@ class OSC::Machete::TorqueHelper
 
   private
     def pbs(host: nil, id: nil, script: nil)
-      host ||= ( (id && host_from_pbsid(id)) || (script && host_from_script_pbs_header(script)))
-      server = self.class.servers.fetch(host.to_s.to_sym)
+      if host
+        # actually check if host is "oakley" i.e. a cluster key
+        host = HOSTS.fetch(host.to_s, host.to_s)
+      else
+        # try to determine host
+        key = host_from_pbsid(id) if id
+        key = host_from_script_pbs_header(script) if script && key.nil?
+
+        host = HOSTS.fetch(key, HOSTS.fetch(:default))
+      end
 
       pbs = PBS::Batch.new(
-        host: HOSTS.fetch(host),
+        host: host,
         lib: LIB,
         bin: BIN
       )
-    rescue KeyError
-      #FIXME: PBS::Error is caught by osc_machete_rails but KeyError is not
-      # so to fail gradefully we have to raise a PBS::Error
-      # raise KeyError, "Host or cluster id not recognized as key in OSC::Machete::TorqueHelper.servers hash: #{host.to_s}"
-      raise PBS::BadhostError, "Host or cluster id not recognized as key in OSC::Machete::TorqueHelper.servers hash: #{host.to_s}"
     end
 
     # return the name of the host to use based on the pbs header
@@ -153,8 +157,6 @@ class OSC::Machete::TorqueHelper
         "quick"
       elsif (File.open(script) { |f| f.read =~ /#PBS -q @owens-batch/ })
         "owens"
-      else
-        "oakley"  # DEFAULT
       end
     end
 
@@ -168,8 +170,6 @@ class OSC::Machete::TorqueHelper
         "quick"
       elsif (pbsid =~ /owens/ )
         "owens"
-      else
-        "oakley"  # DEFAULT
       end
     end
 end
