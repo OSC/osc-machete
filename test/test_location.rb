@@ -24,41 +24,41 @@ class TestLocation < Minitest::Test
   def test_render_default_replace_template
     setup_render
     @location1.render("")
-    assert_equal true,  File.exists?("#{@dir1}/file.txt")
-    assert_equal false, File.exists?("#{@dir1}/file.txt.mustache")
+    assert_equal true,  File.exist?("#{@dir1}/file.txt")
+    assert_equal false, File.exist?("#{@dir1}/file.txt.mustache")
   end
 
   def test_render_user_replace_template
     setup_render
     @location1.render("", {replace: true})
-    assert_equal true,  File.exists?("#{@dir1}/file.txt")
-    assert_equal false, File.exists?("#{@dir1}/file.txt.mustache")
+    assert_equal true,  File.exist?("#{@dir1}/file.txt")
+    assert_equal false, File.exist?("#{@dir1}/file.txt.mustache")
   end
 
   def test_render_user_doesnt_replace_template
     setup_render
     @location1.render("", {replace: false})
-    assert_equal true,  File.exists?("#{@dir1}/file.txt")
-    assert_equal true,  File.exists?("#{@dir1}/file.txt.mustache")
+    assert_equal true,  File.exist?("#{@dir1}/file.txt")
+    assert_equal true,  File.exist?("#{@dir1}/file.txt.mustache")
   end
 
   def test_copy_to_shouldnt_copy_developer_files
     setup_copy_to
     
     @location1.copy_to(@dir2)
-    assert_equal true,  Dir.exists?("#{@dir2}")
-    assert_equal false, Dir.exists?("#{@dir2}/.git")
-    assert_equal false, Dir.exists?("#{@dir2}/.svn")
-    assert_equal false, Dir.exists?("#{@dir2}/test.dir.1")
-    assert_equal true,  Dir.exists?("#{@dir2}/test.dir.2")
-    assert_equal true,  File.exists?("#{@dir2}/test.1")
-    assert_equal false, File.exists?("#{@dir2}/test.2")
-    assert_equal true,  File.exists?("#{@dir2}/test.3")
-    assert_equal false, File.exists?("#{@dir2}/test.4")
-    assert_equal false, File.exists?("#{@dir2}/test.dir.2/test.1")
-    assert_equal false, File.exists?("#{@dir2}/test.dir.2/test.2")
-    assert_equal true,  File.exists?("#{@dir2}/test.dir.2/test.4")
-    assert_equal false, File.exists?("#{@dir2}/.gitignore")
+    assert_equal true,  Dir.exist?("#{@dir2}")
+    assert_equal false, Dir.exist?("#{@dir2}/.git")
+    assert_equal false, Dir.exist?("#{@dir2}/.svn")
+    assert_equal false, Dir.exist?("#{@dir2}/test.dir.1")
+    assert_equal true,  Dir.exist?("#{@dir2}/test.dir.2")
+    assert_equal true,  File.exist?("#{@dir2}/test.1")
+    assert_equal false, File.exist?("#{@dir2}/test.2")
+    assert_equal true,  File.exist?("#{@dir2}/test.3")
+    assert_equal false, File.exist?("#{@dir2}/test.4")
+    assert_equal false, File.exist?("#{@dir2}/test.dir.2/test.1")
+    assert_equal false, File.exist?("#{@dir2}/test.dir.2/test.2")
+    assert_equal true,  File.exist?("#{@dir2}/test.dir.2/test.4")
+    assert_equal false, File.exist?("#{@dir2}/.gitignore")
   end
   
   

@@ -34,6 +34,6 @@ class TestJobDir < Minitest::Test
     # Create unique directory
     new_jobdir = OSC::Machete::JobDir.new(@parent).new_jobdir
     Dir.mkdir(new_jobdir)
-    assert Dir.exists?("#{@parent}/9"), "Directory was not created: #{@parent}/9"
+    assert Dir.exist?("#{@parent}/9"), "Directory was not created: #{@parent}/9"
   end
 end

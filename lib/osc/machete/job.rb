@@ -205,7 +205,7 @@ class OSC::Machete::Job
       # something if the script name is munged
 
       # recursively delete the directory after killing the job
-      Pathname.new(path).rmtree if path && rmdir && File.exists?(path)
+      Pathname.new(path).rmtree if path && rmdir && File.exist?(path)
     end
   end
 

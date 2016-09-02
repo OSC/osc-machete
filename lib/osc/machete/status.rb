@@ -55,27 +55,42 @@ class OSC::Machete::Status
   end
 
 
-  # TODO: these methods are previously declared so we can document them easily
-  # if there is a better way to document class methods we'll do that
-
-  # @return [Status]
-  def self.undetermined() end
-  # @return [Status] 
-  def self.not_submitted() end
-  # @return [Status]
-  def self.passed() end
-  # @return [Status] 
-  def self.failed() end
-  # @return [Status]
-  def self.running() end
-  # @return [Status] 
-  def self.queued() end
-  # @return [Status] 
-  def self.held() end
-  # @return [Status] 
-  def self.suspended() end
-
+  # NOTE: on yard documentation: to do something like what I do below,
+  # documenting a set of class methods, you must have the documentation block be
+  # inside the `class << self` block or else the last documented method will be
+  # ignored or hidden if newlines exist between each @!method block. If no
+  # newlines exist, like below, the entire block would have been ignored.
+  # Also, indenting the tags for the rest of the methods is required when
+  # omitting newlines, otherwise, each method includes all of the returns below
+  # it - so yard displays 6 return Status lines for the method.
+  #
+  # Why do we have no newlines here? So that "View source" on each of these
+  # class methods points to the block itself.
   class << self
+    # @!method undetermined
+    #   A 'null' special case for Status
+    #   @return [Status]
+    #
+    # @!method not_submitted
+    #   @return [Status]
+    #
+    # @!method passed
+    #   @return [Status]
+    #
+    # @!method failed
+    #   @return [Status]
+    #
+    # @!method running
+    #   @return [Status]
+    #
+    # @!method queued
+    #   @return [Status]
+    #
+    # @!method held
+    #   @return [Status]
+    #
+    # @!method suspended
+    #   @return [Status]
     VALUES_HASH.each do |char, name|
       define_method(name) do
         OSC::Machete::Status.new(char)
@@ -84,22 +99,28 @@ class OSC::Machete::Status
   end
 
   # @!method undetermined?
-  #   the Status value Null object
-  #   @return [Boolean] true if undetermined
+  # @return [Boolean] true if undetermined
+
   # @!method not_submitted?
-  #   @return [Boolean] true if not_submitted
+  # @return [Boolean] true if not_submitted
+
   # @!method failed?
-  #   @return [Boolean] true if failed
+  # @return [Boolean] true if failed
+
   # @!method passed?
-  #   @return [Boolean] true if passed
+  # @return [Boolean] true if passed
+
   # @!method held?
-  #   @return [Boolean] true if held
+  # @return [Boolean] true if held
+
   # @!method queued?
-  #   @return [Boolean] true if queued
+  # @return [Boolean] true if queued
+
   # @!method running?
-  #   @return [Boolean] true if running
+  # @return [Boolean] true if running
+
   # @!method suspended?
-  #   @return [Boolean] true if suspended
+  # @return [Boolean] true if suspended
   VALUES_HASH.each do |char, name|
     define_method("#{name}?") do
       self == OSC::Machete::Status.new(char)
