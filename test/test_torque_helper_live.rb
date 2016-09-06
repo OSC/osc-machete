@@ -71,7 +71,7 @@ class TestTorqueHelperLive < Minitest::Test
 
       # Qstat it to make sure it's queued.
       live_status = torque.qstat(live_job)
-      assert_equal @job_state_queued, live_status
+      assert_includes OSC::Machete::Status.active_values, live_status
 
       # Delete it and assert true returned.
       live_delete_status = torque.qdel(live_job)
@@ -102,7 +102,7 @@ class TestTorqueHelperLive < Minitest::Test
 
       # Qstat it to make sure it's queued.
       live_status = torque.qstat(live_job)
-      assert_equal @job_state_queued, live_status
+      assert_includes OSC::Machete::Status.active_values, live_status
 
       # Delete it and assert true returned.
       live_delete_status = torque.qdel(live_job)
@@ -132,7 +132,7 @@ class TestTorqueHelperLive < Minitest::Test
 
       # Qstat it to make sure it's queued.
       live_status = torque.qstat(live_job)
-      assert_equal @job_state_queued, live_status
+      assert_includes OSC::Machete::Status.active_values, live_status
 
       # Delete it and assert true returned.
       live_delete_status = torque.qdel(live_job)
@@ -161,7 +161,7 @@ class TestTorqueHelperLive < Minitest::Test
 
       # Qstat it to make sure it's queued.
       live_status = torque.qstat(live_job)
-      assert_equal @job_state_queued, live_status
+      assert_includes OSC::Machete::Status.active_values, live_status
 
       # Delete it and assert true returned.
       live_delete_status = torque.qdel(live_job)
