@@ -206,4 +206,49 @@ class TestTorqueHelper < Minitest::Test
     PBS::Batch.any_instance.unstub(:submit_script)
     @shell.unstub(:default_account_string)
   end
+
+  def test_pbs_default_host
+    s = @shell.pbs
+    assert_equal 'oak-batch.osc.edu', s.host
+    assert_equal OSC::Machete::TorqueHelper::LIB, s.lib.to_s
+    assert_equal OSC::Machete::TorqueHelper::BIN, s.bin.to_s
+  end
+
+  def test_pbs_host_variations
+    # you can use the cluster ids
+    assert_equal 'ruby-batch.osc.edu', @shell.pbs(host: 'ruby').host
+
+    # or you can use the host itself
+    assert_equal 'ruby-batch.osc.edu', @shell.pbs(host: 'ruby-batch.osc.edu').host
+    assert_equal '@ruby-batch', @shell.pbs(host: '@ruby-batch').host
+
+    assert_equal 'ruby-batch.osc.edu', @shell.pbs(id: '4567').host
+    assert_equal 'ruby-batch.osc.edu', @shell.pbs(script: @script_ruby).host
+    assert_equal 'oak-batch.osc.edu', @shell.pbs(script: @script_oakley).host
+  end
+
+  def test_setting_default_torque_helper
+    d = OSC::Machete::TorqueHelper.default
+
+    assert_equal 'oak-batch.osc.edu', OSC::Machete::TorqueHelper.default.pbs.host
+
+    # this is an example of how you can quickly modify the default behavior of
+    # a TorqueHelper instance to provide a new host, id, and script
+    d2 = OSC::Machete::TorqueHelper.new
+    class << d2
+      def pbs(host: nil, id: nil, script: nil)
+        pbs = PBS::Batch.new(
+          host: "ruby-batch.osc.edu",
+          lib: LIB,
+          bin: BIN
+        )
+      end
+    end
+
+    OSC::Machete::TorqueHelper.default = d2
+
+    assert_equal 'ruby-batch.osc.edu', OSC::Machete::TorqueHelper.default.pbs.host
+
+    OSC::Machete::TorqueHelper.default = d
+  end
 end

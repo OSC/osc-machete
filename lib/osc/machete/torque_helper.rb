@@ -14,20 +14,25 @@ class OSC::Machete::TorqueHelper
     'oakley' => 'oak-batch.osc.edu',
     'ruby'   => 'ruby-batch.osc.edu',
     'quick'  => 'quick-batch.osc.edu',
-    'owens'  => 'owens-batch.ten.osc.edu'
+    'owens'  => 'owens-batch.ten.osc.edu',
+    :default => 'oak-batch.osc.edu'
   }
 
-  # Alias to initialize a new object.
-  def self.default
-    self::new()
+  class << self
+    #@!attribute default
+    #  @return [TorqueHelper] default TorqueHelper instance to use
+    attr_writer :default
+    def default
+      @default ||= self::new()
+    end
   end
 
   # Returns an OSC::Machete::Status ValueObject for a char
   #
   # @param [String] char The Torque status char
   #
-  # @example Completed
-  #   status_for_char("C") #=> OSC::Machete::Status.completed
+  # @example Passed
+  #   status_for_char("C") #=> OSC::Machete::Status.passed
   # @example Queued
   #   status_for_char("W") #=> OSC::Machete::Status.queued
   #
@@ -60,16 +65,6 @@ class OSC::Machete::TorqueHelper
   #
   # Bills against the project specified by the primary group of the user.
   def qsub(script, host: nil, depends_on: {}, account_string: nil)
-    # if the script is set to run on Oakley in PBS headers
-    # this is to obviate current torque filter defect in which
-    # a script with PBS header set to specify oak-batch ends
-    # isn't properly handled and the job gets limited to 4GB
-    pbs = PBS::Batch.new(
-      host: HOSTS.fetch( host || host_from_script_pbs_header(script) ),
-      lib: LIB,
-      bin: BIN
-    )
-
     headers = { depend: qsub_dependencies_header(depends_on) }
     headers.clear if headers[:depend].empty?
 
@@ -83,7 +78,7 @@ class OSC::Machete::TorqueHelper
       headers[PBS::ATTR[:A]] = default_account_string
     end
 
-    pbs.submit_script(script, headers: headers, qsub: true)
+    pbs(host: host, script: script).submit_script(script, headers: headers, qsub: true)
   end
 
   # convert dependencies hash to a PBS header string
@@ -117,13 +112,7 @@ class OSC::Machete::TorqueHelper
   # @return [Status] The job state
   def qstat(pbsid, host: nil)
     id = pbsid.to_s
-    pbs = PBS::Batch.new(
-      host: HOSTS.fetch( host || host_from_pbsid(id) ),
-      lib: LIB,
-      bin: BIN
-    )
-
-    status = pbs.get_job(id, filters: [:job_state])
+    status = pbs(host: host, id: id).get_job(id, filters: [:job_state])
     status_for_char status[id][:job_state][0] # get status from status char value
   rescue PBS::UnkjobidError
     OSC::Machete::Status.passed
@@ -136,15 +125,28 @@ class OSC::Machete::TorqueHelper
   # @return [nil]
   def qdel(pbsid, host: nil)
     id = pbsid.to_s
+    pbs(host: host, id: id).delete_job(id)
+  rescue PBS::UnkjobidError
+    # Common use case where trying to delete a job that is no longer in the system.
+  end
+
+  def pbs(host: nil, id: nil, script: nil)
+    if host
+      # actually check if host is "oakley" i.e. a cluster key
+      host = HOSTS.fetch(host.to_s, host.to_s)
+    else
+      # try to determine host
+      key = host_from_pbsid(id) if id
+      key = host_from_script_pbs_header(script) if script && key.nil?
+
+      host = HOSTS.fetch(key, HOSTS.fetch(:default))
+    end
+
     pbs = PBS::Batch.new(
-      host: HOSTS.fetch( host || host_from_pbsid(id) ),
+      host: host,
       lib: LIB,
       bin: BIN
     )
-
-    pbs.delete_job(id)
-  rescue PBS::UnkjobidError
-    # Common use case where trying to delete a job that is no longer in the system.
   end
 
   private
@@ -159,8 +161,6 @@ class OSC::Machete::TorqueHelper
         "quick"
       elsif (File.open(script) { |f| f.read =~ /#PBS -q @owens-batch/ })
         "owens"
-      else
-        "oakley"  # DEFAULT
       end
     end
 
@@ -174,8 +174,6 @@ class OSC::Machete::TorqueHelper
         "quick"
       elsif (pbsid =~ /owens/ )
         "owens"
-      else
-        "oakley"  # DEFAULT
       end
     end
 end
