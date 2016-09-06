@@ -18,9 +18,13 @@ class OSC::Machete::TorqueHelper
     :default => 'oak-batch.osc.edu'
   }
 
-  # Alias to initialize a new object.
-  def self.default
-    self::new()
+  class << self
+    #@!attribute default
+    #  @return [TorqueHelper] default TorqueHelper instance to use
+    attr_writer :default
+    def default
+      @default ||= self::new()
+    end
   end
 
   # Returns an OSC::Machete::Status ValueObject for a char

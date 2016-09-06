@@ -226,4 +226,29 @@ class TestTorqueHelper < Minitest::Test
     assert_equal 'ruby-batch.osc.edu', @shell.pbs(script: @script_ruby).host
     assert_equal 'oak-batch.osc.edu', @shell.pbs(script: @script_oakley).host
   end
+
+  def test_setting_default_torque_helper
+    d = OSC::Machete::TorqueHelper.default
+
+    assert_equal 'oak-batch.osc.edu', OSC::Machete::TorqueHelper.default.pbs.host
+
+    # this is an example of how you can quickly modify the default behavior of
+    # a TorqueHelper instance to provide a new host, id, and script
+    d2 = OSC::Machete::TorqueHelper.new
+    class << d2
+      def pbs(host: nil, id: nil, script: nil)
+        pbs = PBS::Batch.new(
+          host: "ruby-batch.osc.edu",
+          lib: LIB,
+          bin: BIN
+        )
+      end
+    end
+
+    OSC::Machete::TorqueHelper.default = d2
+
+    assert_equal 'ruby-batch.osc.edu', OSC::Machete::TorqueHelper.default.pbs.host
+
+    OSC::Machete::TorqueHelper.default = d
+  end
 end
