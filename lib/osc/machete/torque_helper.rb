@@ -126,26 +126,26 @@ class OSC::Machete::TorqueHelper
     # Common use case where trying to delete a job that is no longer in the system.
   end
 
-  private
-    def pbs(host: nil, id: nil, script: nil)
-      if host
-        # actually check if host is "oakley" i.e. a cluster key
-        host = HOSTS.fetch(host.to_s, host.to_s)
-      else
-        # try to determine host
-        key = host_from_pbsid(id) if id
-        key = host_from_script_pbs_header(script) if script && key.nil?
+  def pbs(host: nil, id: nil, script: nil)
+    if host
+      # actually check if host is "oakley" i.e. a cluster key
+      host = HOSTS.fetch(host.to_s, host.to_s)
+    else
+      # try to determine host
+      key = host_from_pbsid(id) if id
+      key = host_from_script_pbs_header(script) if script && key.nil?
 
-        host = HOSTS.fetch(key, HOSTS.fetch(:default))
-      end
-
-      pbs = PBS::Batch.new(
-        host: host,
-        lib: LIB,
-        bin: BIN
-      )
+      host = HOSTS.fetch(key, HOSTS.fetch(:default))
     end
 
+    pbs = PBS::Batch.new(
+      host: host,
+      lib: LIB,
+      bin: BIN
+    )
+  end
+
+  private
     # return the name of the host to use based on the pbs header
     # TODO: Think of a more efficient way to do this.
     def host_from_script_pbs_header(script)
