@@ -5,6 +5,52 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [1.2.0] - 2016-09-06
+
+### Added
+
+- TorqueHelper.default= so we can specify a different TorqueHelper
+- TorqueHelper#pbs to get the PBS::Batch object for the given id, script, or host.
+  This lets us change the TorqueHelper instance used as a default with a
+  different TorqueHelper class or instance that has a different implementation
+  of TorqueHelper#pbs.
+- (OSC specific) Owens cluster support
+- (OSC specific) LIB and BIN for specifying torque lib locations
+
+### Changed
+
+- Depends on latest version of pbs ruby gem 2.0
+- TorqueHelper.default returns the same instance every time (which is now
+  memoized) instead of creating a new instance
+
+### Deprecated
+
+- `OSC::Machete::User` - use `OodSupport::User` instead
+- `OSC::Machete::Process` - use `OodSupport::Process` instead
+
+### Fixed
+
+- yardoc documentation for OSC::Machete::Status class methods
+- deprecation warnings by using File.exist? instead of File.exists?
+
+## [1.1.4] - 2016-08-17
+
+### Added
+
+- `Job#host` getter (which should have been there but was accidentally omitted)
+
+## [1.1.3] - 2016-06-07
+
+### Fixed
+
+- README and gemspec docs update for rubygems.org release
+
+## [1.1.2] - 2016-06-07
+
+### Fixed
+
+- Copyright in LICENSE.txt
+
 ## [1.1.1] - 2016-02-24
 
 ### Fixed
@@ -79,7 +125,11 @@ lib/osc/machete/torque_helper.rb _(still an internal class right now, not meant 
 
 Previous release of osc-machete
 
-[Unreleased]: https://github.com/AweSim-OSC/osc-machete/compare/v1.1.1...master
+[Unreleased]: https://github.com/AweSim-OSC/osc-machete/compare/v1.2.0...master
+[1.2.0]: https://github.com/AweSim-OSC/osc-machete/compare/v1.1.4...v1.2.0
+[1.1.4]: https://github.com/AweSim-OSC/osc-machete/compare/v1.1.3...v1.1.4
+[1.1.3]: https://github.com/AweSim-OSC/osc-machete/compare/v1.1.2...v1.1.3
+[1.1.2]: https://github.com/AweSim-OSC/osc-machete/compare/v1.1.1...v1.1.2
 [1.1.1]: https://github.com/AweSim-OSC/osc-machete/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/AweSim-OSC/osc-machete/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/AweSim-OSC/osc-machete/compare/v1.0.0...v1.0.1
