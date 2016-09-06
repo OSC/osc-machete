@@ -142,7 +142,7 @@ class OSC::Machete::TorqueHelper
       host = HOSTS.fetch(key, HOSTS.fetch(:default))
     end
 
-    pbs = PBS::Batch.new(
+    PBS::Batch.new(
       host: host,
       lib: LIB,
       bin: BIN

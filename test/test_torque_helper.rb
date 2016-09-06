@@ -237,7 +237,7 @@ class TestTorqueHelper < Minitest::Test
     d2 = OSC::Machete::TorqueHelper.new
     class << d2
       def pbs(host: nil, id: nil, script: nil)
-        pbs = PBS::Batch.new(
+        PBS::Batch.new(
           host: "ruby-batch.osc.edu",
           lib: LIB,
           bin: BIN
