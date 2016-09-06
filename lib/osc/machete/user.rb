@@ -1,6 +1,7 @@
 # Class that maintains the name and home identifiers of a User.
 # Helper methods provided use the Etc module underneath.
 #
+# @deprecated Please use {http://www.rubydoc.info/gems/ood_support/OodSupport/User OodSupport::User} instead.
 class OSC::Machete::User
 
   attr_reader :name
@@ -19,6 +20,8 @@ class OSC::Machete::User
   #
   def initialize(username = Etc.getpwuid.name)
     @name = username
+
+    warn "[DEPRECATION] `OSC::Machete::User` is deprecated. Please use `OodSupport::User` instead (see ood_support gem)."
   end
 
   # factory method to produce a User from specified uid
