@@ -106,7 +106,7 @@ class TestTorqueHelper < Minitest::Test
   # Test that qdel works for quick batch
   def test_qdel_quick
     PBS::Batch.any_instance.stubs(:delete_job).returns(true)
-    assert_equal true, @shell.qdel("123.quick-batch.osc.edu")
+    assert_equal true, @shell.qdel("123.quick-batch.ten.osc.edu")
     PBS::Batch.any_instance.unstub(:delete_job)
   end
 
@@ -120,18 +120,18 @@ class TestTorqueHelper < Minitest::Test
   # Test that qdel throws exception on PBS exception
   def test_qdel_throws_exception
     PBS::Batch.any_instance.stubs(:delete_job).raises(PBS::Error)
-    assert_raises(PBS::Error) { @shell.qdel("123.quick-batch.osc.edu") }
+    assert_raises(PBS::Error) { @shell.qdel("123.quick-batch.ten.osc.edu") }
     PBS::Batch.any_instance.unstub(:delete_job)
 
     PBS::Batch.any_instance.stubs(:delete_job).raises(PBS::SystemError)
-    assert_raises(PBS::SystemError) { @shell.qdel("123.quick-batch.osc.edu") }
+    assert_raises(PBS::SystemError) { @shell.qdel("123.quick-batch.ten.osc.edu") }
     PBS::Batch.any_instance.unstub(:delete_job)
   end
 
   # Test that qdel doesn't throw exception if Unknown Job Id exception
   def test_qdel_doesnt_throw_exception_on_unknown_job_id
     PBS::Batch.any_instance.stubs(:delete_job).raises(PBS::UnkjobidError)
-    @shell.qdel("123.quick-batch.osc.edu")
+    @shell.qdel("123.quick-batch.ten.osc.edu")
     PBS::Batch.any_instance.unstub(:delete_job)
   end
   

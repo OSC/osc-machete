@@ -13,7 +13,7 @@ class OSC::Machete::TorqueHelper
   HOSTS = {
     'oakley' => 'oak-batch.osc.edu',
     'ruby'   => 'ruby-batch.osc.edu',
-    'quick'  => 'quick-batch.osc.edu',
+    'quick'  => 'quick-batch.ten.osc.edu',
     'owens'  => 'owens-batch.ten.osc.edu',
     :default => 'oak-batch.osc.edu'
   }
