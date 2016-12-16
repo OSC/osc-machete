@@ -5,6 +5,12 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [1.2.1] - 2016-12-16
+
+### Fixed
+
+- host name for Quick Cluster changed
+
 ## [1.2.0] - 2016-09-06
 
 ### Added
