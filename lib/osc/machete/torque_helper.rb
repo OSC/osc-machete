@@ -12,7 +12,7 @@ class OSC::Machete::TorqueHelper
   BIN = ENV['TORQUE_BIN'] || '/opt/torque/bin'
   HOSTS = {
     'oakley' => 'oak-batch.osc.edu',
-    'ruby'   => 'ruby-batch.osc.edu',
+    'ruby'   => 'ruby-batch.ten.osc.edu',
     'quick'  => 'quick-batch.ten.osc.edu',
     'owens'  => 'owens-batch.ten.osc.edu',
     :default => 'oak-batch.osc.edu'

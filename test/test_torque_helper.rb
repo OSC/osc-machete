@@ -216,14 +216,14 @@ class TestTorqueHelper < Minitest::Test
 
   def test_pbs_host_variations
     # you can use the cluster ids
-    assert_equal 'ruby-batch.osc.edu', @shell.pbs(host: 'ruby').host
+    assert_equal 'ruby-batch.ten.osc.edu', @shell.pbs(host: 'ruby').host
 
     # or you can use the host itself
     assert_equal 'ruby-batch.osc.edu', @shell.pbs(host: 'ruby-batch.osc.edu').host
     assert_equal '@ruby-batch', @shell.pbs(host: '@ruby-batch').host
 
-    assert_equal 'ruby-batch.osc.edu', @shell.pbs(id: '4567').host
-    assert_equal 'ruby-batch.osc.edu', @shell.pbs(script: @script_ruby).host
+    assert_equal 'ruby-batch.ten.osc.edu', @shell.pbs(id: '4567').host
+    assert_equal 'ruby-batch.ten.osc.edu', @shell.pbs(script: @script_ruby).host
     assert_equal 'oak-batch.osc.edu', @shell.pbs(script: @script_oakley).host
   end
 

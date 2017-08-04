@@ -5,6 +5,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- host name for Ruby Cluster changed
+
 ## [1.2.1] - 2016-12-16
 
 ### Fixed
